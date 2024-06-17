@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bxuuger6nhio6"
+path="res://.godot/imported/pavilion.obj-6de8a9711a65326da0f516644c4b5090.mesh"
+
+[deps]
+
+files=["res://.godot/imported/pavilion.obj-6de8a9711a65326da0f516644c4b5090.mesh"]
+
+source_file="res://hubs/city/assets/courtyard/structures/pavilion.obj"
+dest_files=["res://.godot/imported/pavilion.obj-6de8a9711a65326da0f516644c4b5090.mesh", "res://.godot/imported/pavilion.obj-6de8a9711a65326da0f516644c4b5090.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

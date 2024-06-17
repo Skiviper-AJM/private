@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://l25t77irs1hq"]
+
+[ext_resource type="PackedScene" uid="uid://cs5xaf6b6ooq4" path="res://combat/parts/chest/unit02Chest.tscn" id="1_f2mye"]
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_jo2sq"]
+
+[resource]
+script = ExtResource("1_jo2sq")
+name = "Bulk Chestplate"
+type = 2
+model = ExtResource("1_f2mye")
+cost = 3000
+description = "Designed for damage-intensive operations"
+maxDurability = 30
+currentDurability = 30
+damage = 0
+armorRating = 25
+speedRating = 0
+range = 0
+splash = 0

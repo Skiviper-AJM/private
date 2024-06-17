@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://b05gsgwhad60i"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_1vona"]
+[ext_resource type="PackedScene" uid="uid://dio4vbfnr5361" path="res://combat/parts/leg/unit04Leg.tscn" id="1_fit45"]
+
+[resource]
+script = ExtResource("1_1vona")
+name = "Corroded Leg"
+type = 1
+model = ExtResource("1_fit45")
+cost = 0
+description = " Still has a bit of use left in it"
+maxDurability = 3
+currentDurability = 3
+damage = 2
+armorRating = 0
+speedRating = 0
+range = 0
+splash = 0

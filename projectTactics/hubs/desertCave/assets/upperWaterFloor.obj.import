@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dxxk8qiv7sh3k"
+path="res://.godot/imported/upperWaterFloor.obj-7f08b67b9eecc9d724a451d157a787ae.mesh"
+
+[deps]
+
+files=["res://.godot/imported/upperWaterFloor.obj-7f08b67b9eecc9d724a451d157a787ae.mesh"]
+
+source_file="res://hubs/desertCave/assets/upperWaterFloor.obj"
+dest_files=["res://.godot/imported/upperWaterFloor.obj-7f08b67b9eecc9d724a451d157a787ae.mesh", "res://.godot/imported/upperWaterFloor.obj-7f08b67b9eecc9d724a451d157a787ae.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

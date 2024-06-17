@@ -1,0 +1,1774 @@
+[gd_scene load_steps=54 format=3 uid="uid://bpoag1rko7t2q"]
+
+[ext_resource type="Script" path="res://hubs/player/scripts/player.gd" id="1_rqkst"]
+[ext_resource type="Resource" uid="uid://jlq0uk01mcbf" path="res://hubs/player/mainPlayerData.tres" id="2_0c2xc"]
+[ext_resource type="Texture2D" uid="uid://btqiip1eh0ls7" path="res://placeholder/selectionDot.png" id="3_cs0of"]
+[ext_resource type="Texture2D" uid="uid://dm3wnx6pfh76j" path="res://placeholder/deniedDot.png" id="4_d801r"]
+[ext_resource type="Texture2D" uid="uid://dkiqu40adxd44" path="res://placeholder/confirmRing.png" id="5_310ec"]
+[ext_resource type="Texture2D" uid="uid://dtqb5saq8xk4e" path="res://placeholder/damageButton.png" id="6_5vg7v"]
+[ext_resource type="Texture2D" uid="uid://cqrr3jwnhmr4f" path="res://placeholder/armorButton.png" id="7_ydctm"]
+[ext_resource type="Texture2D" uid="uid://bwme6erjt1r38" path="res://placeholder/speedButton.png" id="8_73coa"]
+[ext_resource type="Texture2D" uid="uid://dvf1svcqoa420" path="res://placeholder/rangeButton.png" id="9_a3t77"]
+[ext_resource type="Texture2D" uid="uid://dww2h4g166cl5" path="res://placeholder/splashButton.png" id="10_7270a"]
+[ext_resource type="Script" path="res://hubs/player/scripts/pauseUI.gd" id="11_7tsis"]
+[ext_resource type="Shader" path="res://hubs/player/scripts/blur.gdshader" id="12_ti0yg"]
+[ext_resource type="PackedScene" uid="uid://7p08th6jln4e" path="res://general/UI/settingsMenu.tscn" id="13_55kmc"]
+[ext_resource type="Script" path="res://hubs/player/scripts/dialogueUI.gd" id="14_bkpgj"]
+[ext_resource type="Script" path="res://hubs/player/scripts/sellUI.gd" id="15_3c183"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_uksar"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n4b74"]
+no_depth_test = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_ahqgw"]
+size = Vector3(0.1, 2, 0.1)
+
+[sub_resource type="Animation" id="Animation_1o4jv"]
+resource_name = "cast"
+length = 1.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.8, 1.1),
+"transitions": PackedFloat32Array(-2, -2, 1),
+"update": 0,
+"values": [Vector3(0.261799, 0, 0), Vector3(-0.698132, 0, 0), Vector3(-0.624008, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_gll01"]
+resource_name = "idle"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(-2, -2, 1),
+"update": 0,
+"values": [Vector3(-0.624008, 0, 0), Vector3(-0.651008, 0, 0), Vector3(-0.624008, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_mpxix"]
+resource_name = "startReel"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(0.2, 1),
+"update": 0,
+"values": [Vector3(-0.624008, 0, 0), Vector3(-0.239738, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_elljn"]
+resource_name = "reeling"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.6),
+"transitions": PackedFloat32Array(-2, -2, 1),
+"update": 0,
+"values": [Vector3(-0.239738, 0, 0), Vector3(-0.261799, 0, 0), Vector3(-0.239738, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ea711"]
+resource_name = "withdraw"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector3(-0.624008, 0, 0), Vector3(0.297107, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_cmp57"]
+resource_name = "reelComplete"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector3(-0.239738, 0, 0), Vector3(0.264923, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_37e1v"]
+_data = {
+"cast": SubResource("Animation_1o4jv"),
+"idle": SubResource("Animation_gll01"),
+"reelComplete": SubResource("Animation_cmp57"),
+"reeling": SubResource("Animation_elljn"),
+"startReel": SubResource("Animation_mpxix"),
+"withdraw": SubResource("Animation_ea711")
+}
+
+[sub_resource type="Animation" id="Animation_oxxec"]
+resource_name = "fall"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, -0.1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_txopa"]
+resource_name = "land"
+length = 0.1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector3(0, -0.1, 0), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_uu48b"]
+_data = {
+"fall": SubResource("Animation_oxxec"),
+"land": SubResource("Animation_txopa")
+}
+
+[sub_resource type="Animation" id="Animation_tnh7i"]
+resource_name = "bob"
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("head:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(-2, -2),
+"update": 0,
+"values": [Vector3(0, 0.5, 0), Vector3(0, 0.545, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_q05j1"]
+_data = {
+"bob": SubResource("Animation_tnh7i")
+}
+
+[sub_resource type="Animation" id="Animation_sqv72"]
+resource_name = "appear"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("itemMenuName:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(3, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("itemMenuName:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.333, 1),
+"update": 0,
+"values": [Vector2(-200, -50), Vector2(-200, -110)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("itemMenuCost:visible_ratio")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("itemMenuBank:visible_ratio")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("damageIcon:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(3, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("damageIcon:position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.333, 1),
+"update": 0,
+"values": [Vector2(-37, -11), Vector2(-87, -11)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("armorIcon:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(3, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("armorIcon:position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.333, 1),
+"update": 0,
+"values": [Vector2(-37, 17), Vector2(-87, 17)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("speedIcon:modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(3, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("speedIcon:position")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.333, 1),
+"update": 0,
+"values": [Vector2(36, -11), Vector2(86, -11)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("rangeIcon:modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0.00466507, 0.3),
+"transitions": PackedFloat32Array(3, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("rangeIcon:position")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.333, 1),
+"update": 0,
+"values": [Vector2(36, 17), Vector2(86, 17)]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("itemMenuSplashIcon:modulate")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0.00466507, 0.3),
+"transitions": PackedFloat32Array(3, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("itemMenuSplashIcon:position")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.333, 1),
+"update": 0,
+"values": [Vector2(0, 73), Vector2(0, 48)]
+}
+tracks/14/type = "value"
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/path = NodePath(".:modulate")
+tracks/14/interp = 1
+tracks/14/loop_wrap = true
+tracks/14/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/15/type = "value"
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/path = NodePath(".:position")
+tracks/15/interp = 1
+tracks/15/loop_wrap = true
+tracks/15/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/16/type = "value"
+tracks/16/imported = false
+tracks/16/enabled = true
+tracks/16/path = NodePath("itemMenuInventoryCount:visible_ratio")
+tracks/16/interp = 1
+tracks/16/loop_wrap = true
+tracks/16/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="Animation" id="Animation_woix5"]
+resource_name = "disappear"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(3, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 50)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.333, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_mp5ln"]
+resource_name = "revealInventory"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("itemMenuInventoryCount:visible_ratio")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_sd8v5"]
+_data = {
+"appear": SubResource("Animation_sqv72"),
+"disappear": SubResource("Animation_woix5"),
+"revealInventory": SubResource("Animation_mp5ln")
+}
+
+[sub_resource type="LabelSettings" id="LabelSettings_iw3gp"]
+font_size = 24
+
+[sub_resource type="LabelSettings" id="LabelSettings_6tdxm"]
+font_size = 12
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5gtqt"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lbxy6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fq1qp"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jd4ku"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t88bi"]
+shader = ExtResource("12_ti0yg")
+shader_parameter/lod = 1.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yeky0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6tmej"]
+bg_color = Color(0.466667, 0.466667, 0.466667, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w2bpg"]
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fejb1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vhrrq"]
+
+[sub_resource type="Environment" id="Environment_tr3w1"]
+
+[sub_resource type="World3D" id="World3D_dnxow"]
+environment = SubResource("Environment_tr3w1")
+
+[sub_resource type="Animation" id="Animation_wn4ei"]
+resource_name = "spin"
+length = 10.0
+loop_mode = 1
+step = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("inventoryItemModel:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 10),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 6.28319, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_aaux6"]
+_data = {
+"spin": SubResource("Animation_wn4ei")
+}
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_ukbvr"]
+viewport_path = NodePath("UI/pauseMenu/inventoryMenu/inventoryItemViewport")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5gfna"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_70jjf"]
+
+[node name="player" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.80221, 37.4239)
+collision_layer = 0
+collision_mask = 17
+floor_constant_speed = true
+script = ExtResource("1_rqkst")
+playerInfo = ExtResource("2_0c2xc")
+
+[node name="hitbox" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_uksar")
+
+[node name="head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="neck" type="Node3D" parent="head"]
+
+[node name="playerCam" type="Camera3D" parent="head/neck"]
+unique_name_in_owner = true
+
+[node name="itemRay" type="RayCast3D" parent="head/neck/playerCam"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+target_position = Vector3(0, -4, 0)
+collision_mask = 2
+hit_from_inside = true
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="interactRay" type="RayCast3D" parent="head/neck/playerCam"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+target_position = Vector3(0, -4, 0)
+collision_mask = 8
+hit_from_inside = true
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="hand" type="Node3D" parent="head/neck/playerCam"]
+transform = Transform3D(1, 0, 0, 0, 0.965113, -0.261835, 0, 0.261835, 0.965113, 0.463, -0.191891, -0.191719)
+
+[node name="fishingRod" type="MeshInstance3D" parent="head/neck/playerCam/hand"]
+transform = Transform3D(1, 0, 0, 0, 0.958347, 0.285605, 0, -0.285605, 0.958347, 2.76268e-05, -0.0067234, 2.67029e-05)
+material_override = SubResource("StandardMaterial3D_n4b74")
+mesh = SubResource("BoxMesh_ahqgw")
+
+[node name="bobberSpawnPoint" type="Node3D" parent="head/neck/playerCam/hand/fishingRod"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.962335, 0.000354767)
+
+[node name="fishingAnims" type="AnimationPlayer" parent="head/neck/playerCam/hand"]
+unique_name_in_owner = true
+libraries = {
+"": SubResource("AnimationLibrary_37e1v")
+}
+
+[node name="movementAnims" type="AnimationPlayer" parent="head/neck"]
+libraries = {
+"": SubResource("AnimationLibrary_uu48b")
+}
+
+[node name="bobAnim" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+"": SubResource("AnimationLibrary_q05j1")
+}
+autoplay = "bob"
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="crosshairs" type="CenterContainer" parent="UI/HUD"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="interactIcon" type="Sprite2D" parent="UI/HUD/crosshairs"]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("3_cs0of")
+
+[node name="deniedIcon" type="Sprite2D" parent="UI/HUD/crosshairs"]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("4_d801r")
+
+[node name="shop" type="CenterContainer" parent="UI/HUD"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="itemMenu" type="Node2D" parent="UI/HUD/shop"]
+unique_name_in_owner = true
+
+[node name="itemMenuAnims" type="AnimationPlayer" parent="UI/HUD/shop/itemMenu"]
+unique_name_in_owner = true
+process_mode = 3
+libraries = {
+"": SubResource("AnimationLibrary_sd8v5")
+}
+
+[node name="itemMenuName" type="Label" parent="UI/HUD/shop/itemMenu"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+offset_left = -200.0
+offset_top = -50.0
+offset_right = 200.0
+offset_bottom = -16.0
+text = "Basic Chestplate"
+label_settings = SubResource("LabelSettings_iw3gp")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="itemMenuInventoryCount" type="Label" parent="UI/HUD/shop/itemMenu"]
+unique_name_in_owner = true
+offset_left = -200.0
+offset_top = -87.0
+offset_right = 200.0
+offset_bottom = -53.0
+label_settings = SubResource("LabelSettings_6tdxm")
+horizontal_alignment = 1
+vertical_alignment = 1
+visible_characters = 0
+visible_ratio = 0.0
+
+[node name="itemMenuCost" type="RichTextLabel" parent="UI/HUD/shop/itemMenu"]
+unique_name_in_owner = true
+offset_left = -200.0
+offset_top = -65.0
+offset_right = 200.0
+offset_bottom = -42.0
+theme_override_font_sizes/normal_font_size = 15
+bbcode_enabled = true
+text = "[center][color=#f8f644][u]100 [img=12]placeholder/goldIcon.png[/img]"
+visible_characters = 0
+visible_ratio = 0.0
+
+[node name="itemMenuBank" type="RichTextLabel" parent="UI/HUD/shop/itemMenu"]
+unique_name_in_owner = true
+offset_left = -200.0
+offset_top = -49.0
+offset_right = 200.0
+offset_bottom = -24.0
+theme_override_font_sizes/normal_font_size = 15
+bbcode_enabled = true
+text = "[center][color=#f8c53a]65,000 [img=12]placeholder/goldIcon.png[/img]"
+visible_characters = 0
+visible_ratio = 0.0
+
+[node name="itemMenuBuyBar" type="TextureProgressBar" parent="UI/HUD/shop/itemMenu"]
+unique_name_in_owner = true
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+pivot_offset = Vector2(16, 16)
+fill_mode = 4
+texture_progress = ExtResource("5_310ec")
+
+[node name="damageIcon" type="Sprite2D" parent="UI/HUD/shop/itemMenu"]
+modulate = Color(1, 1, 1, 0)
+position = Vector2(-37, -11)
+texture = ExtResource("6_5vg7v")
+
+[node name="itemMenuDamage" type="Label" parent="UI/HUD/shop/itemMenu/damageIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "12"
+horizontal_alignment = 1
+
+[node name="armorIcon" type="Sprite2D" parent="UI/HUD/shop/itemMenu"]
+modulate = Color(1, 1, 1, 0)
+position = Vector2(-37, 17)
+texture = ExtResource("7_ydctm")
+
+[node name="itemMenuArmor" type="Label" parent="UI/HUD/shop/itemMenu/armorIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "5"
+horizontal_alignment = 1
+
+[node name="speedIcon" type="Sprite2D" parent="UI/HUD/shop/itemMenu"]
+modulate = Color(1, 1, 1, 0)
+position = Vector2(36, -11)
+texture = ExtResource("8_73coa")
+
+[node name="itemMenuSpeed" type="Label" parent="UI/HUD/shop/itemMenu/speedIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "-3"
+horizontal_alignment = 1
+
+[node name="rangeIcon" type="Sprite2D" parent="UI/HUD/shop/itemMenu"]
+modulate = Color(1, 1, 1, 0)
+position = Vector2(36, 17)
+texture = ExtResource("9_a3t77")
+
+[node name="itemMenuRange" type="Label" parent="UI/HUD/shop/itemMenu/rangeIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "8"
+horizontal_alignment = 1
+
+[node name="itemMenuSplashIcon" type="Sprite2D" parent="UI/HUD/shop/itemMenu"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+position = Vector2(0, 73)
+texture = ExtResource("10_7270a")
+
+[node name="itemMenuSplash" type="Label" parent="UI/HUD/shop/itemMenu/itemMenuSplashIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "1"
+horizontal_alignment = 1
+
+[node name="itemMenuInteractionTimer" type="Timer" parent="UI/HUD/shop/itemMenu"]
+unique_name_in_owner = true
+wait_time = 0.2
+one_shot = true
+
+[node name="dialogueMenu" type="Control" parent="UI"]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("14_bkpgj")
+
+[node name="dialogueLayout" type="GridContainer" parent="UI/dialogueMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 3
+
+[node name="HSeparator" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_5gtqt")
+
+[node name="HSeparator2" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_5gtqt")
+
+[node name="HSeparator3" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_5gtqt")
+
+[node name="HSeparator4" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_5gtqt")
+
+[node name="HSeparator5" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_5gtqt")
+
+[node name="HSeparator6" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_5gtqt")
+
+[node name="VSeparator" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_lbxy6")
+
+[node name="background" type="ColorRect" parent="UI/dialogueMenu/dialogueLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0, 0, 0.482353)
+
+[node name="dialogueTextGrid" type="GridContainer" parent="UI/dialogueMenu/dialogueLayout/background"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 3
+
+[node name="HSeparator" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueTextGrid"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fq1qp")
+
+[node name="HSeparator2" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueTextGrid"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fq1qp")
+
+[node name="HSeparator3" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueTextGrid"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fq1qp")
+
+[node name="VSeparator" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueTextGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="dialogueText" type="RichTextLabel" parent="UI/dialogueMenu/dialogueLayout/background/dialogueTextGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+scroll_active = false
+
+[node name="VSeparator2" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueTextGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="dialogueResponseGrid" type="GridContainer" parent="UI/dialogueMenu/dialogueLayout/background"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 3
+
+[node name="VSeparator" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 30)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="VSeparator2" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 30)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="VSeparator11" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 30)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="VSeparator3" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="response1" type="Button" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Nevermind"
+alignment = 0
+
+[node name="VSeparator4" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="VSeparator5" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="response2" type="Button" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Talk"
+alignment = 0
+
+[node name="VSeparator6" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="VSeparator7" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="response3" type="Button" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sell"
+alignment = 0
+
+[node name="VSeparator8" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="VSeparator9" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="response4" type="Button" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Assemble Unit"
+alignment = 0
+
+[node name="VSeparator10" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_jd4ku")
+
+[node name="VSeparator2" type="VSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_lbxy6")
+
+[node name="HSeparator10" type="HSeparator" parent="UI/dialogueMenu/dialogueLayout"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_5gtqt")
+
+[node name="sellMenu" type="Control" parent="UI"]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("15_3c183")
+playerInfo = ExtResource("2_0c2xc")
+
+[node name="backdrop" type="ColorRect" parent="UI/sellMenu"]
+material = SubResource("ShaderMaterial_t88bi")
+custom_minimum_size = Vector2(700, 400)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.117647)
+
+[node name="clearSelectionButton" type="Button" parent="UI/sellMenu"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_right = 1151.0
+offset_bottom = 649.0
+
+[node name="sellLayout" type="GridContainer" parent="UI/sellMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 7
+
+[node name="spacer1" type="VSeparator" parent="UI/sellMenu/sellLayout"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="filterMenu" type="ColorRect" parent="UI/sellMenu/sellLayout"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.0901961, 0.0901961, 0.0901961, 0.662745)
+
+[node name="filterGrid" type="GridContainer" parent="UI/sellMenu/sellLayout/filterMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="topSeparator" type="HSeparator" parent="UI/sellMenu/sellLayout/filterMenu/filterGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_yeky0")
+
+[node name="sellAllFilter" type="Button" parent="UI/sellMenu/sellLayout/filterMenu/filterGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "All"
+flat = true
+
+[node name="sellPartsFilter" type="Button" parent="UI/sellMenu/sellLayout/filterMenu/filterGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Parts"
+flat = true
+
+[node name="sellUnitsFilter" type="Button" parent="UI/sellMenu/sellLayout/filterMenu/filterGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Units"
+flat = true
+
+[node name="sellFishFilter" type="Button" parent="UI/sellMenu/sellLayout/filterMenu/filterGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Fish"
+flat = true
+
+[node name="bottomSeparator" type="HSeparator" parent="UI/sellMenu/sellLayout/filterMenu/filterGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_yeky0")
+
+[node name="spacer3" type="VSeparator" parent="UI/sellMenu/sellLayout"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="items" type="ColorRect" parent="UI/sellMenu/sellLayout"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0, 0, 0, 0.662745)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/sellMenu/sellLayout/items"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="sellItemGrid" type="GridContainer" parent="UI/sellMenu/sellLayout/items/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="topSeparator" type="HSeparator" parent="UI/sellMenu/sellLayout/items/ScrollContainer/sellItemGrid"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_yeky0")
+
+[node name="sellItemTemplate" type="Button" parent="UI/sellMenu/sellLayout/items/ScrollContainer/sellItemGrid"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Glowing Sunstone Chestplate"
+flat = true
+
+[node name="spacer4" type="VSeparator" parent="UI/sellMenu/sellLayout"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="saleHistory" type="ColorRect" parent="UI/sellMenu/sellLayout"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.203922, 0.0588235, 0, 0.662745)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/sellMenu/sellLayout/saleHistory"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="salesItemGrid" type="GridContainer" parent="UI/sellMenu/sellLayout/saleHistory/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="topSeparator" type="HSeparator" parent="UI/sellMenu/sellLayout/saleHistory/ScrollContainer/salesItemGrid"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_yeky0")
+
+[node name="salesItemTemplate" type="Button" parent="UI/sellMenu/sellLayout/saleHistory/ScrollContainer/salesItemGrid"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Glowing Sunstone Chestplate"
+flat = true
+
+[node name="sellOptions" type="GridContainer" parent="UI/sellMenu/sellLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 4
+
+[node name="hSeparator" type="HSeparator" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fejb1")
+
+[node name="totalSpacer" type="GridContainer" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="UI/sellMenu/sellLayout/sellOptions/totalSpacer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_vhrrq")
+
+[node name="salesTotalAmt" type="RichTextLabel" parent="UI/sellMenu/sellLayout/sellOptions/totalSpacer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+
+[node name="profitSpacer" type="GridContainer" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="UI/sellMenu/sellLayout/sellOptions/profitSpacer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_vhrrq")
+
+[node name="salesProfitAmt" type="RichTextLabel" parent="UI/sellMenu/sellLayout/sellOptions/profitSpacer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+
+[node name="hSeparator4" type="HSeparator" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fejb1")
+
+[node name="VSeparator5" type="VSeparator" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fejb1")
+
+[node name="sellConfirmButton" type="Button" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+text = "Confirm"
+
+[node name="sellCancelButton" type="Button" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="VSeparator6" type="VSeparator" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fejb1")
+
+[node name="hSeparator5" type="HSeparator" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fejb1")
+
+[node name="hSeparator6" type="HSeparator" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fejb1")
+
+[node name="hSeparator7" type="HSeparator" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fejb1")
+
+[node name="hSeparator8" type="HSeparator" parent="UI/sellMenu/sellLayout/sellOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_fejb1")
+
+[node name="pauseMenu" type="Control" parent="UI"]
+unique_name_in_owner = true
+process_mode = 2
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("11_7tsis")
+playerInfo = ExtResource("2_0c2xc")
+
+[node name="backdrop" type="ColorRect" parent="UI/pauseMenu"]
+material = SubResource("ShaderMaterial_t88bi")
+custom_minimum_size = Vector2(700, 400)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.117647)
+
+[node name="clearSelectionButton" type="Button" parent="UI/pauseMenu"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_right = 1151.0
+offset_bottom = 649.0
+
+[node name="inventoryMenu" type="GridContainer" parent="UI/pauseMenu"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 6
+
+[node name="inventoryItemViewport" type="SubViewport" parent="UI/pauseMenu/inventoryMenu"]
+unique_name_in_owner = true
+own_world_3d = true
+world_3d = SubResource("World3D_dnxow")
+transparent_bg = true
+
+[node name="Camera3D" type="Camera3D" parent="UI/pauseMenu/inventoryMenu/inventoryItemViewport"]
+projection = 1
+
+[node name="inventoryItemModel" type="MeshInstance3D" parent="UI/pauseMenu/inventoryMenu/inventoryItemViewport/Camera3D"]
+unique_name_in_owner = true
+transform = Transform3D(0.75, 0, 0, 0, 0.75, 0, 0, 0, 0.75, 0, 0, -1)
+
+[node name="itemAnim" type="AnimationPlayer" parent="UI/pauseMenu/inventoryMenu/inventoryItemViewport/Camera3D"]
+libraries = {
+"": SubResource("AnimationLibrary_aaux6")
+}
+autoplay = "spin"
+
+[node name="sunlight" type="DirectionalLight3D" parent="UI/pauseMenu/inventoryMenu/inventoryItemViewport/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 0.999123, -0.0418757, 0, 0.0418757, 0.999123, 0, 0, -1.5)
+shadow_enabled = true
+
+[node name="spacer1" type="VSeparator" parent="UI/pauseMenu/inventoryMenu"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 330
+
+[node name="filterMenu" type="ColorRect" parent="UI/pauseMenu/inventoryMenu"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.0901961, 0.0901961, 0.0901961, 0.662745)
+
+[node name="filterGrid" type="GridContainer" parent="UI/pauseMenu/inventoryMenu/filterMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="topSeparator" type="HSeparator" parent="UI/pauseMenu/inventoryMenu/filterMenu/filterGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_yeky0")
+
+[node name="allFilter" type="Button" parent="UI/pauseMenu/inventoryMenu/filterMenu/filterGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "All"
+flat = true
+
+[node name="partsFilter" type="Button" parent="UI/pauseMenu/inventoryMenu/filterMenu/filterGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Parts"
+flat = true
+
+[node name="unitsFilter" type="Button" parent="UI/pauseMenu/inventoryMenu/filterMenu/filterGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Units"
+flat = true
+
+[node name="fishFilter" type="Button" parent="UI/pauseMenu/inventoryMenu/filterMenu/filterGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Fish"
+flat = true
+
+[node name="bottomSeparator" type="HSeparator" parent="UI/pauseMenu/inventoryMenu/filterMenu/filterGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_yeky0")
+
+[node name="spacer3" type="VSeparator" parent="UI/pauseMenu/inventoryMenu"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="items" type="ColorRect" parent="UI/pauseMenu/inventoryMenu"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0, 0, 0, 0.662745)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/pauseMenu/inventoryMenu/items"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="itemGrid" type="GridContainer" parent="UI/pauseMenu/inventoryMenu/items/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="topSeparator" type="HSeparator" parent="UI/pauseMenu/inventoryMenu/items/ScrollContainer/itemGrid"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_yeky0")
+
+[node name="itemTemplate" type="Button" parent="UI/pauseMenu/inventoryMenu/items/ScrollContainer/itemGrid"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_colors/font_outline_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/hover = SubResource("StyleBoxFlat_w2bpg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6tmej")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6tmej")
+text = "Glowing Sunstone Chestplate"
+flat = true
+
+[node name="inventoryItem" type="GridContainer" parent="UI/pauseMenu/inventoryMenu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 200)
+layout_mode = 2
+
+[node name="inventoryItemSprite" type="Sprite2D" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+position = Vector2(272.715, 180.715)
+scale = Vector2(0.619141, 0.619141)
+texture = SubResource("ViewportTexture_ukbvr")
+offset = Vector2(250, 250)
+
+[node name="itemSpacerV" type="HSeparator" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+custom_minimum_size = Vector2(860, 500)
+layout_mode = 2
+theme_override_constants/separation = 325
+theme_override_styles/separator = SubResource("StyleBoxEmpty_5gfna")
+
+[node name="inventoryItemName" type="Label" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Standard Chestplate"
+horizontal_alignment = 1
+
+[node name="inventoryItemData" type="RichTextLabel" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
+text = "[center][color=red]Chest [color=white]- [color=blue]10/12"
+fit_content = true
+
+[node name="inventoryItemDescription" type="RichTextLabel" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/italics_font_size = 10
+bbcode_enabled = true
+text = "[center][i]Standard Chestplate"
+fit_content = true
+
+[node name="inventoryDamageIcon" type="Sprite2D" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+position = Vector2(366.215, 587.715)
+texture = ExtResource("6_5vg7v")
+
+[node name="inventoryDamage" type="Label" parent="UI/pauseMenu/inventoryMenu/inventoryItem/inventoryDamageIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "12"
+horizontal_alignment = 1
+
+[node name="inventoryArmorIcon" type="Sprite2D" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+position = Vector2(366.215, 615.715)
+texture = ExtResource("7_ydctm")
+
+[node name="inventoryArmor" type="Label" parent="UI/pauseMenu/inventoryMenu/inventoryItem/inventoryArmorIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "5"
+horizontal_alignment = 1
+
+[node name="inventorySpeedIcon" type="Sprite2D" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+position = Vector2(489.215, 587.715)
+texture = ExtResource("8_73coa")
+
+[node name="inventorySpeed" type="Label" parent="UI/pauseMenu/inventoryMenu/inventoryItem/inventorySpeedIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "-3"
+horizontal_alignment = 1
+
+[node name="inventoryRangeIcon" type="Sprite2D" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+position = Vector2(489.215, 615.715)
+texture = ExtResource("9_a3t77")
+
+[node name="inventoryRange" type="Label" parent="UI/pauseMenu/inventoryMenu/inventoryItem/inventoryRangeIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "8"
+horizontal_alignment = 1
+
+[node name="inventorySplashIcon" type="Sprite2D" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+position = Vector2(428.215, 646.715)
+texture = ExtResource("10_7270a")
+
+[node name="inventorySplash" type="Label" parent="UI/pauseMenu/inventoryMenu/inventoryItem/inventorySplashIcon"]
+unique_name_in_owner = true
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 40.0
+offset_bottom = 11.0
+text = "1"
+horizontal_alignment = 1
+
+[node name="VSeparator" type="HSeparator" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+layout_mode = 2
+theme_override_constants/separation = 100
+theme_override_styles/separator = SubResource("StyleBoxEmpty_70jjf")
+
+[node name="deleteButton" type="Button" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Trash"
+
+[node name="saveMenu" type="GridContainer" parent="UI/pauseMenu"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -104.5
+offset_top = -56.0
+offset_right = 104.5
+offset_bottom = 56.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="saveGameButton" type="Button" parent="UI/pauseMenu/saveMenu"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Manual Save"
+
+[node name="spacer1" type="HSeparator" parent="UI/pauseMenu/saveMenu"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+
+[node name="mainMenuButton" type="Button" parent="UI/pauseMenu/saveMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Quit to Main Menu"
+
+[node name="spacer2" type="HSeparator" parent="UI/pauseMenu/saveMenu"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+
+[node name="desktopButton" type="Button" parent="UI/pauseMenu/saveMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Quit to Desktop"
+
+[node name="options" type="GridContainer" parent="UI/pauseMenu"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 50.0
+offset_top = -87.0
+offset_right = 259.0
+offset_bottom = 87.0
+grow_vertical = 2
+
+[node name="pauseMenuBalance" type="RichTextLabel" parent="UI/pauseMenu/options"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+bbcode_enabled = true
+text = "1000G"
+
+[node name="inventoryButton" type="Button" parent="UI/pauseMenu/options"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Inventory"
+
+[node name="spacer1" type="HSeparator" parent="UI/pauseMenu/options"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+
+[node name="settingsButton" type="Button" parent="UI/pauseMenu/options"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Settings"
+
+[node name="spacer2" type="HSeparator" parent="UI/pauseMenu/options"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+
+[node name="quitButton" type="Button" parent="UI/pauseMenu/options"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Save and Quit"
+
+[node name="settingsMenu" parent="UI/pauseMenu" instance=ExtResource("13_55kmc")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+offset_left = -276.0
+offset_right = 324.0
+
+[connection signal="animation_finished" from="head/neck/playerCam/hand/fishingAnims" to="." method="fishingAnimFinished"]
+[connection signal="timeout" from="UI/HUD/shop/itemMenu/itemMenuInteractionTimer" to="." method="triggerItemMenu"]
+[connection signal="dialogueEnded" from="UI/dialogueMenu" to="." method="dialogueEnded"]
+[connection signal="button_up" from="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid/response1" to="UI/dialogueMenu" method="response1Pressed"]
+[connection signal="button_up" from="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid/response2" to="UI/dialogueMenu" method="response2Pressed"]
+[connection signal="button_up" from="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid/response3" to="UI/dialogueMenu" method="response3Pressed"]
+[connection signal="button_up" from="UI/dialogueMenu/dialogueLayout/background/dialogueResponseGrid/response4" to="UI/dialogueMenu" method="response4Pressed"]
+[connection signal="button_up" from="UI/sellMenu/sellLayout/sellOptions/sellConfirmButton" to="UI/sellMenu" method="confirmPressed"]
+[connection signal="button_up" from="UI/sellMenu/sellLayout/sellOptions/sellCancelButton" to="UI/sellMenu" method="cancelPressed"]
+[connection signal="button_up" from="UI/pauseMenu/inventoryMenu/inventoryItem/deleteButton" to="UI/pauseMenu" method="deleteItemPressed"]
+[connection signal="button_up" from="UI/pauseMenu/saveMenu/saveGameButton" to="UI/pauseMenu" method="saveGamePressed"]
+[connection signal="button_up" from="UI/pauseMenu/saveMenu/mainMenuButton" to="UI/pauseMenu" method="mainMenuPressed"]
+[connection signal="button_up" from="UI/pauseMenu/saveMenu/desktopButton" to="UI/pauseMenu" method="desktopPressed"]
+[connection signal="button_up" from="UI/pauseMenu/options/inventoryButton" to="UI/pauseMenu" method="openInventory"]
+[connection signal="button_up" from="UI/pauseMenu/options/settingsButton" to="UI/pauseMenu" method="openSettings"]
+[connection signal="button_up" from="UI/pauseMenu/options/quitButton" to="UI/pauseMenu" method="openQuit"]

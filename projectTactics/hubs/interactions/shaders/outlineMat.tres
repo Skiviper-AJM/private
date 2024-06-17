@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://rb3cau1jv83o"]
+
+[ext_resource type="Shader" path="res://hubs/interactions/shaders/outline.gdshader" id="1_rxiva"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_rxiva")
+shader_parameter/shadow_color = Color(1, 1, 1, 1)
+shader_parameter/shadow_thickness = 2.0

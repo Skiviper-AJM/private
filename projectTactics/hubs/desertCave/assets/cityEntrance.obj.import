@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dgliwm6b4gu63"
+path="res://.godot/imported/cityEntrance.obj-ca8e9d06e10fd85ddd6069db0a041c53.mesh"
+
+[deps]
+
+files=["res://.godot/imported/cityEntrance.obj-ca8e9d06e10fd85ddd6069db0a041c53.mesh"]
+
+source_file="res://hubs/desertCave/assets/cityEntrance.obj"
+dest_files=["res://.godot/imported/cityEntrance.obj-ca8e9d06e10fd85ddd6069db0a041c53.mesh", "res://.godot/imported/cityEntrance.obj-ca8e9d06e10fd85ddd6069db0a041c53.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

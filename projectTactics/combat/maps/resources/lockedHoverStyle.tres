@@ -1,0 +1,6 @@
+[gd_resource type="StyleBoxTexture" load_steps=2 format=3 uid="uid://b3qh2x2hbole4"]
+
+[ext_resource type="Texture2D" uid="uid://2o6e66mcbwjo" path="res://combat/maps/assets/lockedPointHover.png" id="1_ongy8"]
+
+[resource]
+texture = ExtResource("1_ongy8")

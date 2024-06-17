@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Unit" load_steps=7 format=3 uid="uid://bovi3bigqcrpf"]
+
+[ext_resource type="Script" path="res://combat/resources/unit.gd" id="1_71ltt"]
+[ext_resource type="Resource" uid="uid://uptaogo07nbk" path="res://combat/parts/arm/unit04Arm.tres" id="1_r75ps"]
+[ext_resource type="Resource" uid="uid://mk30q4vrm7x8" path="res://combat/parts/chest/unit04Chest.tres" id="2_irmaa"]
+[ext_resource type="Resource" uid="uid://c3kd8c7ue708l" path="res://combat/parts/core/unit04Core.tres" id="3_gosxu"]
+[ext_resource type="Resource" uid="uid://dchwgujnnfiof" path="res://combat/parts/head/unit04Head.tres" id="4_c2x2i"]
+[ext_resource type="Resource" uid="uid://b05gsgwhad60i" path="res://combat/parts/leg/unit04Leg.tres" id="5_wdvjy"]
+
+[resource]
+script = ExtResource("1_71ltt")
+name = "Well Worn Mech"
+cost = 0
+description = " It's well worn and falling apart in certain areas, but it looks to still have some life left in it."
+head = ExtResource("4_c2x2i")
+chest = ExtResource("2_irmaa")
+arm = ExtResource("1_r75ps")
+core = ExtResource("3_gosxu")
+leg = ExtResource("5_wdvjy")

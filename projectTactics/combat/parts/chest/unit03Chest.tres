@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://b4ui1jrjnwkdn"]
+
+[ext_resource type="PackedScene" uid="uid://irob1fg18hjk" path="res://combat/parts/chest/unit03Chest.tscn" id="1_1vj6d"]
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_5f1qa"]
+
+[resource]
+script = ExtResource("1_5f1qa")
+name = "Brass Chestplate"
+type = 2
+model = ExtResource("1_1vj6d")
+cost = 7500
+description = " Brass plated"
+maxDurability = 35
+currentDurability = 35
+damage = 15
+armorRating = 20
+speedRating = 0
+range = 0
+splash = 0

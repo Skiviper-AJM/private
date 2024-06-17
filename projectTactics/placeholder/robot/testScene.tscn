@@ -1,0 +1,67 @@
+[gd_scene load_steps=10 format=3 uid="uid://xe085x7nnkju"]
+
+[ext_resource type="ArrayMesh" uid="uid://c5wqpxxlv01a5" path="res://placeholder/robot/testRobot.obj" id="1_cqnjn"]
+[ext_resource type="Texture2D" uid="uid://0ov86xtyumrm" path="res://placeholder/robot/testRobotSpritemap.png" id="2_fwbai"]
+[ext_resource type="Texture2D" uid="uid://ff4cketo6hti" path="res://placeholder/robot/testRobotSpritemapGlow.png" id="3_ra0lq"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_030xq"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mfsw2"]
+albedo_color = Color(0.168627, 0.0980392, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ts0j8"]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+cull_mode = 2
+albedo_texture = ExtResource("2_fwbai")
+emission_enabled = true
+emission_texture = ExtResource("3_ra0lq")
+texture_filter = 0
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_7g6hf"]
+sky_top_color = Color(1, 0.921569, 0.858824, 1)
+sky_horizon_color = Color(0.72549, 0.592157, 0.376471, 1)
+ground_bottom_color = Color(0.121569, 0.00392157, 0, 1)
+ground_horizon_color = Color(0.647059, 0.286275, 0.0980392, 1)
+
+[sub_resource type="Sky" id="Sky_f7p47"]
+sky_material = SubResource("ProceduralSkyMaterial_7g6hf")
+
+[sub_resource type="Environment" id="Environment_6m5w4"]
+background_mode = 2
+sky = SubResource("Sky_f7p47")
+ssao_enabled = true
+ssil_enabled = true
+sdfgi_enabled = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0075
+volumetric_fog_albedo = Color(1, 0.815686, 0.537255, 1)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(55.0329, 0, 0, 0, 1, 0, 0, 0, 62.6143, 0, 0, 0)
+mesh = SubResource("BoxMesh_030xq")
+surface_material_override/0 = SubResource("StandardMaterial3D_mfsw2")
+
+[node name="TestRobot" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, -1.75742, 6.40021, -0.524849)
+mesh = ExtResource("1_cqnjn")
+surface_material_override/0 = SubResource("StandardMaterial3D_ts0j8")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="TestRobot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.51181, 2.52938, 0.25101)
+light_color = Color(1, 0.823529, 0.411765, 1)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_6m5w4")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 18.0363, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.7523, -0.319785, 0.576006, 0, 0.874298, 0.48539, -0.658821, -0.365159, 0.657734, 23.3375, 26.3189, 25.0181)
+projection = 1
+size = 46.637

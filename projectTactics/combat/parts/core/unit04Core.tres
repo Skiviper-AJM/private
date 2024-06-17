@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://c3kd8c7ue708l"]
+
+[ext_resource type="PackedScene" uid="uid://dpbwd1lo32um3" path="res://combat/parts/core/unit04Core.tscn" id="1_1a2rl"]
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_jy148"]
+
+[resource]
+script = ExtResource("1_jy148")
+name = "Corroded Fire Core"
+type = 3
+model = ExtResource("1_1a2rl")
+cost = 0
+description = "It still smolders slightly"
+maxDurability = 3
+currentDurability = 3
+damage = 0
+armorRating = 0
+speedRating = 0
+range = 0
+splash = 0

@@ -1,0 +1,523 @@
+[gd_scene load_steps=10 format=3 uid="uid://jve6laga0kwo"]
+
+[ext_resource type="Texture2D" uid="uid://c0mmmnw4or4jb" path="res://placeholder/mainMenuBackground.png" id="1_i5o2u"]
+[ext_resource type="Script" path="res://general/UI/scripts/mainMenu.gd" id="1_rvynx"]
+[ext_resource type="Shader" path="res://hubs/player/scripts/blur.gdshader" id="3_yd77q"]
+[ext_resource type="PackedScene" uid="uid://7p08th6jln4e" path="res://general/UI/settingsMenu.tscn" id="4_s6bh7"]
+[ext_resource type="Texture2D" uid="uid://udwjq704nr6m" path="res://general/UI/assets/trashIcon.png" id="5_4yixd"]
+[ext_resource type="Script" path="res://general/autoloads/fileManager.gd" id="5_fbuwu"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e4dko"]
+shader = ExtResource("3_yd77q")
+shader_parameter/lod = 1.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3il0j"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ifdjk"]
+
+[node name="mainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rvynx")
+
+[node name="background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_i5o2u")
+expand_mode = 3
+
+[node name="backdrop" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_e4dko")
+custom_minimum_size = Vector2(700, 400)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.117647)
+
+[node name="optionsMenu" type="GridContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 50.0
+offset_top = -106.0
+offset_right = 221.0
+offset_bottom = 106.0
+grow_vertical = 2
+
+[node name="newButton" type="Button" parent="optionsMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "New Game"
+
+[node name="loadButton" type="Button" parent="optionsMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Load Game"
+
+[node name="settingsButton" type="Button" parent="optionsMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Settings"
+
+[node name="quitButton" type="Button" parent="optionsMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Quit"
+
+[node name="settingsMenu" parent="." instance=ExtResource("4_s6bh7")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="loadMenu" type="GridContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -229.0
+offset_right = 300.0
+offset_bottom = 229.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="saveTitle" type="Button" parent="loadMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 30
+button_mask = 0
+text = "Game Saves"
+
+[node name="saveSubMenu" type="Control" parent="loadMenu"]
+custom_minimum_size = Vector2(0, 365)
+layout_mode = 2
+
+[node name="backdrop" type="ColorRect" parent="loadMenu/saveSubMenu"]
+custom_minimum_size = Vector2(600, 365)
+layout_mode = 2
+offset_right = 600.0
+offset_bottom = 365.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.313726)
+
+[node name="saveMenu" type="GridContainer" parent="loadMenu/saveSubMenu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(580, 0)
+layout_mode = 1
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 590.0
+offset_bottom = 151.0
+columns = 2
+
+[node name="saveName1" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName1"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave1" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName2" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave2" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName3" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName3"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave3" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName4" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName4"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave4" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName5" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName5"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave5" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName6" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName6"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave6" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName7" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName7"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave7" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName8" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName8"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave8" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName9" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName9"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave9" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="saveName10" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "     Player1"
+alignment = 0
+
+[node name="saveText" type="Label" parent="loadMenu/saveSubMenu/saveMenu/saveName10"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+offset_left = 264.0
+offset_top = 4.0
+offset_right = 541.0
+offset_bottom = 27.0
+size_flags_horizontal = 0
+text = "4h 32m | City | 7:46pm - 21/02/2024"
+horizontal_alignment = 2
+
+[node name="deleteSave10" type="Button" parent="loadMenu/saveSubMenu/saveMenu"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("5_4yixd")
+expand_icon = true
+
+[node name="navigationButtons" type="GridContainer" parent="loadMenu"]
+layout_mode = 2
+columns = 3
+
+[node name="previousButton" type="Button" parent="loadMenu/navigationButtons"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+text = "Previous"
+
+[node name="nextButton" type="Button" parent="loadMenu/navigationButtons"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+text = "Next"
+
+[node name="FileManager" type="Node" parent="."]
+script = ExtResource("5_fbuwu")
+
+[node name="gameCreationMenu" type="GridContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+columns = 3
+
+[node name="lSideSeparator1" type="VSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_3il0j")
+
+[node name="topSeparator" type="HSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_ifdjk")
+
+[node name="lSideSeparator2" type="VSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_3il0j")
+
+[node name="lSideSeparator3" type="VSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_3il0j")
+
+[node name="newGameName" type="LineEdit" parent="gameCreationMenu"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+placeholder_text = "Enter save name"
+alignment = 1
+max_length = 30
+
+[node name="rSideSeparator1" type="VSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_3il0j")
+
+[node name="lSideSeparator4" type="VSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_3il0j")
+
+[node name="createGameButton" type="Button" parent="gameCreationMenu"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+disabled = true
+text = "Start"
+
+[node name="rSideSeparator2" type="VSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_3il0j")
+
+[node name="bottomSeparator" type="HSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_ifdjk")
+
+[node name="rSideSeparator3" type="VSeparator" parent="gameCreationMenu"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_3il0j")
+
+[connection signal="button_up" from="optionsMenu/newButton" to="." method="newGamePressed"]
+[connection signal="button_up" from="optionsMenu/loadButton" to="." method="loadGamePressed"]
+[connection signal="button_up" from="optionsMenu/settingsButton" to="." method="settingsPressed"]
+[connection signal="pressed" from="optionsMenu/quitButton" to="." method="quitPressed"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName1" to="." method="save1"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave1" to="." method="deleteSave1"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName2" to="." method="save2"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave2" to="." method="deleteSave2"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName3" to="." method="save3"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave3" to="." method="deleteSave3"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName4" to="." method="save4"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave4" to="." method="deleteSave4"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName5" to="." method="save5"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave5" to="." method="deleteSave5"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName6" to="." method="save6"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave6" to="." method="deleteSave6"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName7" to="." method="save7"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave7" to="." method="deleteSave7"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName8" to="." method="save8"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave8" to="." method="deleteSave8"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName9" to="." method="save9"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave9" to="." method="deleteSave9"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/saveName10" to="." method="save10"]
+[connection signal="button_up" from="loadMenu/saveSubMenu/saveMenu/deleteSave10" to="." method="deleteSave10"]
+[connection signal="button_up" from="loadMenu/navigationButtons/previousButton" to="." method="previousButtonPressed"]
+[connection signal="button_up" from="loadMenu/navigationButtons/nextButton" to="." method="nextButtonPressed"]
+[connection signal="text_changed" from="gameCreationMenu/newGameName" to="." method="gameNameChanged"]
+[connection signal="button_up" from="gameCreationMenu/createGameButton" to="." method="createButtonPressed"]

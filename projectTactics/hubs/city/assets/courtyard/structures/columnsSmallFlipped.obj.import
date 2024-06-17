@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cpc6q7hiqkcd1"
+path="res://.godot/imported/columnsSmallFlipped.obj-688f77b03c41c90f4c2a40de18a65bce.mesh"
+
+[deps]
+
+files=["res://.godot/imported/columnsSmallFlipped.obj-688f77b03c41c90f4c2a40de18a65bce.mesh"]
+
+source_file="res://hubs/city/assets/courtyard/structures/columnsSmallFlipped.obj"
+dest_files=["res://.godot/imported/columnsSmallFlipped.obj-688f77b03c41c90f4c2a40de18a65bce.mesh", "res://.godot/imported/columnsSmallFlipped.obj-688f77b03c41c90f4c2a40de18a65bce.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

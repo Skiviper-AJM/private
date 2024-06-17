@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://i4t6tqlf6sba"]
+
+[ext_resource type="Script" path="res://hubs/interactions/scripts/npc.gd" id="1_gtq6c"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_j2oh8"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_n6vgi"]
+
+[node name="interactable" type="Area3D"]
+transform = Transform3D(-0.099991, 0, -0.00134557, 0, 0.1, 0, 0.00134557, 0, -0.099991, -4.44159, 3.90415, 32.3934)
+collision_layer = 8
+collision_mask = 0
+input_ray_pickable = false
+monitoring = false
+script = ExtResource("1_gtq6c")
+
+[node name="hitbox" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_j2oh8")
+
+[node name="interactableModel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, -9.31323e-10, 0, 1, 0, 9.31323e-10, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_n6vgi")
+skeleton = NodePath(".")

@@ -1,0 +1,54 @@
+[gd_scene load_steps=7 format=3 uid="uid://d3n1cbba7eoii"]
+
+[ext_resource type="Script" path="res://combat/resources/partModel.gd" id="1_d8y1j"]
+[ext_resource type="Material" uid="uid://cpwthuupwouf" path="res://combat/parts/assets/materials/unit02Mat.tres" id="2_56ikp"]
+[ext_resource type="ArrayMesh" uid="uid://cwdboi1g3f2t5" path="res://combat/parts/assets/unit02/unit02UpperLeg.obj" id="3_wqer7"]
+[ext_resource type="ArrayMesh" uid="uid://dp74p18g3ieki" path="res://combat/parts/assets/unit02/unit02LowerLeg.obj" id="4_wg2gs"]
+[ext_resource type="ArrayMesh" uid="uid://bwljessrks8ei" path="res://combat/parts/assets/unit02/unit02Foot.obj" id="5_rf6ba"]
+[ext_resource type="ArrayMesh" uid="uid://bqqqhkqevsks5" path="res://combat/parts/assets/unit02/unit02LowerLegInverted.obj" id="6_pqm0c"]
+
+[node name="upperLegPivot" type="Node3D"]
+script = ExtResource("1_d8y1j")
+type = 1
+
+[node name="upperLeg" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.973938, 0)
+material_override = ExtResource("2_56ikp")
+mesh = ExtResource("3_wqer7")
+
+[node name="lowerLegPivot" type="Node3D" parent="upperLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.81415, 0.0320423)
+
+[node name="lowerLeg" type="MeshInstance3D" parent="upperLeg/lowerLegPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0732642, -1.62413, 0)
+material_override = ExtResource("2_56ikp")
+mesh = ExtResource("4_wg2gs")
+
+[node name="footPivot" type="Node3D" parent="upperLeg/lowerLegPivot/lowerLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0397884, -1.31745, -0.0188315)
+
+[node name="foot" type="MeshInstance3D" parent="upperLeg/lowerLegPivot/lowerLeg/footPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.587771, 0.54303)
+material_override = ExtResource("2_56ikp")
+mesh = ExtResource("5_rf6ba")
+
+[node name="inverted" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.973938, 0)
+material_override = ExtResource("2_56ikp")
+mesh = ExtResource("3_wqer7")
+
+[node name="lowerLegPivot" type="Node3D" parent="inverted"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.81415, 0.0320423)
+
+[node name="lowerLeg" type="MeshInstance3D" parent="inverted/lowerLegPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0634804, -1.38665, 0)
+material_override = ExtResource("2_56ikp")
+mesh = ExtResource("6_pqm0c")
+
+[node name="footPivot" type="Node3D" parent="inverted/lowerLegPivot/lowerLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0611668, -1.5571, -0.0188315)
+
+[node name="foot" type="MeshInstance3D" parent="inverted/lowerLegPivot/lowerLeg/footPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.587771, 0.54303)
+material_override = ExtResource("2_56ikp")
+mesh = ExtResource("5_rf6ba")

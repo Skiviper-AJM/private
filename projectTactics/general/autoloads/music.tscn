@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://4iksg2apvcyt"]
+
+[ext_resource type="Script" path="res://general/autoloads/music.gd" id="1_a0hk7"]
+[ext_resource type="AudioStream" uid="uid://bumyl7qoknpy1" path="res://general/music/cave.mp3" id="2_mr02v"]
+[ext_resource type="AudioStream" uid="uid://bnqp41d4khvrv" path="res://general/music/city.mp3" id="3_te6yx"]
+
+[node name="Music" type="Node"]
+process_mode = 3
+script = ExtResource("1_a0hk7")
+
+[node name="cave" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_mr02v")
+
+[node name="city" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_te6yx")

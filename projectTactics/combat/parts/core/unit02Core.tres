@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://dcdtjebpxg7f5"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_6fj3w"]
+[ext_resource type="PackedScene" uid="uid://c25rmkh8s2qco" path="res://combat/parts/core/unit02Core.tscn" id="1_qeq53"]
+
+[resource]
+script = ExtResource("1_6fj3w")
+name = "Ice Core"
+type = 3
+model = ExtResource("1_qeq53")
+cost = 1000
+description = " Small icicles cover it"
+maxDurability = 5
+currentDurability = 5
+damage = 5
+armorRating = 0
+speedRating = 10
+range = 0
+splash = 0

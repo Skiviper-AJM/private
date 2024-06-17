@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://7gcfgw42mq58"]
+
+[ext_resource type="Script" path="res://combat/resources/partModel.gd" id="1_jqdf3"]
+[ext_resource type="Material" uid="uid://ga0l4a4pcqaf" path="res://combat/parts/assets/materials/unit03Mat.tres" id="2_0rury"]
+[ext_resource type="ArrayMesh" uid="uid://dwb2sivdg57rv" path="res://combat/parts/assets/unit01/unit01UpperArm.obj" id="3_wbser"]
+[ext_resource type="ArrayMesh" uid="uid://dv7kgyvhdpsy2" path="res://combat/parts/assets/unit01/unit01LowerArm.obj" id="4_k143a"]
+[ext_resource type="ArrayMesh" uid="uid://p7cpbfvufved" path="res://combat/parts/assets/unit01/unit01UpperArmInverted.obj" id="5_6jde2"]
+
+[node name="upperArmPivot" type="Node3D"]
+script = ExtResource("1_jqdf3")
+scaleModifier = 0.7
+
+[node name="upperArm" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.157654, -0.578744, -0.013899)
+material_override = ExtResource("2_0rury")
+mesh = ExtResource("3_wbser")
+
+[node name="lowerArmPivot" type="Node3D" parent="upperArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.898733, 0)
+
+[node name="lowerArm" type="MeshInstance3D" parent="upperArm/lowerArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.758121, 4.44645)
+material_override = ExtResource("2_0rury")
+mesh = ExtResource("4_k143a")
+
+[node name="inverted" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.166276, -0.578744, -0.013899)
+material_override = ExtResource("2_0rury")
+mesh = ExtResource("5_6jde2")
+
+[node name="lowerArmPivot" type="Node3D" parent="inverted"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.898733, 0)
+
+[node name="lowerArm" type="MeshInstance3D" parent="inverted/lowerArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.758121, 4.44645)
+material_override = ExtResource("2_0rury")
+mesh = ExtResource("4_k143a")
+
+[node name="pivotCenter" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.93247)

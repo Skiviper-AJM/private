@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dwb2sivdg57rv"
+path="res://.godot/imported/unit01UpperArm.obj-5069d93ddbd3380eaaa5b070040dcd01.mesh"
+
+[deps]
+
+files=["res://.godot/imported/unit01UpperArm.obj-5069d93ddbd3380eaaa5b070040dcd01.mesh"]
+
+source_file="res://combat/parts/assets/unit01/unit01UpperArm.obj"
+dest_files=["res://.godot/imported/unit01UpperArm.obj-5069d93ddbd3380eaaa5b070040dcd01.mesh", "res://.godot/imported/unit01UpperArm.obj-5069d93ddbd3380eaaa5b070040dcd01.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

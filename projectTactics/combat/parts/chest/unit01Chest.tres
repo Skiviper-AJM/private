@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://dyp6f7kkhjgyw"]
+
+[ext_resource type="PackedScene" uid="uid://sqw73mktxhpy" path="res://combat/parts/chest/unit01Chest.tscn" id="1_iehic"]
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="2_vnmx5"]
+
+[resource]
+script = ExtResource("2_vnmx5")
+name = "Reinforced Chestplate"
+type = 2
+model = ExtResource("1_iehic")
+cost = 2500
+description = "Standard issue armor, reinforced with steel plating"
+maxDurability = 20
+currentDurability = 20
+damage = 0
+armorRating = 15
+speedRating = 1
+range = 0
+splash = 0

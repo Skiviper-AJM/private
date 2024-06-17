@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://r14eyviw1qw3"
+path="res://.godot/imported/caveOuterWalls.obj-a32b999bea8769b05a8a0b62cbe0eda5.mesh"
+
+[deps]
+
+files=["res://.godot/imported/caveOuterWalls.obj-a32b999bea8769b05a8a0b62cbe0eda5.mesh"]
+
+source_file="res://hubs/desertCave/assets/caveOuterWalls.obj"
+dest_files=["res://.godot/imported/caveOuterWalls.obj-a32b999bea8769b05a8a0b62cbe0eda5.mesh", "res://.godot/imported/caveOuterWalls.obj-a32b999bea8769b05a8a0b62cbe0eda5.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

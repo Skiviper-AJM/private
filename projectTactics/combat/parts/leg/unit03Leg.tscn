@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://cb6r44e4a0vft"]
+
+[ext_resource type="Script" path="res://combat/resources/partModel.gd" id="1_ytq77"]
+[ext_resource type="Material" uid="uid://ga0l4a4pcqaf" path="res://combat/parts/assets/materials/unit03Mat.tres" id="2_y4tb0"]
+[ext_resource type="ArrayMesh" uid="uid://c5y5w35ludc0p" path="res://combat/parts/assets/unit01/unit01UpperLeg.obj" id="3_hayiq"]
+[ext_resource type="ArrayMesh" uid="uid://bontp7gtx1bks" path="res://combat/parts/assets/unit01/unit01LowerLeg.obj" id="4_4mq4m"]
+[ext_resource type="ArrayMesh" uid="uid://bperqvdqdngal" path="res://combat/parts/assets/unit01/unit01Foot.obj" id="5_o5i0w"]
+
+[node name="upperLegPivot" type="Node3D"]
+script = ExtResource("1_ytq77")
+type = 1
+
+[node name="upperLeg" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.14755, 0)
+material_override = ExtResource("2_y4tb0")
+mesh = ExtResource("3_hayiq")
+
+[node name="lowerLegPivot" type="Node3D" parent="upperLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.45227, 0)
+
+[node name="lowerLeg" type="MeshInstance3D" parent="upperLeg/lowerLegPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.30633, 0)
+material_override = ExtResource("2_y4tb0")
+mesh = ExtResource("4_4mq4m")
+
+[node name="footPivot" type="Node3D" parent="upperLeg/lowerLegPivot/lowerLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0212304, -1.2931, 0.0470125)
+
+[node name="foot" type="MeshInstance3D" parent="upperLeg/lowerLegPivot/lowerLeg/footPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.445993, 0)
+material_override = ExtResource("2_y4tb0")
+mesh = ExtResource("5_o5i0w")

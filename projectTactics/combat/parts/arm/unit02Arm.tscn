@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://eran212spg56"]
+
+[ext_resource type="Script" path="res://combat/resources/partModel.gd" id="1_1b6dg"]
+[ext_resource type="Material" uid="uid://cpwthuupwouf" path="res://combat/parts/assets/materials/unit02Mat.tres" id="2_kjfj1"]
+[ext_resource type="ArrayMesh" uid="uid://dkkvlfcq2eiqj" path="res://combat/parts/assets/unit02/unit02UpperArm.obj" id="3_6eywc"]
+[ext_resource type="ArrayMesh" uid="uid://c3tufkfv4f7gh" path="res://combat/parts/assets/unit02/unit02LowerArm.obj" id="4_hu0l5"]
+[ext_resource type="ArrayMesh" uid="uid://sp4u3qas5gl7" path="res://combat/parts/assets/unit02/unit02UpperArmInverted.obj" id="5_33k1f"]
+
+[node name="upperArmPivot" type="Node3D"]
+script = ExtResource("1_1b6dg")
+scaleModifier = 0.5
+
+[node name="upperArm" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.189196, -0.427958, -0.053791)
+material_override = ExtResource("2_kjfj1")
+mesh = ExtResource("3_6eywc")
+
+[node name="lowerArmPivot" type="Node3D" parent="upperArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1821, 0.0232441)
+
+[node name="lowerArm" type="MeshInstance3D" parent="upperArm/lowerArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.260525, -0.541304, 0.124371)
+material_override = ExtResource("2_kjfj1")
+mesh = ExtResource("4_hu0l5")
+
+[node name="inverted" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.654289, -0.323637, -0.0214578)
+material_override = ExtResource("2_kjfj1")
+mesh = ExtResource("5_33k1f")
+
+[node name="lowerArmPivot" type="Node3D" parent="inverted"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.215541, -1.27418, 0.0232441)
+
+[node name="lowerArm" type="MeshInstance3D" parent="inverted/lowerArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.179406, -0.541304, 0.124371)
+material_override = ExtResource("2_kjfj1")
+mesh = ExtResource("4_hu0l5")
+
+[node name="pivotCenter" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.99362)

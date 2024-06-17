@@ -1,0 +1,25 @@
+[gd_resource type="StandardMaterial3D" load_steps=6 format=3 uid="uid://crfxlwwscqie"]
+
+[ext_resource type="Texture2D" uid="uid://c3tyh1cabrr6u" path="res://hubs/shared/assets/water1.png" id="1_7jkxh"]
+[ext_resource type="Texture2D" uid="uid://d35na4bpku1nj" path="res://hubs/shared/assets/water2.png" id="2_jdfkw"]
+[ext_resource type="Texture2D" uid="uid://dat0j83l4m1rm" path="res://hubs/shared/assets/water3.png" id="3_hlrcb"]
+[ext_resource type="Texture2D" uid="uid://buqnwcv5cacmv" path="res://hubs/shared/assets/water4.png" id="4_uap3n"]
+
+[sub_resource type="AnimatedTexture" id="AnimatedTexture_sb0pu"]
+frames = 4
+speed_scale = 3.0
+frame_0/texture = ExtResource("1_7jkxh")
+frame_1/texture = ExtResource("2_jdfkw")
+frame_1/duration = 1.0
+frame_2/texture = ExtResource("3_hlrcb")
+frame_2/duration = 1.0
+frame_3/texture = ExtResource("4_uap3n")
+frame_3/duration = 1.0
+
+[resource]
+albedo_texture = SubResource("AnimatedTexture_sb0pu")
+emission_enabled = true
+emission = Color(0.258824, 0.74902, 0.909804, 1)
+emission_energy_multiplier = 0.4
+emission_texture = SubResource("AnimatedTexture_sb0pu")
+texture_filter = 0

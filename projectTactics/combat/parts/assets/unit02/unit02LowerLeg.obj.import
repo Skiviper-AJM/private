@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dp74p18g3ieki"
+path="res://.godot/imported/unit02LowerLeg.obj-dffa6149add89eae1e64b9665f35aa8f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/unit02LowerLeg.obj-dffa6149add89eae1e64b9665f35aa8f.mesh"]
+
+source_file="res://combat/parts/assets/unit02/unit02LowerLeg.obj"
+dest_files=["res://.godot/imported/unit02LowerLeg.obj-dffa6149add89eae1e64b9665f35aa8f.mesh", "res://.godot/imported/unit02LowerLeg.obj-dffa6149add89eae1e64b9665f35aa8f.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

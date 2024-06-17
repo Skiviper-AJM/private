@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://blyodidu1j4fj"
+path="res://.godot/imported/caveBridge.obj-79942fa8cdcfe40ebdaf1a9c91d89432.mesh"
+
+[deps]
+
+files=["res://.godot/imported/caveBridge.obj-79942fa8cdcfe40ebdaf1a9c91d89432.mesh"]
+
+source_file="res://hubs/desertCave/assets/caveBridge.obj"
+dest_files=["res://.godot/imported/caveBridge.obj-79942fa8cdcfe40ebdaf1a9c91d89432.mesh", "res://.godot/imported/caveBridge.obj-79942fa8cdcfe40ebdaf1a9c91d89432.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

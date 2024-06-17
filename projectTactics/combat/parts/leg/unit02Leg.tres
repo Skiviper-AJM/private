@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://3mybeu0x33nu"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_1vi6r"]
+[ext_resource type="PackedScene" uid="uid://d3n1cbba7eoii" path="res://combat/parts/leg/unit02Leg.tscn" id="1_xj5b5"]
+
+[resource]
+script = ExtResource("1_1vi6r")
+name = "Bulk Leg"
+type = 1
+model = ExtResource("1_xj5b5")
+cost = 2500
+description = " Steel reinforced"
+maxDurability = 5
+currentDurability = 5
+damage = 3
+armorRating = 3
+speedRating = 1
+range = 0
+splash = 2

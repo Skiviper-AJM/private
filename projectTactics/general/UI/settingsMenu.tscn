@@ -1,0 +1,335 @@
+[gd_scene load_steps=5 format=3 uid="uid://7p08th6jln4e"]
+
+[ext_resource type="Script" path="res://general/UI/scripts/settingsMenu.gd" id="1_8y1tr"]
+[ext_resource type="Script" path="res://general/UI/scripts/keybindsMenu.gd" id="1_30jyb"]
+
+[sub_resource type="Animation" id="Animation_ax8q1"]
+resource_name = "fade"
+length = 3.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 2, 3),
+"transitions": PackedFloat32Array(-2, 1, -2, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_3rn0m"]
+_data = {
+"fade": SubResource("Animation_ax8q1")
+}
+
+[node name="settingsMenu" type="GridContainer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -229.0
+offset_right = 300.0
+offset_bottom = 229.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_8y1tr")
+
+[node name="settingsOptions" type="GridContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 3
+
+[node name="audioSettingsButton" type="Button" parent="settingsOptions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "Audio"
+
+[node name="graphicsSettingsButton" type="Button" parent="settingsOptions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "Graphics"
+
+[node name="keybindsSettingsButton" type="Button" parent="settingsOptions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "Keybinds"
+
+[node name="settingsSubMenus" type="Control" parent="."]
+layout_mode = 2
+
+[node name="clearSelectionButton" type="Button" parent="settingsSubMenus"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+offset_top = -54.0
+offset_right = 600.0
+offset_bottom = -46.0
+focus_mode = 0
+mouse_filter = 2
+
+[node name="backdrop" type="ColorRect" parent="settingsSubMenus"]
+custom_minimum_size = Vector2(600, 400)
+layout_mode = 2
+offset_right = 600.0
+offset_bottom = 400.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.313726)
+
+[node name="audioMenu" type="GridContainer" parent="settingsSubMenus"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(575, 0)
+layout_mode = 1
+offset_top = 10.0
+offset_right = 575.0
+offset_bottom = 151.0
+columns = 2
+
+[node name="musicLabel" type="Label" parent="settingsSubMenus/audioMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Music"
+horizontal_alignment = 1
+
+[node name="musicSlider" type="HSlider" parent="settingsSubMenus/audioMenu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 5.0
+value = 5.0
+
+[node name="combatLabel" type="Label" parent="settingsSubMenus/audioMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Combat"
+horizontal_alignment = 1
+
+[node name="combatSlider" type="HSlider" parent="settingsSubMenus/audioMenu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 5.0
+value = 5.0
+
+[node name="uiLabel" type="Label" parent="settingsSubMenus/audioMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "UI"
+horizontal_alignment = 1
+
+[node name="uiSlider" type="HSlider" parent="settingsSubMenus/audioMenu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 5.0
+value = 5.0
+
+[node name="ambientLabel" type="Label" parent="settingsSubMenus/audioMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Ambient"
+horizontal_alignment = 1
+
+[node name="ambientSlider" type="HSlider" parent="settingsSubMenus/audioMenu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 5.0
+value = 5.0
+
+[node name="resetButton" type="Button" parent="settingsSubMenus/audioMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset"
+
+[node name="graphicsMenu" type="GridContainer" parent="settingsSubMenus"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(575, 0)
+layout_mode = 1
+offset_top = 10.0
+offset_right = 575.0
+offset_bottom = 151.0
+columns = 2
+
+[node name="fullscreenLabel" type="Label" parent="settingsSubMenus/graphicsMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Fullscreen"
+horizontal_alignment = 1
+
+[node name="fullscreenButton" type="CheckBox" parent="settingsSubMenus/graphicsMenu"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="vsyncLabel" type="Label" parent="settingsSubMenus/graphicsMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "V-Sync"
+horizontal_alignment = 1
+
+[node name="vsyncButton" type="CheckBox" parent="settingsSubMenus/graphicsMenu"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="keybindsMenu" type="GridContainer" parent="settingsSubMenus"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(575, 0)
+layout_mode = 1
+offset_top = 10.0
+offset_right = 575.0
+offset_bottom = 151.0
+columns = 6
+script = ExtResource("1_30jyb")
+
+[node name="spacer4" type="Control" parent="settingsSubMenus/keybindsMenu"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="spacer11" type="Control" parent="settingsSubMenus/keybindsMenu"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="spacer1" type="Control" parent="settingsSubMenus/keybindsMenu"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="spacer2" type="Control" parent="settingsSubMenus/keybindsMenu"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="spacer3" type="Control" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="inUseLabel" type="RichTextLabel" parent="settingsSubMenus/keybindsMenu"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+text = "[shake]Keybind in use"
+fit_content = true
+
+[node name="inUseAnim" type="AnimationPlayer" parent="settingsSubMenus/keybindsMenu/inUseLabel"]
+unique_name_in_owner = true
+process_mode = 3
+libraries = {
+"": SubResource("AnimationLibrary_3rn0m")
+}
+
+[node name="forwardLabel" type="Label" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Forward"
+horizontal_alignment = 1
+
+[node name="forwardButton" type="Button" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset"
+
+[node name="backwardLabel" type="Label" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Backward"
+horizontal_alignment = 1
+
+[node name="backwardButton" type="Button" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset"
+
+[node name="leftLabel" type="Label" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Left"
+horizontal_alignment = 1
+
+[node name="leftButton" type="Button" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset"
+
+[node name="rightLabel" type="Label" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Right"
+horizontal_alignment = 1
+
+[node name="rightButton" type="Button" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset"
+
+[node name="jumpLabel" type="Label" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Jump"
+horizontal_alignment = 1
+
+[node name="jumpButton" type="Button" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset"
+
+[node name="sprintLabel" type="Label" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sprint"
+horizontal_alignment = 1
+
+[node name="sprintButton" type="Button" parent="settingsSubMenus/keybindsMenu"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset"
+
+[connection signal="button_up" from="settingsOptions/audioSettingsButton" to="." method="audioPressed"]
+[connection signal="button_up" from="settingsOptions/graphicsSettingsButton" to="." method="graphicsPressed"]
+[connection signal="button_up" from="settingsOptions/keybindsSettingsButton" to="." method="keybindsPressed"]
+[connection signal="value_changed" from="settingsSubMenus/audioMenu/musicSlider" to="." method="musicAudioUpdated"]
+[connection signal="value_changed" from="settingsSubMenus/audioMenu/combatSlider" to="." method="combatAudioUpdated"]
+[connection signal="value_changed" from="settingsSubMenus/audioMenu/uiSlider" to="." method="uiAudioUpdated"]
+[connection signal="value_changed" from="settingsSubMenus/audioMenu/ambientSlider" to="." method="ambientAudioUpdated"]
+[connection signal="button_up" from="settingsSubMenus/audioMenu/resetButton" to="." method="resetAudioPressed"]
+[connection signal="toggled" from="settingsSubMenus/graphicsMenu/fullscreenButton" to="." method="fullscreenToggled"]
+[connection signal="toggled" from="settingsSubMenus/graphicsMenu/vsyncButton" to="." method="vsyncToggled"]
+[connection signal="button_up" from="settingsSubMenus/keybindsMenu/forwardButton" to="settingsSubMenus/keybindsMenu" method="focusKeybind" binds= ["moveUp"]]
+[connection signal="focus_exited" from="settingsSubMenus/keybindsMenu/forwardButton" to="settingsSubMenus/keybindsMenu" method="unfocusKeybind"]
+[connection signal="button_up" from="settingsSubMenus/keybindsMenu/backwardButton" to="settingsSubMenus/keybindsMenu" method="focusKeybind" binds= ["moveDown"]]
+[connection signal="focus_exited" from="settingsSubMenus/keybindsMenu/backwardButton" to="settingsSubMenus/keybindsMenu" method="unfocusKeybind"]
+[connection signal="button_up" from="settingsSubMenus/keybindsMenu/leftButton" to="settingsSubMenus/keybindsMenu" method="focusKeybind" binds= ["moveLeft"]]
+[connection signal="focus_exited" from="settingsSubMenus/keybindsMenu/leftButton" to="settingsSubMenus/keybindsMenu" method="unfocusKeybind"]
+[connection signal="button_up" from="settingsSubMenus/keybindsMenu/rightButton" to="settingsSubMenus/keybindsMenu" method="focusKeybind" binds= ["moveRight"]]
+[connection signal="focus_exited" from="settingsSubMenus/keybindsMenu/rightButton" to="settingsSubMenus/keybindsMenu" method="unfocusKeybind"]
+[connection signal="button_up" from="settingsSubMenus/keybindsMenu/jumpButton" to="settingsSubMenus/keybindsMenu" method="focusKeybind" binds= ["moveJump"]]
+[connection signal="focus_exited" from="settingsSubMenus/keybindsMenu/jumpButton" to="settingsSubMenus/keybindsMenu" method="unfocusKeybind"]
+[connection signal="button_up" from="settingsSubMenus/keybindsMenu/sprintButton" to="settingsSubMenus/keybindsMenu" method="focusKeybind" binds= ["moveSprint"]]
+[connection signal="focus_exited" from="settingsSubMenus/keybindsMenu/sprintButton" to="settingsSubMenus/keybindsMenu" method="unfocusKeybind"]

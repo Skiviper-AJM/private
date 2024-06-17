@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://b6k5t46xth5x3"]
+
+[ext_resource type="PackedScene" uid="uid://7gcfgw42mq58" path="res://combat/parts/arm/unit03Arm.tscn" id="1_c5q1q"]
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_okx2r"]
+
+[resource]
+script = ExtResource("1_okx2r")
+name = "Brass Cannon"
+type = 0
+model = ExtResource("1_c5q1q")
+cost = 6000
+description = " Brass plated"
+maxDurability = 25
+currentDurability = 25
+damage = 25
+armorRating = 15
+speedRating = 0
+range = 0
+splash = 0

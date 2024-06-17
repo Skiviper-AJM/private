@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://cmgeifhnvfqwr"]
+
+[ext_resource type="PackedScene" uid="uid://n402vcrepdtg" path="res://combat/parts/core/unit01Core.tscn" id="1_iawfg"]
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_w7qqy"]
+
+[resource]
+script = ExtResource("1_w7qqy")
+name = "Electric Core"
+type = 3
+model = ExtResource("1_iawfg")
+cost = 500
+description = "Small electrical circuits swirl around inside it"
+maxDurability = 5
+currentDurability = 5
+damage = 2
+armorRating = 0
+speedRating = 8
+range = 0
+splash = 1

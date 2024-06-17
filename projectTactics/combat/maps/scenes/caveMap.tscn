@@ -1,0 +1,128 @@
+[gd_scene load_steps=12 format=3 uid="uid://btdyry6osoa4x"]
+
+[ext_resource type="Script" path="res://combat/maps/scripts/caveMap.gd" id="1_vxlpq"]
+[ext_resource type="Texture2D" uid="uid://cdnloarun2dcp" path="res://combat/maps/assets/maps/cave.png" id="2_k8pwp"]
+[ext_resource type="Texture2D" uid="uid://cuvfc6lsayaeu" path="res://combat/maps/assets/dottedLine.png" id="4_1w7m2"]
+[ext_resource type="StyleBox" uid="uid://clgaadpsfr0qs" path="res://combat/maps/resources/emptyStyle.tres" id="5_3guir"]
+[ext_resource type="Texture2D" uid="uid://cs3axakw8wtyf" path="res://combat/maps/assets/darkDottedLine.png" id="5_pieva"]
+[ext_resource type="Texture2D" uid="uid://c7c5ntgd7r8ug" path="res://combat/maps/assets/quitButton.png" id="8_xsers"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_giby5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kjsnm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vk73p"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ieb0l"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4iext"]
+
+[node name="caveMap" type="Node2D"]
+script = ExtResource("1_vxlpq")
+
+[node name="caveBackground" type="Sprite2D" parent="."]
+position = Vector2(874, 485.375)
+scale = Vector2(4.08745, 4.08745)
+texture = ExtResource("2_k8pwp")
+
+[node name="line1" type="Line2D" parent="."]
+texture_repeat = 2
+points = PackedVector2Array(309, 790, 479, 662)
+texture = ExtResource("4_1w7m2")
+texture_mode = 1
+
+[node name="line2" type="Line2D" parent="."]
+texture_repeat = 2
+points = PackedVector2Array(578, 553, 777, 438)
+texture = ExtResource("4_1w7m2")
+texture_mode = 1
+
+[node name="line3" type="Line2D" parent="."]
+texture_repeat = 2
+points = PackedVector2Array(827, 434, 1004, 542)
+texture = ExtResource("5_pieva")
+texture_mode = 1
+
+[node name="line4" type="Line2D" parent="."]
+texture_repeat = 2
+points = PackedVector2Array(1005, 539, 1189, 454, 1370, 311)
+texture = ExtResource("5_pieva")
+texture_mode = 1
+
+[node name="line5" type="Line2D" parent="."]
+texture_repeat = 2
+points = PackedVector2Array(1004, 542, 1027, 686, 960, 796)
+texture = ExtResource("5_pieva")
+texture_mode = 1
+
+[node name="line6" type="Line2D" parent="."]
+texture_repeat = 2
+points = PackedVector2Array(928, 794, 722, 787, 500, 587, 379, 413, 322, 291)
+texture = ExtResource("5_pieva")
+texture_mode = 1
+
+[node name="location1" type="Button" parent="."]
+offset_left = 206.0
+offset_top = 703.0
+offset_right = 246.0
+offset_bottom = 743.0
+scale = Vector2(5, 5)
+focus_mode = 0
+theme_override_styles/focus = ExtResource("5_3guir")
+
+[node name="location2" type="Button" parent="."]
+offset_left = 716.0
+offset_top = 325.0
+offset_right = 756.0
+offset_bottom = 365.0
+scale = Vector2(5, 5)
+focus_mode = 0
+theme_override_styles/focus = ExtResource("5_3guir")
+
+[node name="location3" type="Button" parent="."]
+offset_left = 1311.0
+offset_top = 189.0
+offset_right = 1351.0
+offset_bottom = 229.0
+scale = Vector2(5, 5)
+focus_mode = 0
+theme_override_styles/focus = ExtResource("5_3guir")
+
+[node name="location4" type="Button" parent="."]
+offset_left = 865.0
+offset_top = 691.0
+offset_right = 905.0
+offset_bottom = 731.0
+scale = Vector2(5, 5)
+focus_mode = 0
+theme_override_styles/focus = ExtResource("5_3guir")
+
+[node name="location5" type="Button" parent="."]
+offset_left = 234.0
+offset_top = 168.0
+offset_right = 274.0
+offset_bottom = 208.0
+scale = Vector2(5, 5)
+focus_mode = 0
+theme_override_styles/focus = ExtResource("5_3guir")
+
+[node name="quitButton" type="Button" parent="."]
+offset_left = 1626.0
+offset_top = 23.0
+offset_right = 1666.0
+offset_bottom = 63.0
+scale = Vector2(2, 2)
+theme_override_styles/normal = SubResource("StyleBoxEmpty_giby5")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_kjsnm")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_vk73p")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_ieb0l")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_4iext")
+icon = ExtResource("8_xsers")
+flat = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(862, 491)
+
+[connection signal="button_up" from="quitButton" to="." method="_on_quit_button_button_up"]

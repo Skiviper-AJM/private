@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3 uid="uid://sqw73mktxhpy"]
+
+[ext_resource type="Script" path="res://combat/resources/partModel.gd" id="1_0tat8"]
+[ext_resource type="Material" uid="uid://cu51qpkgeyfmk" path="res://combat/parts/assets/materials/unit01Mat.tres" id="2_tdj3k"]
+[ext_resource type="ArrayMesh" uid="uid://cby1eo1fslwpt" path="res://combat/parts/assets/unit01/unit01Chest.obj" id="3_bm10s"]
+
+[node name="chestPivot" type="Node3D"]
+script = ExtResource("1_0tat8")
+type = 2
+
+[node name="chest" type="MeshInstance3D" parent="."]
+material_override = ExtResource("2_tdj3k")
+mesh = ExtResource("3_bm10s")
+
+[node name="corePos" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.00531, -0.796356)
+
+[node name="headPos" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.57888, 1.35871)
+
+[node name="lArmPos" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.36383, 0.982666, -0.465147)
+
+[node name="rArmPos" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.32846, 0.982666, -0.465147)
+
+[node name="lLegPos" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.49002, -1.83824, 0.290979)
+
+[node name="rLegPos" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.45552, -1.83824, 0.290979)

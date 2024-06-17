@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://ccxjwkb038q6b"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_a8qns"]
+[ext_resource type="PackedScene" uid="uid://eran212spg56" path="res://combat/parts/arm/unit02Arm.tscn" id="1_b6sip"]
+
+[resource]
+script = ExtResource("1_a8qns")
+name = "Steel Sword"
+type = 0
+model = ExtResource("1_b6sip")
+cost = 2000
+description = "Excellent for close range combat"
+maxDurability = 5
+currentDurability = 5
+damage = 25
+armorRating = 1
+speedRating = 5
+range = 1
+splash = 4

@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bxowf5tg5rqin"
+path="res://.godot/imported/cityStairway.obj-6cb0a2478fe9f7447c760e9030c5f334.mesh"
+
+[deps]
+
+files=["res://.godot/imported/cityStairway.obj-6cb0a2478fe9f7447c760e9030c5f334.mesh"]
+
+source_file="res://hubs/desertCave/assets/cityStairway.obj"
+dest_files=["res://.godot/imported/cityStairway.obj-6cb0a2478fe9f7447c760e9030c5f334.mesh", "res://.godot/imported/cityStairway.obj-6cb0a2478fe9f7447c760e9030c5f334.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

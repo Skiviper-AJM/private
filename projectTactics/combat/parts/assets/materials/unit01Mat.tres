@@ -1,0 +1,15 @@
+[gd_resource type="StandardMaterial3D" load_steps=3 format=3 uid="uid://cu51qpkgeyfmk"]
+
+[ext_resource type="Texture2D" uid="uid://cgk5p36qa0si1" path="res://combat/parts/assets/unit01/unit01SpriteMap.png" id="1_glodv"]
+[ext_resource type="Texture2D" uid="uid://c82wu7lxiy36a" path="res://combat/parts/assets/unit01/unit01Emission.png" id="2_2b1xn"]
+
+[resource]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+cull_mode = 2
+albedo_texture = ExtResource("1_glodv")
+emission_enabled = true
+emission_energy_multiplier = 0.5
+emission_texture = ExtResource("2_2b1xn")
+texture_filter = 0

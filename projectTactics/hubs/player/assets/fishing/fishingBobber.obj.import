@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://drbd3wgla7q0x"
+path="res://.godot/imported/fishingBobber.obj-c3fe38fb87a13d968757d42f0fac0ced.mesh"
+
+[deps]
+
+files=["res://.godot/imported/fishingBobber.obj-c3fe38fb87a13d968757d42f0fac0ced.mesh"]
+
+source_file="res://hubs/player/assets/fishing/fishingBobber.obj"
+dest_files=["res://.godot/imported/fishingBobber.obj-c3fe38fb87a13d968757d42f0fac0ced.mesh", "res://.godot/imported/fishingBobber.obj-c3fe38fb87a13d968757d42f0fac0ced.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

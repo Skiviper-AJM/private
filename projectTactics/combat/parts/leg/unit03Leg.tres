@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://bxb83mj7vh7hk"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_48gu4"]
+[ext_resource type="PackedScene" uid="uid://cb6r44e4a0vft" path="res://combat/parts/leg/unit03Leg.tscn" id="1_pxpl3"]
+
+[resource]
+script = ExtResource("1_48gu4")
+name = "Brass Leg"
+type = 1
+model = ExtResource("1_pxpl3")
+cost = 5500
+description = " "
+maxDurability = 15
+currentDurability = 15
+damage = 5
+armorRating = 25
+speedRating = 15
+range = 0
+splash = 0

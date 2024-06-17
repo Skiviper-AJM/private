@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://ba5cdqgq2vnl"
+path="res://.godot/imported/largeRock.obj-ac7e003ce94d2168c2594f587f493093.mesh"
+
+[deps]
+
+files=["res://.godot/imported/largeRock.obj-ac7e003ce94d2168c2594f587f493093.mesh"]
+
+source_file="res://hubs/desertCave/assets/largeRock.obj"
+dest_files=["res://.godot/imported/largeRock.obj-ac7e003ce94d2168c2594f587f493093.mesh", "res://.godot/imported/largeRock.obj-ac7e003ce94d2168c2594f587f493093.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

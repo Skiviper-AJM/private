@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://oee3tarot5sa"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_cvn8v"]
+[ext_resource type="PackedScene" uid="uid://c6vt4cnngx7ej" path="res://combat/parts/head/unit03Head.tscn" id="1_soifb"]
+
+[resource]
+script = ExtResource("1_cvn8v")
+name = "Brass Missiles"
+type = 4
+model = ExtResource("1_soifb")
+cost = 4500
+description = " Brass lined"
+maxDurability = 50
+currentDurability = 50
+damage = 10
+armorRating = 5
+speedRating = 10
+range = 0
+splash = 0

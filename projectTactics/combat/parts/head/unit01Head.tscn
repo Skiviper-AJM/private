@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://d74kd7fagxyd"]
+
+[ext_resource type="Script" path="res://combat/resources/partModel.gd" id="1_1davt"]
+[ext_resource type="Material" uid="uid://cu51qpkgeyfmk" path="res://combat/parts/assets/materials/unit01Mat.tres" id="2_e3a1f"]
+[ext_resource type="ArrayMesh" uid="uid://dh78ue5hm4q11" path="res://combat/parts/assets/unit01/unit01Head.obj" id="3_n14k0"]
+
+[node name="headPivot" type="Node3D"]
+script = ExtResource("1_1davt")
+type = 4
+scaleModifier = 0.9
+
+[node name="head" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.126744, 0.414742)
+material_override = ExtResource("2_e3a1f")
+mesh = ExtResource("3_n14k0")

@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://dw3l561qcg1h3"]
+
+[ext_resource type="Script" path="res://hubs/interactions/scripts/item.gd" id="1_wj28b"]
+
+[node name="item" type="Area3D"]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 0, 0)
+collision_layer = 2
+collision_mask = 0
+input_ray_pickable = false
+monitoring = false
+script = ExtResource("1_wj28b")

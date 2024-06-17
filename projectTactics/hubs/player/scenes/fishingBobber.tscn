@@ -1,0 +1,145 @@
+[gd_scene load_steps=15 format=3 uid="uid://c5mrc1cyefdda"]
+
+[ext_resource type="Script" path="res://hubs/player/scripts/fishingBobber.gd" id="1_1oog2"]
+[ext_resource type="Texture2D" uid="uid://6bpr1lcwsqjw" path="res://hubs/player/assets/fishing/fishingBobber.png" id="2_4povw"]
+[ext_resource type="ArrayMesh" uid="uid://drbd3wgla7q0x" path="res://hubs/player/assets/fishing/fishingBobber.obj" id="3_txecf"]
+[ext_resource type="AudioStream" uid="uid://c2w7wfqm5ny5h" path="res://hubs/player/sfx/waterSplash.mp3" id="4_keolf"]
+[ext_resource type="AudioStream" uid="uid://dfendjtg33qwy" path="res://hubs/player/sfx/boySink.mp3" id="5_vuo6q"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wk3sa"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qoa6i"]
+size = Vector3(0.13, 0.13, 0.13)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aeqb7"]
+albedo_texture = ExtResource("2_4povw")
+texture_filter = 0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_0y5fd"]
+radius = 0.1
+
+[sub_resource type="Animation" id="Animation_l3ydb"]
+resource_name = "float"
+length = 0.5
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("bobberMesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(-2, -2),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, -0.02, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ae2gh"]
+resource_name = "pull"
+length = 0.2
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("bobberMesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(-2, -2),
+"update": 0,
+"values": [Vector3(0, -0.240307, 0), Vector3(0, -0.187954, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_4qwhn"]
+resource_name = "sink"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("bobberMesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(-2, 1),
+"update": 0,
+"values": [Vector3(0, -0.0136, 0), Vector3(0, -0.240307, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ylnl0"]
+resource_name = "surface"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("bobberMesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(-2, -2),
+"update": 0,
+"values": [Vector3(0, -0.240307, 0), Vector3(0, -0.0136, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_se10d"]
+_data = {
+"float": SubResource("Animation_l3ydb"),
+"pull": SubResource("Animation_ae2gh"),
+"sink": SubResource("Animation_4qwhn"),
+"surface": SubResource("Animation_ylnl0")
+}
+
+[node name="bobber" type="RigidBody3D"]
+collision_layer = 0
+physics_material_override = SubResource("PhysicsMaterial_wk3sa")
+can_sleep = false
+max_contacts_reported = 1
+contact_monitor = true
+constant_force = Vector3(0, -10, 0)
+script = ExtResource("1_1oog2")
+
+[node name="hitbox" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_qoa6i")
+
+[node name="bobberMesh" type="MeshInstance3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(0.333, 0, 0, 0, 0.333, 0, 0, 0, 0.333, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_aeqb7")
+cast_shadow = 0
+mesh = ExtResource("3_txecf")
+
+[node name="floorScanner" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 32
+monitorable = false
+
+[node name="hitbox" type="CollisionShape3D" parent="floorScanner"]
+shape = SubResource("SphereShape3D_0y5fd")
+
+[node name="waterCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.254989, 0)
+collision_mask = 32
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="bobberAnims" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_se10d")
+}
+autoplay = "float"
+
+[node name="splashSFX" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("4_keolf")
+volume_db = -5.0
+
+[node name="sinkSFX" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("5_vuo6q")
+volume_db = 10.0
+max_db = 6.0
+
+[connection signal="body_entered" from="." to="." method="bodyContacted"]
+[connection signal="area_entered" from="floorScanner" to="." method="areaContacted"]
+[connection signal="animation_finished" from="bobberAnims" to="." method="bobberAnimFinished"]

@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bjr6cdk1jkv2k"
+path="res://.godot/imported/entranceWall.obj-985b0b3a0eed2d0309eb274b0b0c9709.mesh"
+
+[deps]
+
+files=["res://.godot/imported/entranceWall.obj-985b0b3a0eed2d0309eb274b0b0c9709.mesh"]
+
+source_file="res://hubs/city/assets/courtyard/structures/entranceWall.obj"
+dest_files=["res://.godot/imported/entranceWall.obj-985b0b3a0eed2d0309eb274b0b0c9709.mesh", "res://.godot/imported/entranceWall.obj-985b0b3a0eed2d0309eb274b0b0c9709.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://os1jany8k015"
+path="res://.godot/imported/columns.obj-443073cf28c621ec686964453c1e81f3.mesh"
+
+[deps]
+
+files=["res://.godot/imported/columns.obj-443073cf28c621ec686964453c1e81f3.mesh"]
+
+source_file="res://hubs/city/assets/courtyard/structures/columns.obj"
+dest_files=["res://.godot/imported/columns.obj-443073cf28c621ec686964453c1e81f3.mesh", "res://.godot/imported/columns.obj-443073cf28c621ec686964453c1e81f3.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

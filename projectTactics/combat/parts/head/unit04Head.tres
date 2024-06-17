@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://dchwgujnnfiof"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_5vb68"]
+[ext_resource type="PackedScene" uid="uid://baqmv28265spq" path="res://combat/parts/head/unit04Head.tscn" id="1_flrx6"]
+
+[resource]
+script = ExtResource("1_5vb68")
+name = "Corroded Head"
+type = 4
+model = ExtResource("1_flrx6")
+cost = 0
+description = " Still has a bit of life left in it"
+maxDurability = 3
+currentDurability = 3
+damage = 0
+armorRating = 0
+speedRating = 0
+range = 0
+splash = 0

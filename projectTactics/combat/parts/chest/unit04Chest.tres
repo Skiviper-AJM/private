@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://mk30q4vrm7x8"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_27vsw"]
+[ext_resource type="PackedScene" uid="uid://o3hyje4q1tud" path="res://combat/parts/chest/unit04Chest.tscn" id="1_y60mu"]
+
+[resource]
+script = ExtResource("1_27vsw")
+name = "Corroded Chest Plating"
+type = 2
+model = ExtResource("1_y60mu")
+cost = 0
+description = " Still has a bit of life left in it"
+maxDurability = 3
+currentDurability = 3
+damage = 3
+armorRating = 1
+speedRating = 0
+range = 3
+splash = 0

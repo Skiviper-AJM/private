@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://ox7euifrdenk"]
+
+[ext_resource type="Script" path="res://general/autoloads/sfxManager.gd" id="1_8auf1"]
+[ext_resource type="AudioStream" uid="uid://blk5xqnqulg77" path="res://general/UI/sfx/click.ogg" id="2_tmkeg"]
+[ext_resource type="AudioStream" uid="uid://vjs7sldekt6o" path="res://general/UI/sfx/closeMenu.mp3" id="3_ma6s2"]
+
+[node name="sfxManager" type="Node"]
+script = ExtResource("1_8auf1")
+
+[node name="click" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_tmkeg")
+max_polyphony = 3
+
+[node name="closeMenu" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_ma6s2")

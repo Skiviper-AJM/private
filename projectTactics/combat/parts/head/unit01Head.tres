@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://6hcukn22t205"]
+
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_88ik1"]
+[ext_resource type="PackedScene" uid="uid://d74kd7fagxyd" path="res://combat/parts/head/unit01Head.tscn" id="1_cvwko"]
+
+[resource]
+script = ExtResource("1_88ik1")
+name = "Rocket Launcher"
+type = 4
+model = ExtResource("1_cvwko")
+cost = 2000
+description = " Fires several missiles at enemies"
+maxDurability = 10
+currentDurability = 10
+damage = 8
+armorRating = 1
+speedRating = 0
+range = 5
+splash = 3

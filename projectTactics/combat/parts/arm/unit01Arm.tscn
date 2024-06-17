@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://c4fj3xnpobxbc"]
+
+[ext_resource type="Script" path="res://combat/resources/partModel.gd" id="1_kv0ka"]
+[ext_resource type="Material" uid="uid://cu51qpkgeyfmk" path="res://combat/parts/assets/materials/unit01Mat.tres" id="2_g6lay"]
+[ext_resource type="ArrayMesh" uid="uid://dwb2sivdg57rv" path="res://combat/parts/assets/unit01/unit01UpperArm.obj" id="2_rd7y3"]
+[ext_resource type="ArrayMesh" uid="uid://dv7kgyvhdpsy2" path="res://combat/parts/assets/unit01/unit01LowerArm.obj" id="3_4sypr"]
+[ext_resource type="ArrayMesh" uid="uid://p7cpbfvufved" path="res://combat/parts/assets/unit01/unit01UpperArmInverted.obj" id="5_hkwkb"]
+
+[node name="upperArmPivot" type="Node3D"]
+script = ExtResource("1_kv0ka")
+scaleModifier = 0.75
+
+[node name="upperArm" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.157654, -0.327396, -0.013899)
+material_override = ExtResource("2_g6lay")
+mesh = ExtResource("2_rd7y3")
+
+[node name="lowerArmPivot" type="Node3D" parent="upperArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.898733, 0)
+
+[node name="lowerArm" type="MeshInstance3D" parent="upperArm/lowerArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.758121, 4.44645)
+material_override = ExtResource("2_g6lay")
+mesh = ExtResource("3_4sypr")
+
+[node name="inverted" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.166276, -0.327396, -0.013899)
+material_override = ExtResource("2_g6lay")
+mesh = ExtResource("5_hkwkb")
+
+[node name="lowerArmPivot" type="Node3D" parent="inverted"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.898733, 0)
+
+[node name="lowerArm" type="MeshInstance3D" parent="inverted/lowerArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.758121, 4.44645)
+material_override = ExtResource("2_g6lay")
+mesh = ExtResource("3_4sypr")
+
+[node name="pivotCenter" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.72025)

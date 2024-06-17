@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3 uid="uid://bopn5b4636caa"]
+
+[ext_resource type="PackedScene" uid="uid://c4fj3xnpobxbc" path="res://combat/parts/arm/unit01Arm.tscn" id="1_44tkw"]
+[ext_resource type="Script" path="res://combat/resources/part.gd" id="1_ksjc5"]
+
+[resource]
+script = ExtResource("1_ksjc5")
+name = "Gatling Gun"
+type = 0
+model = ExtResource("1_44tkw")
+cost = 1500
+description = " Shoots a barrage of bullets at enemies"
+maxDurability = 8
+currentDurability = 8
+damage = 5
+armorRating = 2
+speedRating = 0
+range = 3
+splash = 8

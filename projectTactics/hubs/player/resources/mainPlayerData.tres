@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PlayerData" load_steps=2 format=3 uid="uid://jlq0uk01mcbf"]
+
+[ext_resource type="Script" path="res://hubs/player/scripts/playerData.gd" id="1_tevc4"]
+
+[resource]
+script = ExtResource("1_tevc4")
+balance = 50500
+inventory = {}
+playerName = "Player"
+playTime = 0
