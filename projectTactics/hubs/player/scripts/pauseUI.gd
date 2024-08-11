@@ -16,6 +16,8 @@ enum Rarities {
 	MYTHIC
 }
 
+var inCombat = false
+
 var selectedItem
 var selectedItemType:ItemTypes = ItemTypes.ALL
 
@@ -33,6 +35,10 @@ func _ready():
 
 func _input(event):
 	if Input.is_action_just_pressed("pause"): unpause();
+
+func combatMode():
+	inCombat = true
+	$options/fleeCombat.visible = true
 
 func unpause():
 	clearDisplayedItem()
@@ -109,7 +115,12 @@ func openQuit():
 	%inventoryItemModel.visible = false
 	%saveMenu.visible = true
 	%settingsMenu.visible = false
-
+	
+func leaveCombat():
+	$options/fleeCombat.visible = false
+	unpause()
+	get_tree().change_scene_to_file(DataPasser.priorScene)
+	
 func inventoryItemSelected(item):
 	if item == selectedItem: return;
 	clearDisplayedItem()
@@ -217,3 +228,4 @@ func deleteItemPressed():
 func setItemType(type:ItemTypes):
 	selectedItemType = type
 	refreshItems()
+
