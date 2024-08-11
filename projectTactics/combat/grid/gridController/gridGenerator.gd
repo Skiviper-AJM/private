@@ -53,8 +53,9 @@ func generate_grid():
 	var hex_width = sqrt(3) * hex_radius
 	var hex_height = hex_radius * 2
 
-	for x in range(grid_width):
-		for y in range(grid_height):
+	# Generate tiles evenly in all directions
+	for x in range(-grid_width / 2, grid_width / 2 + 1):
+		for y in range(-grid_height / 2, grid_height / 2 + 1):
 			var hex_x = x * hex_width + (y % 2) * (hex_width / 2)
 			var hex_y = y * hex_height * 0.75
 			
@@ -64,7 +65,6 @@ func generate_grid():
 
 			# Initialize grid_tiles with empty lists for each position
 			grid_tiles[hex_position] = []
-
 
 func create_hex_cell(position: Vector2) -> Sprite2D:
 	var hex_cell = Sprite2D.new()
@@ -138,11 +138,16 @@ func print_grid_position(position: Vector2, action: String):
 	var hex_width = sqrt(3) * hex_radius
 	var hex_height = hex_radius * 2
 	var grid_x = floor(round_to_nearest_half(position.x / hex_width))
-	var grid_y = round_to_nearest_half(position.y / (hex_height * 0.75))
+	var grid_y = (round_to_nearest_half(position.y / (hex_height * 0.75)))
 	print(action, "Grid Position: (", grid_x, ",", grid_y, ")")
 
 func round_to_nearest_half(value: float) -> float:
 	return round(value * 2) / 2.0
+
+func truncate_decimal(value: float) -> float:
+	if float(int(value)) == value:
+		return int(value)
+	return value
 
 func changeScene(newScene):
 	get_tree().change_scene_to_file(newScene)
