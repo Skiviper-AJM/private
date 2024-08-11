@@ -41,9 +41,9 @@ func _input(event):
 	# Handle zoom with scroll wheel only
 	if event is InputEventMouseButton and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			zoom_in()
+			zoom_in(event.position)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			zoom_out()
+			zoom_out(event.position)
 
 func _ready():
 	grid_container = Node2D.new()
@@ -77,13 +77,23 @@ func create_hex_cell(position: Vector2) -> Sprite2D:
 	hex_cell.texture = preload("res://combat/grid/gridController/stone_02.png")
 	return hex_cell
 
-func zoom_in():
+func zoom_in(mouse_position: Vector2):
 	if grid_container.scale.x < max_zoom:
-		grid_container.scale += Vector2(zoom_speed, zoom_speed)
+		adjust_zoom(zoom_speed, mouse_position)
 
-func zoom_out():
+func zoom_out(mouse_position: Vector2):
 	if grid_container.scale.x > min_zoom:
-		grid_container.scale -= Vector2(zoom_speed, zoom_speed)
+		adjust_zoom(-zoom_speed, mouse_position)
+
+func adjust_zoom(zoom_amount: float, mouse_position: Vector2):
+	var old_scale = grid_container.scale
+	grid_container.scale += Vector2(zoom_amount, zoom_amount)
+	var zoom_factor = grid_container.scale.x / old_scale.x
+
+	# Adjust position to keep the zoom centered on the middle
+	var container_to_mouse = mouse_position - grid_container.position
+	var adjusted_position = grid_container.position - container_to_mouse * (zoom_factor - 1)
+	grid_container.position = adjusted_position
 
 func changeScene(newScene):
 	get_tree().change_scene_to_file(newScene)
