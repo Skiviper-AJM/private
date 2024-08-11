@@ -1,8 +1,8 @@
 extends Node2D
 
-@export var grid_width:int = 10
+@export var grid_width:int = 20
 @export var grid_height:int = 10
-@export var hex_radius:float = 50.0
+@export var hex_radius:float = 70
 @export var zoom_speed:float = 0.1  # Speed of zooming
 @export var min_zoom:float = 0.5  # Minimum zoom level
 @export var max_zoom:float = 2.0  # Maximum zoom level
@@ -13,8 +13,7 @@ var drag_start_position = Vector2()
 var grid_container: Node2D
 
 func _input(event):
-	if Input.is_action_just_pressed("DeleteGrid"):
-		changeScene(DataPasser.priorScene)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	# Handle middle-click drag
 	if event is InputEventMouseButton:
@@ -65,7 +64,7 @@ func generate_grid():
 func create_hex_cell(position: Vector2) -> Sprite2D:
 	var hex_cell = Sprite2D.new()
 	hex_cell.position = position
-	hex_cell.texture = preload("res://combat/grid/gridController/stone_02.png")
+	hex_cell.texture = preload("res://combat/grid/gridController/Tiles/stone_03.png")
 	return hex_cell
 
 func zoom_in(mouse_position: Vector2):

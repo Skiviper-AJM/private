@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gwp1xr2cam0i"
-path="res://.godot/imported/stone_02.png-668cdcdf549585c2f1e371fea0c4dfa7.ctex"
+uid="uid://r22fsu2l0uvr"
+path="res://.godot/imported/stone_06.png-2f6d8c93d93273c80b25a1911d7ec95c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://combat/grid/gridController/stone_02.png"
-dest_files=["res://.godot/imported/stone_02.png-668cdcdf549585c2f1e371fea0c4dfa7.ctex"]
+source_file="res://combat/grid/gridController/Tiles/stone_06.png"
+dest_files=["res://.godot/imported/stone_06.png-2f6d8c93d93273c80b25a1911d7ec95c.ctex"]
 
 [params]
 
