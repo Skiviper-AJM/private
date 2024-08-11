@@ -14,6 +14,8 @@ var grid_container: Node2D
 var grid_tiles = {}  # This will now track the extra tiles added by the user
 
 func _input(event):
+	if Input.is_action_just_pressed("DeleteGrid"): placeUnits();
+	
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	# Handle middle-click drag
@@ -39,7 +41,7 @@ func _input(event):
 	# Handle tile click (left-click for adding tiles)
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		handle_tile_click(event.position, "add")
-
+	
 	# Handle right-click for removing tiles
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		handle_tile_click(event.position, "remove")
@@ -156,5 +158,15 @@ func truncate_decimal(value: float) -> float:
 	return value
 
 func placeUnits():
-	print("X")
+	var item = DataPasser.selectedUnit
+	print(DataPasser.selectedUnit.name)
+	var newModel = Node3D.new()
+	add_child(newModel)
+	newModel.set_script(load("res://combat/resources/unitAssembler.gd"))
+	newModel.unitParts = item
+	newModel.assembleUnit()
+	newModel.position = Vector3(0.0, -(newModel.getAABB().position + newModel.getAABB().size / 2.0).y, 0.0)
+
+	
+
 
