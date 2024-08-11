@@ -1,7 +1,7 @@
 extends Node3D
 
-@export var grid_width:int = 1
-@export var grid_height:int = 1
+@export var grid_width:int = 15
+@export var grid_height:int = 15
 @export var hex_radius:float = 70
 @export var zoom_speed:float = 0.1  # Speed of zooming
 @export var min_zoom:float = 0.5  # Minimum zoom level
@@ -47,6 +47,12 @@ func _input(event):
 func _ready():
 	grid_container = Node2D.new()
 	add_child(grid_container)
+	
+	# Center the grid container
+	var viewport_size = get_viewport().get_visible_rect().size
+	var center_offset = viewport_size / 2
+	grid_container.position = center_offset
+
 	generate_grid()
 
 func generate_grid():
