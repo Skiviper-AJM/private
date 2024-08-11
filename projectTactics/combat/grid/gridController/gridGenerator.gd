@@ -1,7 +1,7 @@
 extends Node2D
 
-@export var grid_width:int = 20
-@export var grid_height:int = 10
+@export var grid_width:int = 15
+@export var grid_height:int = 15
 @export var hex_radius:float = 70
 @export var zoom_speed:float = 0.1  # Speed of zooming
 @export var min_zoom:float = 0.5  # Minimum zoom level
@@ -53,19 +53,10 @@ func generate_grid():
 	var hex_width = sqrt(3) * hex_radius
 	var hex_height = hex_radius * 2
 
-	# Calculate the total grid size
-	var grid_width_px = grid_width * hex_width
-	var grid_height_px = grid_height * hex_height * 0.75
-
-	# Center the grid on the screen
-	var screen_center = get_viewport().get_visible_rect().size / 2
-	var grid_center = Vector2(grid_width_px, grid_height_px) / 2
-	var start_position = screen_center - grid_center
-
 	for x in range(grid_width):
 		for y in range(grid_height):
-			var hex_x = start_position.x + x * hex_width + (y % 2) * (hex_width / 2)
-			var hex_y = start_position.y + y * hex_height * 0.75
+			var hex_x = x * hex_width + (y % 2) * (hex_width / 2)
+			var hex_y = y * hex_height * 0.75
 			
 			var hex_position = Vector2(hex_x, hex_y)
 			var hex_cell = create_hex_cell(hex_position)
@@ -73,6 +64,7 @@ func generate_grid():
 
 			# Initialize grid_tiles with empty lists for each position
 			grid_tiles[hex_position] = []
+
 
 func create_hex_cell(position: Vector2) -> Sprite2D:
 	var hex_cell = Sprite2D.new()

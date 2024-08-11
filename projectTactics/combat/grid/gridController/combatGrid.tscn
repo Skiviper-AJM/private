@@ -7,6 +7,7 @@
 [node name="Combat" type="Node2D"]
 
 [node name="CombatGrid" type="Node2D" parent="."]
+position = Vector2(864, 486)
 script = ExtResource("1_t5om1")
 
 [node name="player" parent="." instance=ExtResource("2_r5dba")]
