@@ -11,6 +11,7 @@ var dragging = false
 var drag_start_position = Vector2()
 
 var grid_container: Node2D
+var grid_tiles = {}  # This will now track the extra tiles added by the user
 
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -35,6 +36,14 @@ func _input(event):
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			zoom_out(event.position)
 
+	# Handle tile click (left-click for adding tiles)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		handle_tile_click(event.position, "add")
+
+	# Handle right-click for removing tiles
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		handle_tile_click(event.position, "remove")
+
 func _ready():
 	grid_container = Node2D.new()
 	add_child(grid_container)
@@ -58,8 +67,12 @@ func generate_grid():
 			var hex_x = start_position.x + x * hex_width + (y % 2) * (hex_width / 2)
 			var hex_y = start_position.y + y * hex_height * 0.75
 			
-			var hex_cell = create_hex_cell(Vector2(hex_x, hex_y))
+			var hex_position = Vector2(hex_x, hex_y)
+			var hex_cell = create_hex_cell(hex_position)
 			grid_container.add_child(hex_cell)
+
+			# Initialize grid_tiles with empty lists for each position
+			grid_tiles[hex_position] = []
 
 func create_hex_cell(position: Vector2) -> Sprite2D:
 	var hex_cell = Sprite2D.new()
@@ -84,6 +97,57 @@ func adjust_zoom(zoom_amount: float, mouse_position: Vector2):
 	var container_to_mouse = mouse_position - grid_container.position
 	var adjusted_position = grid_container.position - container_to_mouse * (zoom_factor - 1)
 	grid_container.position = adjusted_position
+
+func handle_tile_click(mouse_position: Vector2, action: String):
+	var local_position = grid_container.to_local(mouse_position)
+	
+	# Find the closest tile by distance (you can optimize this part as needed)
+	var closest_tile_position: Vector2 = Vector2(INF, INF)
+	var min_distance = INF
+
+	for position in grid_tiles.keys():
+		var distance = position.distance_to(local_position)
+		if distance < min_distance:
+			min_distance = distance
+			closest_tile_position = position
+
+	if closest_tile_position != Vector2(INF, INF):
+		if action == "add":
+			add_tile_on_top(closest_tile_position)
+		elif action == "remove":
+			remove_tile(closest_tile_position)
+
+func add_tile_on_top(position: Vector2):
+	# Create a new tile at the position if none exists there
+	if grid_tiles[position].size() == 0:
+		var new_tile = Sprite2D.new()
+		new_tile.position = position
+		new_tile.texture = preload("res://combat/grid/gridController/Tiles/stone_04.png")  # Change texture for the new tile
+
+		# Add the new tile to the container and store it in the grid_tiles dictionary
+		grid_container.add_child(new_tile)
+		grid_tiles[position].append(new_tile)
+
+		# Print the grid position of the new tile
+		print_grid_position(position)
+
+func remove_tile(position: Vector2):
+	if grid_tiles[position].size() > 0:
+		# Remove the topmost tile from the grid
+		var tile_to_remove = grid_tiles[position].pop_back()
+		grid_container.remove_child(tile_to_remove)
+		tile_to_remove.queue_free()
+
+		# Print the grid position of the removed tile
+		print_grid_position(position)
+
+func print_grid_position(position: Vector2):
+	# Convert the pixel position back to grid coordinates
+	var hex_width = sqrt(3) * hex_radius
+	var hex_height = hex_radius * 2
+	var grid_x = round(position.x / hex_width)
+	var grid_y = round(position.y / (hex_height * 0.75))
+	print("Grid Position: (", grid_x, ",", grid_y, ")")
 
 func changeScene(newScene):
 	get_tree().change_scene_to_file(newScene)
