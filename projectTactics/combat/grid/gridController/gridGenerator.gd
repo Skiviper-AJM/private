@@ -137,9 +137,12 @@ func print_grid_position(position: Vector2, action: String):
 	# Convert the pixel position back to grid coordinates
 	var hex_width = sqrt(3) * hex_radius
 	var hex_height = hex_radius * 2
-	var grid_x = round(position.x / hex_width)
-	var grid_y = round(position.y / (hex_height * 0.75))
+	var grid_x = floor(round_to_nearest_half(position.x / hex_width))
+	var grid_y = round_to_nearest_half(position.y / (hex_height * 0.75))
 	print(action, "Grid Position: (", grid_x, ",", grid_y, ")")
+
+func round_to_nearest_half(value: float) -> float:
+	return round(value * 2) / 2.0
 
 func changeScene(newScene):
 	get_tree().change_scene_to_file(newScene)
