@@ -163,6 +163,9 @@ func inventoryItemSelected(item):
 			aabbSize = newModel.getAABB().size
 			var divideAmt : float = max(aabbSize.x, aabbSize.y, aabbSize.z)
 			%inventoryItemModel.scale = Vector3(0.8, 0.8, 0.8) / divideAmt
+			#combat use of inventory here
+			if inCombat && item.itemType == ItemTypes.UNIT: 
+				DataPasser.passUnitInfo(item)
 		ItemTypes.FISH:
 			%inventoryItemMesh.mesh = item.model
 			aabbSize = item.model.get_aabb().size

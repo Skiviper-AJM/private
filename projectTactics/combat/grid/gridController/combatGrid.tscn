@@ -4,9 +4,8 @@
 [ext_resource type="PackedScene" uid="uid://bpoag1rko7t2q" path="res://hubs/player/scenes/player.tscn" id="2_r5dba"]
 [ext_resource type="Script" path="res://combat/grid/gridController/playerCombat.gd" id="3_4dhxc"]
 
-[node name="Combat" type="Node3D"]
-
-[node name="CombatGrid" type="Node3D" parent="."]
+[node name="CombatGrid" type="Node3D"]
+unique_name_in_owner = true
 script = ExtResource("1_t5om1")
 
 [node name="player" parent="." instance=ExtResource("2_r5dba")]

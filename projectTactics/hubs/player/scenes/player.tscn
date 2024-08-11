@@ -2613,6 +2613,7 @@ unique_name_in_owner = true
 visible = false
 modulate = Color(1, 0, 0.0196078, 1)
 top_level = true
+layout_mode = 0
 offset_left = 638.0
 offset_top = 390.0
 offset_right = 876.0

@@ -51,6 +51,7 @@ func _ready():
 	var viewport_size = get_viewport().get_visible_rect().size
 	var center_offset = viewport_size / 2
 	grid_container.position = center_offset
+	
 
 	generate_grid()
 
@@ -154,9 +155,6 @@ func truncate_decimal(value: float) -> float:
 		return int(value)
 	return value
 
-func panicButton():
-	%noUnits.visible = true
+func placeUnits():
+	print("X")
 
-
-func changeScene(newScene):
-	get_tree().change_scene_to_file(newScene)
