@@ -129,7 +129,7 @@ func add_tile_on_top(position: Vector2):
 		grid_tiles[position].append(new_tile)
 
 		# Print the grid position of the new tile
-		print_grid_position(position)
+		print_grid_position(position, "Added at ")
 
 func remove_tile(position: Vector2):
 	if grid_tiles[position].size() > 0:
@@ -139,15 +139,15 @@ func remove_tile(position: Vector2):
 		tile_to_remove.queue_free()
 
 		# Print the grid position of the removed tile
-		print_grid_position(position)
+		print_grid_position(position, "Deleted at ")
 
-func print_grid_position(position: Vector2):
+func print_grid_position(position: Vector2, action: String):
 	# Convert the pixel position back to grid coordinates
 	var hex_width = sqrt(3) * hex_radius
 	var hex_height = hex_radius * 2
 	var grid_x = round(position.x / hex_width)
 	var grid_y = round(position.y / (hex_height * 0.75))
-	print("Grid Position: (", grid_x, ",", grid_y, ")")
+	print(action, "Grid Position: (", grid_x, ",", grid_y, ")")
 
 func changeScene(newScene):
 	get_tree().change_scene_to_file(newScene)
