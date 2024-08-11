@@ -37,8 +37,20 @@ func _input(event):
 	if Input.is_action_just_pressed("pause"): unpause();
 
 func combatMode():
-	inCombat = true
+
 	$options/fleeCombat.visible = true
+
+	var units = playerInfo.inventory.keys().filter(func(item):
+		return item.itemType == ItemTypes.UNIT
+	)
+	
+	if units.size() > 0:
+		inCombat = true
+		var first_unit = units[0]
+		emit_signal("place_unit_on_grid", first_unit, Vector2(0, 0))
+	else: 
+		%noUnits.visible = true
+	
 
 func unpause():
 	clearDisplayedItem()
@@ -228,4 +240,6 @@ func deleteItemPressed():
 func setItemType(type:ItemTypes):
 	selectedItemType = type
 	refreshItems()
+
+
 

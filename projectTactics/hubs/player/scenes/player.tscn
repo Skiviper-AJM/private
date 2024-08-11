@@ -559,10 +559,10 @@ _data = {
 "spin": SubResource("Animation_wn4ei")
 }
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5gfna"]
+
 [sub_resource type="ViewportTexture" id="ViewportTexture_ukbvr"]
 viewport_path = NodePath("UI/pauseMenu/inventoryMenu/inventoryItemViewport")
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5gfna"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_70jjf"]
 
@@ -2157,6 +2157,10 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = 4.0
+offset_right = 9.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("11_7tsis")
@@ -2388,13 +2392,6 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 200)
 layout_mode = 2
 
-[node name="inventoryItemSprite" type="Sprite2D" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
-unique_name_in_owner = true
-position = Vector2(272.715, 180.715)
-scale = Vector2(0.619141, 0.619141)
-texture = SubResource("ViewportTexture_ukbvr")
-offset = Vector2(250, 250)
-
 [node name="itemSpacerV" type="HSeparator" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
 custom_minimum_size = Vector2(860, 500)
 layout_mode = 2
@@ -2406,6 +2403,13 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Standard Chestplate"
 horizontal_alignment = 1
+
+[node name="inventoryItemSprite" type="Sprite2D" parent="UI/pauseMenu/inventoryMenu/inventoryItem/inventoryItemName"]
+unique_name_in_owner = true
+position = Vector2(272.715, -419.285)
+scale = Vector2(0.619141, 0.619141)
+texture = SubResource("ViewportTexture_ukbvr")
+offset = Vector2(250, 250)
 
 [node name="inventoryItemData" type="RichTextLabel" parent="UI/pauseMenu/inventoryMenu/inventoryItem"]
 unique_name_in_owner = true
@@ -2604,6 +2608,20 @@ layout_mode = 1
 offset_left = -276.0
 offset_right = 324.0
 
+[node name="noUnits" type="Button" parent="UI/pauseMenu"]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 0, 0.0196078, 1)
+top_level = true
+offset_left = 638.0
+offset_top = 390.0
+offset_right = 876.0
+offset_bottom = 482.0
+scale = Vector2(2, 2)
+theme_override_font_sizes/font_size = 30
+text = "NO UNITS: 
+YOU MUST FLEE"
+
 [node name="fade" type="Control" parent="UI"]
 unique_name_in_owner = true
 visible = false
@@ -2675,3 +2693,4 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 [connection signal="button_up" from="UI/pauseMenu/options/quitButton" to="UI/pauseMenu" method="openQuit"]
 [connection signal="button_up" from="UI/pauseMenu/options/fleeCombat" to="UI/pauseMenu" method="leaveCombat"]
 [connection signal="volumeChanged" from="UI/pauseMenu/settingsMenu" to="." method="updateSFXVolume"]
+[connection signal="pressed" from="UI/pauseMenu/noUnits" to="UI/pauseMenu" method="leaveCombat"]

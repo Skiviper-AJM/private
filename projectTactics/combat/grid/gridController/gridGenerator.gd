@@ -47,7 +47,6 @@ func _input(event):
 func _ready():
 	grid_container = Node2D.new()
 	add_child(grid_container)
-	
 	# Center the grid container
 	var viewport_size = get_viewport().get_visible_rect().size
 	var center_offset = viewport_size / 2
@@ -154,6 +153,10 @@ func truncate_decimal(value: float) -> float:
 	if float(int(value)) == value:
 		return int(value)
 	return value
+
+func panicButton():
+	%noUnits.visible = true
+
 
 func changeScene(newScene):
 	get_tree().change_scene_to_file(newScene)
