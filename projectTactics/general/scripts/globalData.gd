@@ -12,3 +12,6 @@ class_name GlobalData
 @export var ambientVolume:int = 5
 # Keybinds
 @export var updatedKeybinds : Dictionary = {}
+
+
+#Combat stuff

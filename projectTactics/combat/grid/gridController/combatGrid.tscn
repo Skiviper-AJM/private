@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://banv8o0e8svma"]
+
+[ext_resource type="Script" path="res://combat/grid/gridController/gridGenerator.gd" id="1_t5om1"]
+
+[node name="CombatGrid" type="Node2D"]
+script = ExtResource("1_t5om1")

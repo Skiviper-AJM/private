@@ -80,7 +80,17 @@ func _ready() -> void:
 	SFX.connectAllButtons()
 	FM.globalLoaded.connect(updateSFXVolume)
 
+
+
 func _input(event):
+	#temp test input
+	var parent_scene = get_parent().get_parent()  # Adjust based on your scene tree structure
+	if Input.is_action_just_pressed("Generate_Grid"):
+		var current_scene =  get_tree().get_current_scene()
+		DataPasser.priorScene = str(get_tree().current_scene.scene_file_path)
+		changeScene("res://combat/grid/gridController/combatGrid.tscn");
+	
+	#temp test input^
 	if event is InputEventMouseMotion and !isStopped and fishingState == FISHING_STATES.inactive: updateCam(event);
 	if Input.is_action_just_pressed("pause"): pause();
 	if Input.is_action_just_pressed("interact") and !reelingFish and !%interactRay.is_colliding() and !%itemRay.is_colliding() and playerInfo.hasFishingRod:
