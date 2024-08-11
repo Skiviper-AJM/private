@@ -47,7 +47,6 @@ func combatMode():
 	if units.size() > 0:
 		inCombat = true
 		var first_unit = units[0]
-		emit_signal("place_unit_on_grid", first_unit, Vector2(0, 0))
 	else: 
 		%noUnits.visible = true
 	

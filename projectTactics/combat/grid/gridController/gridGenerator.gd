@@ -1,4 +1,4 @@
-extends Node3D
+extends Node2D
 
 @export var grid_width:int = 15
 @export var grid_height:int = 15
@@ -9,13 +9,15 @@ extends Node3D
 
 var dragging = false
 var drag_start_position = Vector2()
+var placing_unit = false  # Flag to indicate unit placement mode
+var unit_to_place = null  # Reference to the unit to be placed
 
 var grid_container: Node2D
 var grid_tiles = {}  # This will now track the extra tiles added by the user
 
 func _input(event):
-	if Input.is_action_just_pressed("DeleteGrid"): placeUnits();
 	
+	if Input.is_action_just_pressed("pause"): if DataPasser.selectedUnit != null: unitPlacer();
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	# Handle middle-click drag
@@ -38,23 +40,31 @@ func _input(event):
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			zoom_out(event.position)
 
-	# Handle tile click (left-click for adding tiles)
+	# Handle tile click (left-click for adding tiles or placing units)
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		handle_tile_click(event.position, "add")
+		if placing_unit and unit_to_place:
+			place_unit_on_tile(event.position)
+		else:
+			handle_tile_click(event.position, "add")
 	
 	# Handle right-click for removing tiles
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		handle_tile_click(event.position, "remove")
 
 func _ready():
+  # Assuming your grid is inside a node called GridContainer
+	  # Set this to a low value to render it behind everything else
+	
+	set_physics_process(false)
+
 	grid_container = Node2D.new()
 	add_child(grid_container)
 	# Center the grid container
 	var viewport_size = get_viewport().get_visible_rect().size
 	var center_offset = viewport_size / 2
 	grid_container.position = center_offset
+	grid_container.z_index = -1
 	
-
 	generate_grid()
 
 func generate_grid():
@@ -152,21 +162,43 @@ func print_grid_position(position: Vector2, action: String):
 func round_to_nearest_half(value: float) -> float:
 	return round(value * 2) / 2.0
 
-func truncate_decimal(value: float) -> float:
-	if float(int(value)) == value:
-		return int(value)
-	return value
+func unitPlacer():
+	# Set the flag and assign the unit to place
+	unit_to_place = DataPasser.selectedUnit
+	if unit_to_place:
+		placing_unit = true
+		#print("Ready to place unit:", unit_to_place.name)
 
-func placeUnits():
-	var item = DataPasser.selectedUnit
-	print(DataPasser.selectedUnit.name)
-	var newModel = Node3D.new()
-	add_child(newModel)
-	newModel.set_script(load("res://combat/resources/unitAssembler.gd"))
-	newModel.unitParts = item
-	newModel.assembleUnit()
-	newModel.position = Vector3(0.0, -(newModel.getAABB().position + newModel.getAABB().size / 2.0).y, 0.0)
-
+func place_unit_on_tile(mouse_position: Vector2):
+	var local_position = grid_container.to_local(mouse_position)
 	
+	# Find the closest tile by distance
+	var closest_tile_position: Vector2 = Vector2(INF, INF)
+	var min_distance = INF
 
+	for position in grid_tiles.keys():
+		var distance = position.distance_to(local_position)
+		if distance < min_distance:
+			min_distance = distance
+			closest_tile_position = position
+
+	if closest_tile_position != Vector2(INF, INF) and unit_to_place:
+		# Create and place the 3D model at the tile position
+		print(str(get_parent()))
+		
+		var newModel = Node3D.new()
+		get_parent().add_child(newModel)
+		newModel.set_script(load("res://combat/resources/unitAssembler.gd"))
+		newModel.unitParts = unit_to_place
+		newModel.assembleUnit()
+
+		# Position the 3D model at the center of the selected tile
+		newModel.position = Vector3(closest_tile_position.x, 1, closest_tile_position.y)
+
+		# Stop unit placement mode after placing the unit
+		placing_unit = false
+		unit_to_place = null
+
+		# Print the grid position where the unit was placed
+		print_grid_position(closest_tile_position, "Unit placed at ")
 

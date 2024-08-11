@@ -1,16 +1,35 @@
-[gd_scene load_steps=4 format=3 uid="uid://bm0m125f55vh1"]
+[gd_scene load_steps=5 format=3 uid="uid://bm0m125f55vh1"]
 
 [ext_resource type="Script" path="res://combat/grid/gridController/gridGenerator.gd" id="1_t5om1"]
 [ext_resource type="PackedScene" uid="uid://bpoag1rko7t2q" path="res://hubs/player/scenes/player.tscn" id="2_r5dba"]
 [ext_resource type="Script" path="res://combat/grid/gridController/playerCombat.gd" id="3_4dhxc"]
+[ext_resource type="PackedScene" uid="uid://7gcfgw42mq58" path="res://combat/parts/arm/unit03Arm.tscn" id="4_0ytel"]
 
-[node name="CombatGrid" type="Node3D"]
+[node name="CombatController" type="Node2D"]
+
+[node name="CombatGrid" type="Node2D" parent="."]
 unique_name_in_owner = true
 script = ExtResource("1_t5om1")
 
+[node name="upperArmPivot2" parent="CombatGrid" instance=ExtResource("4_0ytel")]
+transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 858.365, 488.665, 0.182)
+top_level = true
+
+[node name="Camera2D" type="Camera3D" parent="CombatGrid"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 864, 486, 0)
+
 [node name="player" parent="." instance=ExtResource("2_r5dba")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.80221, -0.357087)
+visible = false
+platform_on_leave = 2
 script = ExtResource("3_4dhxc")
 playerInfo = null
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.0436368, 0.999047, 0, -0.999047, -0.0436368, 0, 0, 0)
+light_energy = 1.055
+light_indirect_energy = 4.724
+light_volumetric_fog_energy = 0.77
 
 [node name="noUnits" type="Button" parent="."]
 unique_name_in_owner = true
