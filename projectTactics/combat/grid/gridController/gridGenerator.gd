@@ -16,15 +16,6 @@ func _input(event):
 	if Input.is_action_just_pressed("DeleteGrid"):
 		changeScene(DataPasser.priorScene)
 
-	# Handle right-click drag
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_RIGHT:
-			if event.pressed:
-				dragging = true
-				drag_start_position = event.position
-			else:
-				dragging = false
-
 	# Handle middle-click drag
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
