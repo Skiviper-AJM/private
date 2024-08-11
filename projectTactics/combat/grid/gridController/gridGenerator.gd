@@ -3,6 +3,9 @@ extends Node2D
 @export var grid_width:int = 10
 @export var grid_height:int = 10
 @export var hex_radius:float = 50.0
+@export var zoom_speed:float = 0.1  # Speed of zooming
+@export var min_zoom:float = 0.5  # Minimum zoom level
+@export var max_zoom:float = 2.0  # Maximum zoom level
 
 var dragging = false
 var drag_start_position = Vector2()
@@ -13,16 +16,34 @@ func _input(event):
 	if Input.is_action_just_pressed("DeleteGrid"):
 		changeScene(DataPasser.priorScene)
 
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
-		if event.pressed:
-			dragging = true
-			drag_start_position = event.position
-		else:
-			dragging = false
+	# Handle right-click drag
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			if event.pressed:
+				dragging = true
+				drag_start_position = event.position
+			else:
+				dragging = false
+
+	# Handle middle-click drag
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_MIDDLE:
+			if event.pressed:
+				dragging = true
+				drag_start_position = event.position
+			else:
+				dragging = false
 
 	if dragging and event is InputEventMouseMotion:
 		var offset = event.relative
 		grid_container.position += offset
+
+	# Handle zoom with scroll wheel only
+	if event is InputEventMouseButton and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			zoom_in()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			zoom_out()
 
 func _ready():
 	grid_container = Node2D.new()
@@ -55,6 +76,14 @@ func create_hex_cell(position: Vector2) -> Sprite2D:
 	hex_cell.position = position
 	hex_cell.texture = preload("res://combat/grid/gridController/stone_02.png")
 	return hex_cell
-	
+
+func zoom_in():
+	if grid_container.scale.x < max_zoom:
+		grid_container.scale += Vector2(zoom_speed, zoom_speed)
+
+func zoom_out():
+	if grid_container.scale.x > min_zoom:
+		grid_container.scale -= Vector2(zoom_speed, zoom_speed)
+
 func changeScene(newScene):
 	get_tree().change_scene_to_file(newScene)
