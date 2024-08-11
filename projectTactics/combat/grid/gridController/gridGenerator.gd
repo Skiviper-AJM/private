@@ -1,7 +1,7 @@
-extends Node2D
+extends Node3D
 
-@export var grid_width:int = 15
-@export var grid_height:int = 15
+@export var grid_width:int = 1
+@export var grid_height:int = 1
 @export var hex_radius:float = 70
 @export var zoom_speed:float = 0.1  # Speed of zooming
 @export var min_zoom:float = 0.5  # Minimum zoom level
