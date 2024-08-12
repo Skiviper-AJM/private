@@ -11,7 +11,7 @@ const TILE_HEIGHT := 1.0  # Set this to the actual height of your tile
 const TILE_SIZE := 1.0
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
 
-@export var unit_scale: Vector3 = Vector3(0.2, 0.2, 0.2)  # New export variable for unit scale
+@export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # New export variable for unit scale
 @export_range(2, 35) var grid_size: int = 10
 
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
@@ -203,7 +203,7 @@ func place_unit_on_tile(mouse_position: Vector2):
 
 					var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
 
-					new_model.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 1.45, 0)
+					new_model.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
 				else:
 					print("Foot nodes not found! Adjusting using the main bounding box.")
 					# Fallback to use the main bounding box
