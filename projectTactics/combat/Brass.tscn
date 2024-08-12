@@ -1,0 +1,171 @@
+[gd_scene load_steps=20 format=3 uid="uid://divcmemxuqyh"]
+
+[ext_resource type="Script" path="res://combat/resources/unitAssembler.gd" id="1_p0k7r"]
+[ext_resource type="Resource" uid="uid://b6k5t46xth5x3" path="res://combat/parts/arm/unit03Arm.tres" id="2_66u1e"]
+[ext_resource type="Resource" uid="uid://b4ui1jrjnwkdn" path="res://combat/parts/chest/unit03Chest.tres" id="3_2n1ln"]
+[ext_resource type="Resource" uid="uid://dt45elky6m33f" path="res://combat/parts/core/unit03Core.tres" id="4_pjb3o"]
+[ext_resource type="Resource" uid="uid://oee3tarot5sa" path="res://combat/parts/head/unit03Head.tres" id="5_4d8vb"]
+[ext_resource type="Resource" uid="uid://bxb83mj7vh7hk" path="res://combat/parts/leg/unit03Leg.tres" id="6_v4yk4"]
+[ext_resource type="Script" path="res://combat/resources/unit.gd" id="7_4hpbl"]
+[ext_resource type="Script" path="res://combat/resources/partModel.gd" id="8_xrqit"]
+[ext_resource type="Material" uid="uid://ga0l4a4pcqaf" path="res://combat/parts/assets/materials/unit03Mat.tres" id="9_3j8ip"]
+[ext_resource type="ArrayMesh" uid="uid://cby1eo1fslwpt" path="res://combat/parts/assets/unit01/unit01Chest.obj" id="10_tjb85"]
+[ext_resource type="ArrayMesh" uid="uid://cddv5ts1jmgmu" path="res://combat/parts/assets/unit01/unit01Core.obj" id="11_tk0kw"]
+[ext_resource type="ArrayMesh" uid="uid://dh78ue5hm4q11" path="res://combat/parts/assets/unit01/unit01Head.obj" id="12_0fdvg"]
+[ext_resource type="ArrayMesh" uid="uid://dwb2sivdg57rv" path="res://combat/parts/assets/unit01/unit01UpperArm.obj" id="13_xt13o"]
+[ext_resource type="ArrayMesh" uid="uid://dv7kgyvhdpsy2" path="res://combat/parts/assets/unit01/unit01LowerArm.obj" id="14_8plxa"]
+[ext_resource type="ArrayMesh" uid="uid://p7cpbfvufved" path="res://combat/parts/assets/unit01/unit01UpperArmInverted.obj" id="15_nag0d"]
+[ext_resource type="ArrayMesh" uid="uid://c5y5w35ludc0p" path="res://combat/parts/assets/unit01/unit01UpperLeg.obj" id="16_k1tem"]
+[ext_resource type="ArrayMesh" uid="uid://bontp7gtx1bks" path="res://combat/parts/assets/unit01/unit01LowerLeg.obj" id="17_45ub7"]
+[ext_resource type="ArrayMesh" uid="uid://bperqvdqdngal" path="res://combat/parts/assets/unit01/unit01Foot.obj" id="18_bk5w0"]
+
+[sub_resource type="Resource" id="Resource_3uh1n"]
+script = ExtResource("7_4hpbl")
+name = "BrassLad"
+cost = 0
+description = " "
+head = ExtResource("5_4d8vb")
+chest = ExtResource("3_2n1ln")
+arm = ExtResource("2_66u1e")
+core = ExtResource("4_pjb3o")
+leg = ExtResource("6_v4yk4")
+
+[node name="_Node3D_1730" type="Node3D"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.00264919, 0.8, 18)
+script = ExtResource("1_p0k7r")
+unitParts = SubResource("Resource_3uh1n")
+
+[node name="@Node3D@1789" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.29389, -4.34338, -97.1472)
+script = ExtResource("8_xrqit")
+type = 2
+
+[node name="@MeshInstance3D@1754" type="MeshInstance3D" parent="@Node3D@1789"]
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("10_tjb85")
+
+[node name="@Node3D@1757" type="Node3D" parent="@Node3D@1789"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.00531, -0.796356)
+
+[node name="corePivot" type="Node3D" parent="@Node3D@1789/@Node3D@1757"]
+script = ExtResource("8_xrqit")
+type = 3
+
+[node name="_MeshInstance3D_1756" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1757/corePivot"]
+transform = Transform3D(0.5, 0, 0, 0, -2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("11_tk0kw")
+
+[node name="@Node3D@1760" type="Node3D" parent="@Node3D@1789"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.57888, 1.35871)
+
+[node name="headPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1760"]
+script = ExtResource("8_xrqit")
+type = 4
+
+[node name="@MeshInstance3D@1759" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1760/headPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.126744, 0.414742)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("12_0fdvg")
+
+[node name="_Node3D_1767" type="Node3D" parent="@Node3D@1789"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.36383, 0.982666, -0.465147)
+
+[node name="upperArmPivot" type="Node3D" parent="@Node3D@1789/_Node3D_1767"]
+script = ExtResource("8_xrqit")
+scaleModifier = 0.7
+
+[node name="@MeshInstance3D@1765" type="MeshInstance3D" parent="@Node3D@1789/_Node3D_1767/upperArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.157654, -0.578744, -0.013899)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("13_xt13o")
+
+[node name="lowerArmPivot" type="Node3D" parent="@Node3D@1789/_Node3D_1767/upperArmPivot/@MeshInstance3D@1765"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.898733, 0)
+
+[node name="lowerArm" type="MeshInstance3D" parent="@Node3D@1789/_Node3D_1767/upperArmPivot/@MeshInstance3D@1765/lowerArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.758121, 4.44645)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("14_8plxa")
+
+[node name="@Node3D@1766" type="Node3D" parent="@Node3D@1789/_Node3D_1767/upperArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.93247)
+
+[node name="@Node3D@1774" type="Node3D" parent="@Node3D@1789"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.32846, 0.982666, -0.465147)
+
+[node name="upperArmPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1774"]
+script = ExtResource("8_xrqit")
+scaleModifier = 0.7
+
+[node name="@MeshInstance3D@1772" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1774/upperArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.166276, -0.578744, -0.013899)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("15_nag0d")
+
+[node name="lowerArmPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1774/upperArmPivot/@MeshInstance3D@1772"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.898733, 0)
+
+[node name="lowerArm" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1774/upperArmPivot/@MeshInstance3D@1772/lowerArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.758121, 4.44645)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("14_8plxa")
+
+[node name="@Node3D@1773" type="Node3D" parent="@Node3D@1789/@Node3D@1774/upperArmPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.93247)
+
+[node name="@Node3D@1781" type="Node3D" parent="@Node3D@1789"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.49002, -1.83824, 0.290979)
+
+[node name="upperLegPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1781"]
+script = ExtResource("8_xrqit")
+type = 1
+
+[node name="@MeshInstance3D@1780" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1781/upperLegPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.14755, 0)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("16_k1tem")
+
+[node name="lowerLegPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1781/upperLegPivot/@MeshInstance3D@1780"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.45227, 0)
+
+[node name="lowerLeg" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1781/upperLegPivot/@MeshInstance3D@1780/lowerLegPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.30633, 0)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("17_45ub7")
+
+[node name="footPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1781/upperLegPivot/@MeshInstance3D@1780/lowerLegPivot/lowerLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0212304, -1.2931, 0.0470125)
+
+[node name="foot" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1781/upperLegPivot/@MeshInstance3D@1780/lowerLegPivot/lowerLeg/footPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.445993, 0)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("18_bk5w0")
+
+[node name="@Node3D@1788" type="Node3D" parent="@Node3D@1789"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.45552, -1.83824, 0.290979)
+
+[node name="upperLegPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1788"]
+script = ExtResource("8_xrqit")
+type = 1
+
+[node name="@MeshInstance3D@1787" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1788/upperLegPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.14755, 0)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("16_k1tem")
+
+[node name="lowerLegPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1788/upperLegPivot/@MeshInstance3D@1787"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.45227, 0)
+
+[node name="lowerLeg" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1788/upperLegPivot/@MeshInstance3D@1787/lowerLegPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.30633, 0)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("17_45ub7")
+
+[node name="footPivot" type="Node3D" parent="@Node3D@1789/@Node3D@1788/upperLegPivot/@MeshInstance3D@1787/lowerLegPivot/lowerLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0212304, -1.2931, 0.0470125)
+
+[node name="foot" type="MeshInstance3D" parent="@Node3D@1789/@Node3D@1788/upperLegPivot/@MeshInstance3D@1787/lowerLegPivot/lowerLeg/footPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.445993, 0)
+material_override = ExtResource("9_3j8ip")
+mesh = ExtResource("18_bk5w0")

@@ -193,16 +193,22 @@ func place_unit_on_tile(mouse_position: Vector2):
 				# Set the scale of the 3D model
 				new_model.scale = unit_scale  # Apply the unit scale
 
-				# Position the 3D model at the center of the selected tile
-				new_model.position = closest_tile.global_transform.origin + Vector3(0, 1.8, 0)
+				# Access the foot nodes using the full path
+				var left_foot_node = new_model.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
+				var right_foot_node = new_model.get_node_or_null("chestPivot/rLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
 
-				# Stop unit placement mode after placing the unit
-				placing_unit = false
-				unit_to_place = null
-				DataPasser.selectedUnit = null
+				if left_foot_node and right_foot_node:
+					var left_foot_bbox = left_foot_node.get_aabb()
+					var right_foot_bbox = right_foot_node.get_aabb()
 
-				# Print the grid position where the unit was placed
-				print("Unit placed at tile with center:", closest_tile.global_transform.origin)
+					var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
+
+					new_model.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 3, 0)
+				else:
+					print("Foot nodes not found! Adjusting using the main bounding box.")
+					# Fallback to use the main bounding box
+					var bbox = new_model.get_aabb()
+					new_model.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
 			else:
 				print("No valid tile found for placement.")
 		else:
