@@ -5,8 +5,6 @@ var in_combat = false
 
 @onready var player_combat_controller = $"../HexGrid"
 
-#@export var player_combat_controller : Node 
-
 func combatInitiate():
 	in_combat = true
 	player_combat_controller.block_placement = true  # Disable unit placement from inventory
@@ -15,12 +13,12 @@ func combatInitiate():
 func _handle_unit_click(selected_unit):
 	if in_combat:
 		# Handle unit selection logic when in combat
-		if player_combat_controller.DataPasser.selectedUnit == selected_unit:
+		if DataPasser.selectedUnit == selected_unit:
 			print("Unit already selected.")
 			return
 		else:
 			print("Switching to selected unit:", selected_unit.name)
-			player_combat_controller.DataPasser.passUnitInfo(selected_unit)
+			DataPasser.passUnitInfo(selected_unit)
 			player_combat_controller.unit_to_place = selected_unit
 			player_combat_controller.placing_unit = false
 			player_combat_controller.unit_name_label.text = "Unit: " + selected_unit.name

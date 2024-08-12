@@ -126,6 +126,7 @@ func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_handle_tile_click(event.position)
 
+
 func _handle_tile_click(mouse_position):
 	var camera = $Camera3D
 	var from = camera.project_ray_origin(mouse_position)
@@ -143,25 +144,21 @@ func _handle_tile_click(mouse_position):
 		var clicked_tile = _get_tile_with_tolerance(clicked_position)
 		if clicked_tile:
 			if combat_manager.in_combat:
-				# Combat mode logic
+				# Combat mode logic: prevent placing units, allow selecting units
 				if units_on_tiles.has(clicked_tile):
 					var unit_on_tile = units_on_tiles[clicked_tile]
 					print("Tile occupied by:", unit_on_tile.name)
 					combat_manager._handle_unit_click(unit_on_tile)
 				else:
-					if DataPasser.selectedUnit != null:
-						print("Moving selected unit to new tile...")
-						place_unit_on_tile(mouse_position)
+					print("No unit on this tile to select.")
 			else:
 				# Non-combat mode logic
 				if units_on_tiles.has(clicked_tile):
 					if DataPasser.selectedUnit != null:
-						# Replace the occupant with the selected unit
 						print("Replacing unit on tile with selected unit.")
 						remove_unit(units_on_tiles[clicked_tile])  # Remove the current occupant
 						place_unit_on_tile(mouse_position)  # Place the selected unit on the tile
 					else:
-						# No unit selected, just select the occupant
 						var unit_on_tile = units_on_tiles[clicked_tile]
 						print("Selecting unit on tile:", unit_on_tile.name)
 						DataPasser.passUnitInfo(unit_on_tile.unitParts)
@@ -180,7 +177,6 @@ func _handle_tile_click(mouse_position):
 						clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 						currently_selected_tile = clicked_tile  # Update the currently selected tile reference
 				else:
-					# Allow placing a unit from inventory if one is selected
 					if placing_unit and DataPasser.selectedUnit != null:
 						print("Placing unit on empty tile...")
 						place_unit_on_tile(mouse_position)
@@ -188,7 +184,6 @@ func _handle_tile_click(mouse_position):
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
-
 
 
 func _get_tile_with_tolerance(position, tolerance=0):
