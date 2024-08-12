@@ -50,7 +50,6 @@ depth = 0.25
 polygon = PackedVector2Array(-0.517941, -0.00302254, -0.256728, -0.442807, 0.257796, -0.443494, 0.51496, -0.0120342, 0.261216, 0.442774, -0.264572, 0.443495)
 
 [node name="unit_hex" parent="." instance=ExtResource("1_gwb88")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="mergedBlocks(Clone)" parent="unit_hex" index="0"]
 transform = Transform3D(0.899, 0, 0, 0, 1, 0, 0, 0, 0.899, 0, 0, 0)

@@ -32,6 +32,9 @@ var unit_to_place = null
 # Dictionary to store tile positions with coordinates as keys
 var tiles = {}
 
+# Dictionary to track placed units by their instance ID
+var placed_units = {}
+
 func _ready():
 	_generate_grid()
 	var camera = $Camera3D
@@ -167,6 +170,13 @@ func unitPlacer():
 func place_unit_on_tile(mouse_position: Vector2):
 	if placing_unit and unit_to_place:
 		print("Placing unit...")
+		var unit_id = unit_to_place.get_instance_id()
+		
+		# Check if the unit with the same ID is already placed
+		if placed_units.has(unit_id):
+			print("Unit already placed, removing old instance...")
+			remove_unit(placed_units[unit_id])
+
 		var camera = $Camera3D
 		var from = camera.project_ray_origin(mouse_position)
 		var to = from + camera.project_ray_normal(mouse_position) * 50000
@@ -209,9 +219,17 @@ func place_unit_on_tile(mouse_position: Vector2):
 					# Fallback to use the main bounding box
 					var bbox = new_model.get_aabb()
 					new_model.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
+
+				# Store the new unit in the placed_units dictionary
+				placed_units[unit_id] = new_model
+
+				placing_unit = false  # Reset the placing flag
 			else:
 				print("No valid tile found for placement.")
 		else:
 			print("No raycast hit detected.")
 	else:
 		print("No unit to place or placing_unit flag is false.")
+
+func remove_unit(unit):
+	unit.queue_free()  # This will remove the unit from the scene
