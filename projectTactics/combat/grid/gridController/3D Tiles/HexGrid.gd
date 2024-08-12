@@ -144,13 +144,16 @@ func _handle_tile_click(mouse_position):
 		var clicked_tile = _get_tile_with_tolerance(clicked_position)
 		if clicked_tile:
 			if combat_manager.in_combat:
-				# Combat mode logic: prevent placing units, allow selecting units
+				# Combat mode logic
 				if units_on_tiles.has(clicked_tile):
 					var unit_on_tile = units_on_tiles[clicked_tile]
 					print("Tile occupied by:", unit_on_tile.name)
 					combat_manager._handle_unit_click(unit_on_tile)
 				else:
-					print("No unit on this tile to select.")
+					if DataPasser.selectedUnit != null:
+						print("Cannot place units during combat.")
+					else:
+						print("No unit on this tile to select.")
 			else:
 				# Non-combat mode logic
 				if units_on_tiles.has(clicked_tile):
@@ -184,6 +187,7 @@ func _handle_tile_click(mouse_position):
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
+
 
 
 func _get_tile_with_tolerance(position, tolerance=0):
