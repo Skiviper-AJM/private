@@ -127,68 +127,63 @@ func _input(event):
 		_handle_tile_click(event.position)
 
 func _handle_tile_click(mouse_position):
-	if block_placement and combat_manager.in_combat:
-		print("Tile selection and unit placement blocked by combat mode.")
-		return  # Exit the function without performing raycast
-	# Check if the block placement flag is true
-	if block_placement:
-		print("Tile selection and unit placement blocked by UI button press.")
-		return  # Exit the function without performing raycast
-	
-	if placing_unit:
-		print("Placing unit on tile...")
-		place_unit_on_tile(mouse_position)
-	else:
-		var camera = $Camera3D
-		var from = camera.project_ray_origin(mouse_position)
-		var to = from + camera.project_ray_normal(mouse_position) * 50000
+	var camera = $Camera3D
+	var from = camera.project_ray_origin(mouse_position)
+	var to = from + camera.project_ray_normal(mouse_position) * 50000
 
-		var space_state = get_world_3d().direct_space_state
-		var query = PhysicsRayQueryParameters3D.new()
-		query.from = from
-		query.to = to
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.new()
+	query.from = from
+	query.to = to
 
-		var result = space_state.intersect_ray(query)
+	var result = space_state.intersect_ray(query)
 
-		if result:
-			var clicked_position = result.position
-			var clicked_tile = _get_tile_with_tolerance(clicked_position)
-			if clicked_tile:
-				# If no unit is selected and the tile has a unit, select that unit's data
-				if DataPasser.selectedUnit == null and units_on_tiles.has(clicked_tile):
-					# Deselect the previously selected tile, if any
-					if currently_selected_tile != null:
-						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-
+	if result:
+		var clicked_position = result.position
+		var clicked_tile = _get_tile_with_tolerance(clicked_position)
+		if clicked_tile:
+			if combat_manager.in_combat:
+				# Combat mode logic
+				if units_on_tiles.has(clicked_tile):
 					var unit_on_tile = units_on_tiles[clicked_tile]
-					
-					# Ensure you're passing the unit data, not the node instance itself
-					var unit_data = unit_on_tile.unitParts  # Assuming unitParts holds the necessary data
-					DataPasser.passUnitInfo(unit_data)
-					unit_to_place = unit_data
-					placing_unit = false
-					unit_name_label.text = "Unit: " + unit_data.name
-					print("Selected unit from tile: ", unit_data.name)
-
-					# Set the tile color to green
-					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-					
-					# Update the currently selected tile reference
-					currently_selected_tile = clicked_tile
-					
-					return
-				
-				# Print the coordinates of the clicked tile to the console
-				for coord in tiles.keys():
-					var tile = tiles[coord]
-					if tile == clicked_tile:
-						print("Clicked tile coordinates: ", coord)
-						break
-				var current_material = clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
-				if current_material == TILE_MATERIALS[0]:  # If currently blue
-					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+					print("Tile occupied by:", unit_on_tile.name)
+					combat_manager._handle_unit_click(unit_on_tile)
 				else:
-					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+					if DataPasser.selectedUnit != null:
+						print("Moving selected unit to new tile...")
+						place_unit_on_tile(mouse_position)
+			else:
+				# Non-combat mode logic
+				if units_on_tiles.has(clicked_tile):
+					var unit_on_tile = units_on_tiles[clicked_tile]
+					print("Selecting unit on tile:", unit_on_tile.name)
+					DataPasser.passUnitInfo(unit_on_tile.unitParts)
+					unit_to_place = unit_on_tile.unitParts
+					placing_unit = false
+					unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
+
+					# Immediately set the tile to green
+					if currently_selected_tile != null:
+						# Revert the previously selected tile to red if it's occupied
+						if units_on_tiles.has(currently_selected_tile):
+							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+						else:
+							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+						
+					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+					currently_selected_tile = clicked_tile  # Update the currently selected tile reference
+				else:
+					# Allow placing a unit from inventory if one is selected
+					if placing_unit and DataPasser.selectedUnit != null:
+						print("Placing unit on empty tile...")
+						place_unit_on_tile(mouse_position)
+		else:
+			print("No valid tile found.")
+	else:
+		print("No raycast hit detected.")
+
+
+
 
 
 func _get_tile_with_tolerance(position, tolerance=0):
