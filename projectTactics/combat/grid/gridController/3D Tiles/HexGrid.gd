@@ -10,6 +10,7 @@ const TILE_MATERIALS = [
 const TILE_SIZE := 1.0
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
 
+@export var unit_scale: Vector3 = Vector3(0.2, 0.2, 0.2)  # New export variable for unit scale
 @export_range(2, 35) var grid_size: int = 10
 
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
@@ -184,6 +185,9 @@ func place_unit_on_tile(mouse_position: Vector2):
 				new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
 				new_model.unitParts = unit_to_place
 				new_model.assembleUnit()
+
+				# Set the scale of the 3D model
+				new_model.scale = unit_scale  # Apply the unit scale
 
 				# Position the 3D model at the center of the selected tile
 				new_model.position = closest_tile.global_transform.origin + Vector3(0, 1, 0)

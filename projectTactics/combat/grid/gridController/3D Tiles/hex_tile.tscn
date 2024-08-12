@@ -43,6 +43,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_xbula")
 
 [node name="HexTile" type="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.254333, 0)
 
 [node name="CollisionPolygon3D" type="CollisionPolygon3D" parent="."]
 transform = Transform3D(1.10519, 0, 0, 0, -4.90424e-08, 1.14433, 0, -1.12196, -5.00203e-08, 0, 0.124293, 0)
