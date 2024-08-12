@@ -56,6 +56,7 @@ var units_on_tiles = {}
 var placed_units_queue := []
 
 func _ready():
+	DataPasser.selectedUnit = null
 	_generate_grid()
 	_update_units_label()  # Initialize the label text
 	var camera = $Camera3D
@@ -415,6 +416,7 @@ func buttonLeft():
 	block_placement = false;
 
 func combatInitiate():
+	DataPasser.selectedUnit = null
 	$"../CombatGridUI/UnitPlaceUI/UnitsLabel".visible = false
 	$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
 	combat_manager.combatInitiate()

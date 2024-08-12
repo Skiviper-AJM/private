@@ -128,6 +128,7 @@ func openQuit():
 	%settingsMenu.visible = false
 	
 func leaveCombat():
+	DataPasser.selectedUnit = null
 	$options/fleeCombat.visible = false
 	unpause()
 	get_tree().change_scene_to_file(DataPasser.priorScene)
