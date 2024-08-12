@@ -1,17 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://dgcnywernqiut"]
+[gd_scene load_steps=2 format=3 uid="uid://dgcnywernqiut"]
 
 [ext_resource type="PackedScene" uid="uid://c147eeo0husmh" path="res://combat/grid/gridController/3D Tiles/unit_hex.glb" id="1_gwb88"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_coou5"]
-size = Vector3(1, 0.75293, 1)
-
 [node name="HexTile" type="StaticBody3D"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1.14883, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.123535, 0)
-shape = SubResource("BoxShape3D_coou5")
+[node name="CollisionPolygon3D" type="CollisionPolygon3D" parent="."]
+transform = Transform3D(1.10519, 0, 0, 0, -4.90424e-08, 1.14433, 0, -1.12196, -5.00203e-08, 0, 0.124293, 0)
+depth = 0.25
+polygon = PackedVector2Array(-0.517941, -0.00302254, -0.256728, -0.442807, 0.257796, -0.443494, 0.51496, -0.0120342, 0.261216, 0.442774, -0.264572, 0.443495)
 
-[node name="unit_hex" parent="CollisionShape3D" instance=ExtResource("1_gwb88")]
-transform = Transform3D(0.870447, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.123535, 0)
+[node name="unit_hex" parent="." instance=ExtResource("1_gwb88")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[editable path="CollisionShape3D/unit_hex"]
+[editable path="unit_hex"]

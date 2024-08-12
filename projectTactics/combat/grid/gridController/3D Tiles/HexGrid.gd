@@ -49,17 +49,17 @@ func _generate_grid():
 			tiles[Vector2(x, y)] = tile
 			tile_coordinates.y += TILE_SIZE
 			# Set the default material to blue
-			tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 			tile_index += 1
 
 func _handle_tile_click(clicked_position):
 	var clicked_tile = _get_tile_from_position(clicked_position)
 	if clicked_tile:
-		var current_material = clicked_tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override
+		var current_material = clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
 		if current_material == TILE_MATERIALS[0]:  # If currently blue
-			clicked_tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+			clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 		else:
-			clicked_tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+			clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 
 func _get_tile_from_position(position):
 	for key in tiles.keys():
