@@ -60,12 +60,9 @@ func _ready():
 	camera.rotation_degrees.x = rotation_angle_x
 	camera.rotation_degrees.y = rotation_angle_y
 
-func combatInitiate():
-	block_placement = true  # Toggle the flag when the button is pressed
-	
-	print("fite tiem")
-	
-	pass # Replace with function body.
+
+func buttonHovered():
+	block_placement = true
 
 
 func _input(event):
@@ -318,7 +315,13 @@ func _update_units_label():
 
 
 
+func buttonLeft():
+	block_placement = false;
 
-func startButtonReleased():
-	block_placement = false
-	pass # Replace with function body.
+func combatInitiate():
+	print("fite tiem")
+	
+
+
+
+

@@ -47,3 +47,5 @@ text = "Start Combat"
 
 [connection signal="button_down" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="combatInitiate"]
 [connection signal="button_up" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="startButtonReleased"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="buttonHovered"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="buttonLeft"]
