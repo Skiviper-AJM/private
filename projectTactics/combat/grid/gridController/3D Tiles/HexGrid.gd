@@ -12,16 +12,15 @@ const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tsc
 
 @export_range(2, 35) var grid_size: int = 10
 
-const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD/Arrow keys
+const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
 const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
-const MIN_ZOOM := 10.0   # Minimum FOV value for zoom
-const MAX_ZOOM := 80.0   # Maximum FOV value for zoom
-const ROTATION_SPEED := 0.050  # Speed of rotation when dragging the mouse
-const MAX_ROTATION_ANGLE := 15.0  # Maximum rotation angle in degrees for x-axis
+const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
+const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
+const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
 
-var is_rotating := false  # Whether the user is currently rotating the camera
 var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
 var rotation_angle_y := 0.0  # Start with 0 degrees on the y-axis
+var is_rotating := false  # Track whether the camera is being rotated
 
 # Dictionary to store tile positions with coordinates as keys
 var tiles = {}
@@ -29,58 +28,52 @@ var tiles = {}
 func _ready():
 	_generate_grid()
 	var camera = $Camera3D
-	# Center it on the x-axis
+	# Initialize the camera's position and rotation
 	camera.position.x = 0
-	
-	# Calculate the middle of the grid on the z-axis
-	var grid_center_z = 0  # or you could calculate it based on grid size
-	
-	# Center it on the z-axis
-	camera.position.z = (grid_center_z + grid_size)
-	
-	# Set initial rotation
+	camera.position.z = grid_size
 	camera.rotation_degrees.x = rotation_angle_x
 	camera.rotation_degrees.y = rotation_angle_y
 
 func _input(event):
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
 	
-	# Handle WASD/Arrow keys for panning
+	# Handle WASD keys for panning
 	var input_vector := Vector3.ZERO
 	
-	if Input.is_action_pressed("ui_left") or Input.is_action_pressed("move_left"):
-		input_vector.x -= PAN_SPEED
-	if Input.is_action_pressed("ui_right") or Input.is_action_pressed("move_right"):
-		input_vector.x += PAN_SPEED
-	if Input.is_action_pressed("ui_up") or Input.is_action_pressed("move_forward"):
-		input_vector.z -= PAN_SPEED
-	if Input.is_action_pressed("ui_down") or Input.is_action_pressed("move_backward"):
-		input_vector.z += PAN_SPEED
+	if Input.is_action_pressed("moveLeft"):
+		input_vector.x -= PAN_SPEED * get_process_delta_time()
+	if Input.is_action_pressed("moveRight"):
+		input_vector.x += PAN_SPEED * get_process_delta_time()
+	if Input.is_action_pressed("moveUp"):
+		input_vector.z -= PAN_SPEED * get_process_delta_time()
+	if Input.is_action_pressed("moveDown"):
+		input_vector.z += PAN_SPEED * get_process_delta_time()
 
 	if input_vector != Vector3.ZERO:
-		camera.position += camera.basis.xform(input_vector) * get_process_delta_time()
+		input_vector.y = 0  # Ensure no vertical movement
+		camera.position += input_vector
 
-	# Handle mouse button inputs for camera rotation
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_MIDDLE:
-			is_rotating = event.pressed  # Start or stop rotating
+	# Handle rotation
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
+		is_rotating = event.pressed
 
-		# Handle mouse wheel for zooming
-		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			camera.fov = clamp(camera.fov - ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			camera.fov = clamp(camera.fov + ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
-		elif event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			# Handle tile clicking
-			_handle_tile_click(event.position)
-
-	# Handle mouse motion for camera rotation
-	if event is InputEventMouseMotion and is_rotating:
-		rotation_angle_x = clamp(rotation_angle_x - event.relative.y * ROTATION_SPEED, -90 - MAX_ROTATION_ANGLE, -90 + MAX_ROTATION_ANGLE)
+	if is_rotating and event is InputEventMouseMotion:
+		rotation_angle_x -= event.relative.y * ROTATION_SPEED
 		rotation_angle_y -= event.relative.x * ROTATION_SPEED
 		camera.rotation_degrees.x = rotation_angle_x
 		camera.rotation_degrees.y = rotation_angle_y
+
+	# Handle zooming
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			camera.fov = clamp(camera.fov - ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			camera.fov = clamp(camera.fov + ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
+
+	# Handle tile clicking
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_handle_tile_click(event.position)
 
 func _generate_grid():
 	var tile_index := 0
