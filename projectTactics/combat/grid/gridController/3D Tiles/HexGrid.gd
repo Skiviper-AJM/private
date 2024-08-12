@@ -7,6 +7,7 @@ const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
 ]
 
+const TILE_HEIGHT := 1.0  # Set this to the actual height of your tile
 const TILE_SIZE := 1.0
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
 
@@ -18,7 +19,7 @@ const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
 const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
 const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
-const MAX_ROTATION_X := -75.0  # Maximum rotation angle on the x-axis (camera looks down slightly)
+const MAX_ROTATION_X := 0 # Maximum rotation angle on the x-axis (camera looks down slightly)
 const MIN_ROTATION_X := -90.0  # Minimum rotation angle on the x-axis (camera looks straight down)
 
 var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
@@ -146,7 +147,10 @@ func _generate_grid():
 		for y in range(-grid_size, grid_size + 1):
 			var tile = HEX_TILE.instantiate()
 			add_child(tile)
-			tile.translate(Vector3(tile_coordinates.x, 0, tile_coordinates.y))
+
+			# Adjust the tile's position so the top of the tile is at z=0
+			tile.translate(Vector3(tile_coordinates.x, -TILE_HEIGHT, tile_coordinates.y))
+
 			tiles[Vector2(x, y)] = tile
 			tile_coordinates.y += TILE_SIZE
 			# Set the default material to blue
@@ -190,7 +194,7 @@ func place_unit_on_tile(mouse_position: Vector2):
 				new_model.scale = unit_scale  # Apply the unit scale
 
 				# Position the 3D model at the center of the selected tile
-				new_model.position = closest_tile.global_transform.origin + Vector3(0, 1, 0)
+				new_model.position = closest_tile.global_transform.origin + Vector3(0, 1.9, 0)
 
 				# Stop unit placement mode after placing the unit
 				placing_unit = false
