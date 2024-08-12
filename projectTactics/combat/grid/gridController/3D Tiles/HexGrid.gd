@@ -17,6 +17,8 @@ const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
 const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
 const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
+const MAX_ROTATION_X := -55.0  # Maximum rotation angle on the x-axis (camera looks down slightly)
+const MIN_ROTATION_X := -90.0  # Minimum rotation angle on the x-axis (camera looks straight down)
 
 var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
 var rotation_angle_y := 0.0  # Start with 0 degrees on the y-axis
@@ -38,21 +40,20 @@ func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
 	
-	# Handle WASD keys for panning
+	# Handle WASD keys for panning based on camera's facing direction
 	var input_vector := Vector3.ZERO
 	
 	if Input.is_action_pressed("moveLeft"):
-		input_vector.x -= PAN_SPEED * get_process_delta_time()
+		input_vector -= camera.global_transform.basis.x * PAN_SPEED * get_process_delta_time()
 	if Input.is_action_pressed("moveRight"):
-		input_vector.x += PAN_SPEED * get_process_delta_time()
+		input_vector += camera.global_transform.basis.x * PAN_SPEED * get_process_delta_time()
 	if Input.is_action_pressed("moveUp"):
-		input_vector.z -= PAN_SPEED * get_process_delta_time()
+		input_vector -= camera.global_transform.basis.z * PAN_SPEED * get_process_delta_time()
 	if Input.is_action_pressed("moveDown"):
-		input_vector.z += PAN_SPEED * get_process_delta_time()
+		input_vector += camera.global_transform.basis.z * PAN_SPEED * get_process_delta_time()
 
-	if input_vector != Vector3.ZERO:
-		input_vector.y = 0  # Ensure no vertical movement
-		camera.position += input_vector
+	input_vector.y = 0  # Ensure no vertical movement
+	camera.position += input_vector
 
 	# Handle rotation
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
@@ -61,6 +62,7 @@ func _input(event):
 	if is_rotating and event is InputEventMouseMotion:
 		rotation_angle_x -= event.relative.y * ROTATION_SPEED
 		rotation_angle_y -= event.relative.x * ROTATION_SPEED
+		rotation_angle_x = clamp(rotation_angle_x, MIN_ROTATION_X, MAX_ROTATION_X)  # Clamping x rotation
 		camera.rotation_degrees.x = rotation_angle_x
 		camera.rotation_degrees.y = rotation_angle_y
 
