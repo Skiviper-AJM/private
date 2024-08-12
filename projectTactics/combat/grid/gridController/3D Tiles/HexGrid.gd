@@ -281,6 +281,9 @@ func place_unit_on_tile(mouse_position: Vector2):
 				placed_units[unit_id] = new_model
 				units_on_tiles[closest_tile] = new_model
 				
+				# Change the tile color to red
+				closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+				
 				# Add the unit to the queue to track placement order
 				placed_units_queue.push_back(new_model)
 				
@@ -302,11 +305,12 @@ func place_unit_on_tile(mouse_position: Vector2):
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
 	if unit and is_instance_valid(unit):
-		unit.queue_free()  # This will remove the unit from the scene
-
 		# Find and remove the unit from the tiles dictionary
 		for tile in units_on_tiles.keys():
 			if units_on_tiles[tile] == unit:
+				# Change the tile color back to blue
+				tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+				
 				units_on_tiles.erase(tile)
 				break
 
@@ -315,9 +319,11 @@ func remove_unit(unit):
 
 		# Remove the unit from the placement queue
 		placed_units_queue.erase(unit)
-		
+
 		# Update the label text
 		_update_units_label()
+
+		unit.queue_free()  # This will remove the unit from the scene
 	else:
 		print("Warning: Tried to remove a unit that is no longer valid or doesn't exist.")
 
@@ -332,8 +338,3 @@ func buttonLeft():
 
 func combatInitiate():
 	print("fite tiem")
-	
-
-
-
-
