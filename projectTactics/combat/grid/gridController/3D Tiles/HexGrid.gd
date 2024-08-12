@@ -16,6 +16,9 @@ const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tsc
 
 @export var max_squad_size: int = 2  # Default max squad size
 
+# Label to display the number of units placed and max squad size
+@onready var units_label = $UnitsLabel  # Ensure this path is correct for your scene
+
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
 const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
@@ -45,6 +48,7 @@ var placed_units_queue := []
 
 func _ready():
 	_generate_grid()
+	_update_units_label()  # Initialize the label text
 	var camera = $Camera3D
 	# Initialize the camera's position and rotation
 	camera.position.x = 0
@@ -254,6 +258,9 @@ func place_unit_on_tile(mouse_position: Vector2):
 				# Add the unit to the queue to track placement order
 				placed_units_queue.push_back(new_model)
 				
+				# Update the label text
+				_update_units_label()
+				
 				# Clear unit selected
 				unit_to_place = null
 				DataPasser.selectedUnit = null
@@ -281,5 +288,12 @@ func remove_unit(unit):
 
 		# Remove the unit from the placement queue
 		placed_units_queue.erase(unit)
+		
+		# Update the label text
+		_update_units_label()
 	else:
 		print("Warning: Tried to remove a unit that is no longer valid or doesn't exist.")
+
+func _update_units_label():
+	var current_units := placed_units_queue.size()
+	units_label.text = "Select Units: %d / %d" % [current_units, max_squad_size]
