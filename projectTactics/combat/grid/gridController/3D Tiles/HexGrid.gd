@@ -252,13 +252,17 @@ func place_unit_on_tile(mouse_position: Vector2):
 		print("No unit to place or placing_unit flag is false.")
 
 func remove_unit(unit):
-	unit.queue_free()  # This will remove the unit from the scene
-	
-	# Find and remove the unit from the tiles dictionary
-	for tile in units_on_tiles.keys():
-		if units_on_tiles[tile] == unit:
-			units_on_tiles.erase(tile)
-			break
-	
-	# Remove the unit from the placed_units dictionary
-	placed_units.erase(unit.get_instance_id())
+	# Check if the unit still exists in the scene
+	if unit and is_instance_valid(unit):
+		unit.queue_free()  # This will remove the unit from the scene
+
+		# Find and remove the unit from the tiles dictionary
+		for tile in units_on_tiles.keys():
+			if units_on_tiles[tile] == unit:
+				units_on_tiles.erase(tile)
+				break
+
+		# Remove the unit from the placed_units dictionary
+		placed_units.erase(unit.get_instance_id())
+	else:
+		print("Warning: Tried to remove a unit that is no longer valid or doesn't exist.")
