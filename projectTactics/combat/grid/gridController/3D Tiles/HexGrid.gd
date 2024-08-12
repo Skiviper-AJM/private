@@ -17,7 +17,7 @@ const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
 const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
 const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
-const MAX_ROTATION_X := -55.0  # Maximum rotation angle on the x-axis (camera looks down slightly)
+const MAX_ROTATION_X := -75.0  # Maximum rotation angle on the x-axis (camera looks down slightly)
 const MIN_ROTATION_X := -90.0  # Minimum rotation angle on the x-axis (camera looks straight down)
 
 var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
@@ -44,16 +44,18 @@ func _input(event):
 	var input_vector := Vector3.ZERO
 	
 	if Input.is_action_pressed("moveLeft"):
-		input_vector -= camera.global_transform.basis.x * PAN_SPEED * get_process_delta_time()
+		input_vector -= camera.global_transform.basis.x * PAN_SPEED
 	if Input.is_action_pressed("moveRight"):
-		input_vector += camera.global_transform.basis.x * PAN_SPEED * get_process_delta_time()
+		input_vector += camera.global_transform.basis.x * PAN_SPEED
 	if Input.is_action_pressed("moveUp"):
-		input_vector -= camera.global_transform.basis.z * PAN_SPEED * get_process_delta_time()
+		input_vector -= camera.global_transform.basis.z * PAN_SPEED
 	if Input.is_action_pressed("moveDown"):
-		input_vector += camera.global_transform.basis.z * PAN_SPEED * get_process_delta_time()
+		input_vector += camera.global_transform.basis.z * PAN_SPEED
 
-	input_vector.y = 0  # Ensure no vertical movement
-	camera.position += input_vector
+	if input_vector != Vector3.ZERO:
+		input_vector *= get_process_delta_time()
+		input_vector.y = 0  # Ensure no vertical movement
+		camera.position += input_vector
 
 	# Handle rotation
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
