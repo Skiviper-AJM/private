@@ -1,5 +1,12 @@
 extends Node3D
 
+const TILE_MATERIALS = [
+	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
+]
+
 const TILE_SIZE := 1.0
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
 
@@ -33,6 +40,7 @@ func _input(event):
 
 			
 func _generate_grid():
+	var tile_index := 0
 	for x in range(grid_size):
 		var tile_coordinates := Vector2.ZERO
 		tile_coordinates.x = x * TILE_SIZE * cos(deg_to_rad(30))
@@ -43,7 +51,9 @@ func _generate_grid():
 			tile.translate(Vector3(tile_coordinates.x, 0, tile_coordinates.y))
 			tiles[Vector2(x, y)] = tile
 			tile_coordinates.y += TILE_SIZE
-
+			tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override = get_tile_material(tile_index)
+			tile_index += 1
+			
 func _handle_click(screen_position):
 	var from = get_viewport().get_camera_3d().project_ray_origin(screen_position)
 	var to = from + get_viewport().get_camera_3d().project_ray_normal(screen_position) * 1000
@@ -66,3 +76,7 @@ func _print_tile_coordinates(position):
 		if tile.global_transform.origin.distance_to(position) < TILE_SIZE / 2:
 			print("Tile Coordinates: ", coord)
 			break
+
+func get_tile_material(tile_index: int):
+	var index = tile_index % TILE_MATERIALS.size()
+	return TILE_MATERIALS[index]

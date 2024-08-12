@@ -13,3 +13,5 @@ shape = SubResource("BoxShape3D_coou5")
 
 [node name="unit_hex" parent="CollisionShape3D" instance=ExtResource("1_gwb88")]
 transform = Transform3D(0.870447, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.123535, 0)
+
+[editable path="CollisionShape3D/unit_hex"]
