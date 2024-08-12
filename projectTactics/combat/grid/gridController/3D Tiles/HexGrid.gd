@@ -17,7 +17,7 @@ const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tsc
 @export var max_squad_size: int = 2  # Default max squad size
 
 # Label to display the number of units placed and max squad size
-@onready var units_label = $"../UnitPlaceUI/UnitsLabel"  # Ensure this path is correct for your scene
+@onready var units_label = $"../CombatGridUI/UnitPlaceUI/UnitsLabel"  # Ensure this path is correct for your scene
 
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
 const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
@@ -59,6 +59,8 @@ func _ready():
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
+		
+		
 	if Input.is_action_just_pressed("interact"): 
 		if DataPasser.selectedUnit != null: 
 			unitPlacer()

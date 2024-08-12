@@ -65,6 +65,8 @@ var fishSpeed:float = 0.0
 @export var playerInfo:PlayerData
 @export var secondaryEntrances:Node3D = null
 
+
+
 @export var fishingPool:Array[Fish] = []
 
 func _ready() -> void:
@@ -83,7 +85,13 @@ func _ready() -> void:
 
 
 func _input(event):
-	if Input.is_action_just_pressed("pause"): pause();
+	if Input.is_action_just_pressed("pause"): 
+		if $"../CombatGridUI".visible == true:
+			$"../CombatGridUI".visible = false;
+		elif $"../CombatGridUI".visible == false: 
+			$"../CombatGridUI".visible = true;
+		
+		pause();
 	
 
 

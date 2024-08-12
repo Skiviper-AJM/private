@@ -7,6 +7,7 @@
 [node name="3DGrid" type="Node3D"]
 
 [node name="CombatGridUI" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
 layer = 5
 follow_viewport_enabled = true
 
