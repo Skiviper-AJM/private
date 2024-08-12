@@ -1,7 +1,7 @@
 extends CanvasLayer
 
-@export var grid_width:int = 15
-@export var grid_height:int = 15
+@export var grid_width:int = 1500
+@export var grid_height:int = 1500
 @export var hex_radius:float = 70
 @export var zoom_speed:float = 0.1  # Speed of zooming
 @export var min_zoom:float = 0.5  # Minimum zoom level
@@ -16,8 +16,9 @@ var grid_container: Node2D
 var grid_tiles = {}  # This will now track the extra tiles added by the user
 
 func _input(event):
-	
-	if Input.is_action_just_pressed("pause"): if DataPasser.selectedUnit != null: unitPlacer();
+	if Input.is_action_just_pressed("pause"): 
+		if DataPasser.selectedUnit != null: 
+			unitPlacer()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	# Handle middle-click drag
@@ -52,18 +53,16 @@ func _input(event):
 		handle_tile_click(event.position, "remove")
 
 func _ready():
-  # Assuming your grid is inside a node called GridContainer
-	  # Set this to a low value to render it behind everything else
-	
 	set_physics_process(false)
 
 	grid_container = Node2D.new()
+	grid_container.z_index = -1  # Set the z_index to ensure it renders behind everything else
 	add_child(grid_container)
+
 	# Center the grid container
 	var viewport_size = get_viewport().get_visible_rect().size
 	var center_offset = viewport_size / 2
 	grid_container.position = center_offset
-	grid_container.z_index = -1
 	
 	generate_grid()
 
@@ -88,6 +87,7 @@ func create_hex_cell(position: Vector2) -> Sprite2D:
 	var hex_cell = Sprite2D.new()
 	hex_cell.position = position
 	hex_cell.texture = preload("res://combat/grid/gridController/Tiles/stone_03.png")
+	hex_cell.z_index = -1  # Set z_index for each hex cell to ensure it's behind other objects
 	return hex_cell
 
 func zoom_in(mouse_position: Vector2):
@@ -133,6 +133,7 @@ func add_tile_on_top(position: Vector2):
 		var new_tile = Sprite2D.new()
 		new_tile.position = position
 		new_tile.texture = preload("res://combat/grid/gridController/Tiles/stone_04.png")  # Change texture for the new tile
+		new_tile.z_index = -1  # Ensure new tiles are behind other objects
 
 		# Add the new tile to the container and store it in the grid_tiles dictionary
 		grid_container.add_child(new_tile)

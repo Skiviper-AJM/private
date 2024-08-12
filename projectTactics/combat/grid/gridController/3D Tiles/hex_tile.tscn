@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dgcnywernqiut"]
+
+[ext_resource type="PackedScene" uid="uid://c147eeo0husmh" path="res://combat/grid/gridController/3D Tiles/unit_hex.glb" id="1_gwb88"]
+
+[node name="HexTile" type="Node3D"]
+
+[node name="unit_hex" parent="." instance=ExtResource("1_gwb88")]
