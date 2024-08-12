@@ -12,6 +12,8 @@ const TILE_SIZE := 1.0
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
 var currently_selected_tile = null
 
+@onready var combat_manager = $"../combatManager"
+
 
 @export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
 @export_range(2, 35) var grid_size: int = 10
@@ -125,6 +127,9 @@ func _input(event):
 		_handle_tile_click(event.position)
 
 func _handle_tile_click(mouse_position):
+	if block_placement and combat_manager.in_combat:
+		print("Tile selection and unit placement blocked by combat mode.")
+		return  # Exit the function without performing raycast
 	# Check if the block placement flag is true
 	if block_placement:
 		print("Tile selection and unit placement blocked by UI button press.")
@@ -224,7 +229,7 @@ func unitPlacer():
 		placing_unit = true
 		print("Ready to place unit:", unit_to_place.name)
 		
-		unit_name_label.text = "Unit:  " + unit_to_place.name
+		unit_name_label.text = "Unit: " + unit_to_place.name
 		
 		# Check if the unit is already placed on the grid
 		var unit_id = unit_to_place.get_instance_id()
@@ -411,4 +416,7 @@ func buttonLeft():
 	block_placement = false;
 
 func combatInitiate():
+	$"../CombatGridUI/UnitPlaceUI/UnitsLabel".visible = false
+	$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
+	combat_manager.combatInitiate()
 	print("fite tiem")
