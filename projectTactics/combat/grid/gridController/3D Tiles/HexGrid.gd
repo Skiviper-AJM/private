@@ -17,7 +17,7 @@ const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
 const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
 const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
-const MAX_ROTATION_X := -75.0  # Maximum rotation angle on the x-axis (camera looks down slightly)
+const MAX_ROTATION_X := -60.0  # Maximum rotation angle on the x-axis (camera looks down slightly)
 const MIN_ROTATION_X := -90.0  # Minimum rotation angle on the x-axis (camera looks straight down)
 
 var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
@@ -47,10 +47,18 @@ func _input(event):
 		input_vector -= camera.global_transform.basis.x * PAN_SPEED
 	if Input.is_action_pressed("moveRight"):
 		input_vector += camera.global_transform.basis.x * PAN_SPEED
+	
+	# Adjust the forward and backward movement based on the camera's Y-axis rotation
+	var forward_direction = -Vector3(
+		sin(deg_to_rad(rotation_angle_y)),
+		0,
+		cos(deg_to_rad(rotation_angle_y))
+	)
+	
 	if Input.is_action_pressed("moveUp"):
-		input_vector -= camera.global_transform.basis.z * PAN_SPEED
+		input_vector += forward_direction * PAN_SPEED
 	if Input.is_action_pressed("moveDown"):
-		input_vector += camera.global_transform.basis.z * PAN_SPEED
+		input_vector -= forward_direction * PAN_SPEED
 
 	if input_vector != Vector3.ZERO:
 		input_vector *= get_process_delta_time()
