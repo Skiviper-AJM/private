@@ -194,7 +194,7 @@ func place_unit_on_tile(mouse_position: Vector2):
 				new_model.scale = unit_scale  # Apply the unit scale
 
 				# Position the 3D model at the center of the selected tile
-				new_model.position = closest_tile.global_transform.origin + Vector3(0, 1.9, 0)
+				new_model.position = closest_tile.global_transform.origin + Vector3(0, 1.8, 0)
 
 				# Stop unit placement mode after placing the unit
 				placing_unit = false
