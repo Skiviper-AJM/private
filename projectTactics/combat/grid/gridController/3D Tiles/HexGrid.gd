@@ -203,7 +203,7 @@ func place_unit_on_tile(mouse_position: Vector2):
 
 					var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
 
-					new_model.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 3, 0)
+					new_model.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 1.45, 0)
 				else:
 					print("Foot nodes not found! Adjusting using the main bounding box.")
 					# Fallback to use the main bounding box
