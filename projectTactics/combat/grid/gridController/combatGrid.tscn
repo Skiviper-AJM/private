@@ -7,23 +7,13 @@
 
 [node name="CombatController" type="Node2D"]
 
-[node name="CombatGrid" type="Node2D" parent="."]
+[node name="CombatGrid" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
 script = ExtResource("1_t5om1")
 
 [node name="upperArmPivot2" parent="CombatGrid" instance=ExtResource("4_0ytel")]
-transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 858.365, 488.665, 0.182)
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 1)
 top_level = true
-
-[node name="Camera2D" type="Camera3D" parent="CombatGrid"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 864, 486, 0)
-
-[node name="player" parent="." instance=ExtResource("2_r5dba")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.80221, -0.357087)
-visible = false
-platform_on_leave = 2
-script = ExtResource("3_4dhxc")
-playerInfo = null
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -0.0436368, 0.999047, 0, -0.999047, -0.0436368, 0, 0, 0)
@@ -43,3 +33,14 @@ offset_bottom = 532.0
 theme_override_font_sizes/font_size = 30
 text = "NO UNITS: 
 YOU MUST FLEE"
+
+[node name="Camera3D" type="Camera3D" parent="."]
+process_mode = 3
+current = true
+
+[node name="player" parent="." instance=ExtResource("2_r5dba")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.80221, 1086.77)
+visible = false
+platform_on_leave = 2
+script = ExtResource("3_4dhxc")
+playerInfo = null

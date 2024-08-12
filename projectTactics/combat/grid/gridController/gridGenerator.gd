@@ -1,4 +1,4 @@
-extends Node2D
+extends CanvasLayer
 
 @export var grid_width:int = 15
 @export var grid_height:int = 15
