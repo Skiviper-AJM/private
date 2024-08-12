@@ -7,24 +7,28 @@ const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
 ]
 
-const TILE_HEIGHT := 1.0  # Set this to the actual height of your tile
+const TILE_HEIGHT := 1.0  
 const TILE_SIZE := 1.0
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
 
-@export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # New export variable for unit scale
+@export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
 @export_range(2, 35) var grid_size: int = 10
 
 @export var max_squad_size: int = 2  # Default max squad size
 
 # Label to display the number of units placed and max squad size
-@onready var units_label = $"../CombatGridUI/UnitPlaceUI/UnitsLabel"  # Ensure this path is correct for your scene
+@onready var units_label = $"../CombatGridUI/UnitPlaceUI/UnitsLabel" 
+
+# UI Button to block tile selection and unit placement
+@onready var ui_block_button = $"../CombatGridUI/BlockButton"  # Replace with the correct path to your UI button
+var block_placement: bool = false  # Flag to block tile selection and unit placement
 
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
 const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
 const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
 const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
-const MAX_ROTATION_X := 0 # Maximum rotation angle on the x-axis (camera looks down slightly)
+const MAX_ROTATION_X := -60 # Maximum rotation angle on the x-axis (camera looks down slightly)
 const MIN_ROTATION_X := -90.0  # Minimum rotation angle on the x-axis (camera looks straight down)
 
 var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
@@ -56,12 +60,19 @@ func _ready():
 	camera.rotation_degrees.x = rotation_angle_x
 	camera.rotation_degrees.y = rotation_angle_y
 
+func combatInitiate():
+	block_placement = true  # Toggle the flag when the button is pressed
+	
+	print("fite tiem")
+	
+	pass # Replace with function body.
+
+
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
-		
-		
-	if Input.is_action_just_pressed("interact"): 
+	
+	if Input.is_action_just_pressed("interact"):
 		if DataPasser.selectedUnit != null: 
 			unitPlacer()
 			
@@ -113,6 +124,11 @@ func _input(event):
 		_handle_tile_click(event.position)
 
 func _handle_tile_click(mouse_position):
+	# Check if the block placement flag is true
+	if block_placement:
+		print("Tile selection and unit placement blocked by UI button press.")
+		return  # Exit the function without performing raycast
+	
 	if placing_unit:
 		print("Placing unit on tile...")
 		place_unit_on_tile(mouse_position)
@@ -301,7 +317,8 @@ func _update_units_label():
 	units_label.text = "Select Units: %d / %d" % [current_units, max_squad_size]
 
 
-func combatInitiate():
-	print("fite tiem")
-	
+
+
+func startButtonReleased():
+	block_placement = false
 	pass # Replace with function body.

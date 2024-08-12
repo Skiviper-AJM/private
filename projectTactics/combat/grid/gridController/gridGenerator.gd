@@ -13,7 +13,7 @@ var placing_unit = false  # Flag to indicate unit placement mode
 var unit_to_place = null  # Reference to the unit to be placed
 
 var grid_container: Node2D
-var grid_tiles = {}  # This will now track the extra tiles added by the user
+var grid_tiles = {}  # Track the extra tiles added by the user
 
 func _input(event):
 	if Input.is_action_just_pressed("pause"): 
@@ -111,7 +111,7 @@ func adjust_zoom(zoom_amount: float, mouse_position: Vector2):
 func handle_tile_click(mouse_position: Vector2, action: String):
 	var local_position = grid_container.to_local(mouse_position)
 	
-	# Find the closest tile by distance (you can optimize this part as needed)
+	# Find the closest tile by distance 
 	var closest_tile_position: Vector2 = Vector2(INF, INF)
 	var min_distance = INF
 
