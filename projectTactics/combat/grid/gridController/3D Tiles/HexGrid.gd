@@ -17,6 +17,16 @@ var tiles = {}
 
 func _ready():
 	_generate_grid()
+	var camera = $Camera3D
+	# Center it on the x-axis
+	camera.position.x = 0
+	
+	# Calculate the middle of the grid on the z-axis
+	var grid_center_z = 0  # or you could calculate it based on grid size
+	
+	# Center it on the z-axis
+	camera.position.z = (grid_center_z + grid_size)
+	# The y-coordinate (height) remains unchanged
 
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
