@@ -53,7 +53,7 @@ func _generate_grid():
 			tile_index += 1
 
 func _handle_tile_click(clicked_position):
-	var clicked_tile = _get_tile_from_position(clicked_position)
+	var clicked_tile = _get_tile_with_tolerance(clicked_position)
 	if clicked_tile:
 		var current_material = clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
 		if current_material == TILE_MATERIALS[0]:  # If currently blue
@@ -61,9 +61,13 @@ func _handle_tile_click(clicked_position):
 		else:
 			clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 
-func _get_tile_from_position(position):
+func _get_tile_with_tolerance(position, tolerance=0):
+	var closest_tile = null
+	var min_distance = INF
 	for key in tiles.keys():
 		var tile = tiles[key]
-		if tile.global_transform.origin.distance_to(position) < TILE_SIZE * 0.5:
-			return tile
-	return null
+		var distance = tile.global_transform.origin.distance_to(position)
+		if distance < min_distance + tolerance:
+			min_distance = distance
+			closest_tile = tile
+	return closest_tile if min_distance < TILE_SIZE / 2 + tolerance else null
