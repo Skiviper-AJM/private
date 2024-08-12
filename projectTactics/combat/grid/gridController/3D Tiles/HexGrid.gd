@@ -1,9 +1,9 @@
 extends Node3D
 
 const TILE_MATERIALS = [
-	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),   # Blue material
 	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
-	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),    # Red material
 	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
 ]
 
@@ -34,11 +34,8 @@ func _input(event):
 
 		if result:
 			var clicked_position = result.position
-			_print_tile_coordinates(clicked_position)
-		else:
-			print("No hit detected.")
+			_handle_tile_click(clicked_position)
 
-			
 func _generate_grid():
 	var tile_index := 0
 	for x in range(grid_size):
@@ -51,32 +48,22 @@ func _generate_grid():
 			tile.translate(Vector3(tile_coordinates.x, 0, tile_coordinates.y))
 			tiles[Vector2(x, y)] = tile
 			tile_coordinates.y += TILE_SIZE
-			tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override = get_tile_material(tile_index)
+			# Set the default material to blue
+			tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 			tile_index += 1
-			
-func _handle_click(screen_position):
-	var from = get_viewport().get_camera_3d().project_ray_origin(screen_position)
-	var to = from + get_viewport().get_camera_3d().project_ray_normal(screen_position) * 1000
-	var space_state = get_world_3d().direct_space_state
-	
-	# Create a new PhysicsRayQueryParameters3D object
-	var query = PhysicsRayQueryParameters3D.new()
-	query.from = from
-	query.to = to
-	
-	var result = space_state.intersect_ray(query)
-	
-	if result and result.collider:
-		var clicked_position = result.collider.global_transform.origin
-		_print_tile_coordinates(clicked_position)
 
-func _print_tile_coordinates(position):
-	for coord in tiles:
-		var tile = tiles[coord]
-		if tile.global_transform.origin.distance_to(position) < TILE_SIZE / 2:
-			print("Tile Coordinates: ", coord)
-			break
+func _handle_tile_click(clicked_position):
+	var clicked_tile = _get_tile_from_position(clicked_position)
+	if clicked_tile:
+		var current_material = clicked_tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override
+		if current_material == TILE_MATERIALS[0]:  # If currently blue
+			clicked_tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+		else:
+			clicked_tile.get_node("CollisionShape3D/unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 
-func get_tile_material(tile_index: int):
-	var index = tile_index % TILE_MATERIALS.size()
-	return TILE_MATERIALS[index]
+func _get_tile_from_position(position):
+	for key in tiles.keys():
+		var tile = tiles[key]
+		if tile.global_transform.origin.distance_to(position) < TILE_SIZE * 0.5:
+			return tile
+	return null
