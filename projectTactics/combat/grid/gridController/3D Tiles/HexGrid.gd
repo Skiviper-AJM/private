@@ -17,12 +17,15 @@ const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
 const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
 const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
-const MAX_ROTATION_X := -60.0  # Maximum rotation angle on the x-axis (camera looks down slightly)
+const MAX_ROTATION_X := -75.0  # Maximum rotation angle on the x-axis (camera looks down slightly)
 const MIN_ROTATION_X := -90.0  # Minimum rotation angle on the x-axis (camera looks straight down)
 
 var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
 var rotation_angle_y := 0.0  # Start with 0 degrees on the y-axis
 var is_rotating := false  # Track whether the camera is being rotated
+
+var placing_unit: bool = false
+var unit_to_place = null
 
 # Dictionary to store tile positions with coordinates as keys
 var tiles = {}
@@ -39,7 +42,10 @@ func _ready():
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
-	
+	if Input.is_action_just_pressed("interact"): 
+		if DataPasser.selectedUnit != null: 
+			unitPlacer()
+			
 	# Handle WASD keys for panning based on camera's facing direction
 	var input_vector := Vector3.ZERO
 	
@@ -87,6 +93,49 @@ func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_handle_tile_click(event.position)
 
+func _handle_tile_click(mouse_position):
+	if placing_unit:
+		print("Placing unit on tile...")
+		place_unit_on_tile(mouse_position)
+	else:
+		var camera = $Camera3D
+		var from = camera.project_ray_origin(mouse_position)
+		var to = from + camera.project_ray_normal(mouse_position) * 50000
+
+		var space_state = get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.new()
+		query.from = from
+		query.to = to
+
+		var result = space_state.intersect_ray(query)
+
+		if result:
+			var clicked_position = result.position
+			var clicked_tile = _get_tile_with_tolerance(clicked_position)
+			if clicked_tile:
+				# Print the coordinates of the clicked tile to the console
+				for coord in tiles.keys():
+					var tile = tiles[coord]
+					if tile == clicked_tile:
+						print("Clicked tile coordinates: ", coord)
+						break
+				var current_material = clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
+				if current_material == TILE_MATERIALS[0]:  # If currently blue
+					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+				else:
+					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+
+func _get_tile_with_tolerance(position, tolerance=0):
+	var closest_tile = null
+	var min_distance = INF
+	for key in tiles.keys():
+		var tile = tiles[key]
+		var distance = tile.global_transform.origin.distance_to(position)
+		if distance < min_distance + tolerance:
+			min_distance = distance
+			closest_tile = tile
+	return closest_tile if min_distance < TILE_SIZE / 2 + tolerance else null
+
 func _generate_grid():
 	var tile_index := 0
 	for x in range(-grid_size, grid_size + 1):
@@ -103,41 +152,52 @@ func _generate_grid():
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 			tile_index += 1
 
-func _handle_tile_click(mouse_position):
-	var camera = $Camera3D
-	var from = camera.project_ray_origin(mouse_position)
-	var to = from + camera.project_ray_normal(mouse_position) * 50000
+func unitPlacer():
+	# Set the flag and assign the unit to place
+	unit_to_place = DataPasser.selectedUnit
+	if unit_to_place:
+		placing_unit = true
+		print("Ready to place unit:", unit_to_place.name)
 
-	var space_state = get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.new()
-	query.from = from
-	query.to = to
+func place_unit_on_tile(mouse_position: Vector2):
+	if placing_unit and unit_to_place:
+		print("Placing unit...")
+		var camera = $Camera3D
+		var from = camera.project_ray_origin(mouse_position)
+		var to = from + camera.project_ray_normal(mouse_position) * 50000
 
-	var result = space_state.intersect_ray(query)
+		var space_state = get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.new()
+		query.from = from
+		query.to = to
 
-	if result:
-		var clicked_position = result.position
-		var clicked_tile = _get_tile_with_tolerance(clicked_position)
-		if clicked_tile:
-			# Print the coordinates of the clicked tile to the console
-			for coord in tiles.keys():
-				var tile = tiles[coord]
-				if tile == clicked_tile:
-					print("Clicked tile coordinates: ", coord)
-					break
-			var current_material = clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
-			if current_material == TILE_MATERIALS[0]:  # If currently blue
-				clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+		var result = space_state.intersect_ray(query)
+
+		if result:
+			var clicked_position = result.position
+			var closest_tile = _get_tile_with_tolerance(clicked_position)
+			if closest_tile:
+				# Create and place the 3D model at the tile position
+				print("Creating new unit model...")
+				var new_model = Node3D.new()
+				get_parent().add_child(new_model)
+				new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
+				new_model.unitParts = unit_to_place
+				new_model.assembleUnit()
+
+				# Position the 3D model at the center of the selected tile
+				new_model.position = closest_tile.global_transform.origin + Vector3(0, 1, 0)
+
+				# Stop unit placement mode after placing the unit
+				placing_unit = false
+				unit_to_place = null
+				DataPasser.selectedUnit = null
+
+				# Print the grid position where the unit was placed
+				print("Unit placed at tile with center:", closest_tile.global_transform.origin)
 			else:
-				clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
-
-func _get_tile_with_tolerance(position, tolerance=0):
-	var closest_tile = null
-	var min_distance = INF
-	for key in tiles.keys():
-		var tile = tiles[key]
-		var distance = tile.global_transform.origin.distance_to(position)
-		if distance < min_distance + tolerance:
-			min_distance = distance
-			closest_tile = tile
-	return closest_tile if min_distance < TILE_SIZE / 2 + tolerance else null
+				print("No valid tile found for placement.")
+		else:
+			print("No raycast hit detected.")
+	else:
+		print("No unit to place or placing_unit flag is false.")
