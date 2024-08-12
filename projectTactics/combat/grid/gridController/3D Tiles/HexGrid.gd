@@ -8,7 +8,7 @@ const TILE_MATERIALS = [
 ]
 
 const TILE_HEIGHT := 1.0  
-const TILE_SIZE := 1.0
+@export var TILE_SIZE := 1.0
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
 var currently_selected_tile = null
 
