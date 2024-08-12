@@ -38,11 +38,11 @@ func _input(event):
 
 func _generate_grid():
 	var tile_index := 0
-	for x in range(grid_size):
+	for x in range(-grid_size, grid_size + 1):
 		var tile_coordinates := Vector2.ZERO
 		tile_coordinates.x = x * TILE_SIZE * cos(deg_to_rad(30))
 		tile_coordinates.y = 0 if x % 2 == 0 else TILE_SIZE / 2
-		for y in range(grid_size):
+		for y in range(-grid_size, grid_size + 1):
 			var tile = HEX_TILE.instantiate()
 			add_child(tile)
 			tile.translate(Vector3(tile_coordinates.x, 0, tile_coordinates.y))
@@ -52,9 +52,16 @@ func _generate_grid():
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 			tile_index += 1
 
+
 func _handle_tile_click(clicked_position):
 	var clicked_tile = _get_tile_with_tolerance(clicked_position)
 	if clicked_tile:
+		# Print the coordinates of the clicked tile to the console
+		for coord in tiles.keys():
+			var tile = tiles[coord]
+			if tile == clicked_tile:
+				print("Clicked tile coordinates: ", coord)
+				break
 		var current_material = clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
 		if current_material == TILE_MATERIALS[0]:  # If currently blue
 			clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red

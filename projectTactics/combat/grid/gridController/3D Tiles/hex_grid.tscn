@@ -10,7 +10,7 @@
 script = ExtResource("1_nbd6x")
 grid_size = 20
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="HexGrid"]
 transform = Transform3D(1, 0, 0, 0, 0.419452, 0.907777, 0, -0.907777, 0.419452, 3, 5, 3)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
