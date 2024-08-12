@@ -225,12 +225,40 @@ func unitPlacer():
 		print("Ready to place unit:", unit_to_place.name)
 		
 		unit_name_label.text = "Unit:  " + unit_to_place.name
-	
+		
+		# Check if the unit is already placed on the grid
+		var unit_id = unit_to_place.get_instance_id()
+		if placed_units.has(unit_id):
+			# If the unit is already placed, find the tile it's on
+			var tile_with_unit = null
+			for tile in units_on_tiles.keys():
+				if units_on_tiles[tile] == placed_units[unit_id]:
+					tile_with_unit = tile
+					break
+			
+			if tile_with_unit != null:
+				# Deselect the previously selected tile, if any
+				if currently_selected_tile != null:
+					# Revert the old tile's color
+					if not units_on_tiles.has(currently_selected_tile):
+						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+					else:
+						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+
+				# Set the new tile color to green
+				tile_with_unit.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+				
+				# Update the currently selected tile reference
+				currently_selected_tile = tile_with_unit
+		else:
+			placing_unit = true
 	else:
 		placing_unit = false
 		
 		# Clear the UnitName label if no unit is selected
 		unit_name_label.text = ""
+
+
 
 func place_unit_on_tile(mouse_position: Vector2):
 	if placing_unit and unit_to_place:
