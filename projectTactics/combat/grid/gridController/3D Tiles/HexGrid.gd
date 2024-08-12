@@ -14,6 +14,8 @@ const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tsc
 @export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # New export variable for unit scale
 @export_range(2, 35) var grid_size: int = 10
 
+@export var max_squad_size: int = 2  # Default max squad size
+
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
 const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
@@ -37,6 +39,9 @@ var placed_units = {}
 
 # Dictionary to track units by tile
 var units_on_tiles = {}
+
+# Queue to track the order of placed units
+var placed_units_queue := []
 
 func _ready():
 	_generate_grid()
@@ -208,6 +213,12 @@ func place_unit_on_tile(mouse_position: Vector2):
 					print("Unit is already placed on another tile. Removing from previous tile...")
 					remove_unit(placed_units[unit_id])
 
+				# Check if the squad size is exceeded
+				if placed_units_queue.size() >= max_squad_size:
+					print("Max squad size reached. Removing the earliest placed unit...")
+					var oldest_unit = placed_units_queue.pop_front()
+					remove_unit(oldest_unit)
+
 				# Create and place the 3D model at the tile position
 				print("Creating new unit model...")
 				var new_model = Node3D.new()
@@ -240,7 +251,10 @@ func place_unit_on_tile(mouse_position: Vector2):
 				placed_units[unit_id] = new_model
 				units_on_tiles[closest_tile] = new_model
 				
-				#clears unit selected
+				# Add the unit to the queue to track placement order
+				placed_units_queue.push_back(new_model)
+				
+				# Clear unit selected
 				unit_to_place = null
 				DataPasser.selectedUnit = null
 				placing_unit = false  # Reset the placing flag
@@ -264,5 +278,8 @@ func remove_unit(unit):
 
 		# Remove the unit from the placed_units dictionary
 		placed_units.erase(unit.get_instance_id())
+
+		# Remove the unit from the placement queue
+		placed_units_queue.erase(unit)
 	else:
 		print("Warning: Tried to remove a unit that is no longer valid or doesn't exist.")
