@@ -147,6 +147,19 @@ func _handle_tile_click(mouse_position):
 			var clicked_position = result.position
 			var clicked_tile = _get_tile_with_tolerance(clicked_position)
 			if clicked_tile:
+				# If no unit is selected and the tile has a unit, select that unit's data
+				if DataPasser.selectedUnit == null and units_on_tiles.has(clicked_tile):
+					var unit_on_tile = units_on_tiles[clicked_tile]
+					
+					# Ensure you're passing the unit data, not the node instance itself
+					var unit_data = unit_on_tile.unitParts  # Assuming unitParts holds the necessary data
+					DataPasser.passUnitInfo(unit_data)
+					unit_to_place = unit_data
+					placing_unit = false
+					unit_name_label.text = "Unit: " + unit_data.name
+					print("Selected unit from tile: ", unit_data.name)
+					return
+				
 				# Print the coordinates of the clicked tile to the console
 				for coord in tiles.keys():
 					var tile = tiles[coord]
@@ -158,6 +171,7 @@ func _handle_tile_click(mouse_position):
 					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 				else:
 					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+
 
 func _get_tile_with_tolerance(position, tolerance=0):
 	var closest_tile = null
