@@ -84,16 +84,28 @@ func handle_tile_click(tile):
 	if in_combat:
 		# Check if the tile is highlighted and unoccupied
 		if tile in highlighted_tiles and not player_combat_controller.units_on_tiles.has(tile):
-			# Move the selected unit to the clicked tile
+			# Move the selected unit to the clicked tile by removing and re-adding it
 			var selected_unit = player_combat_controller.units_on_tiles[player_combat_controller.currently_selected_tile]
-			player_combat_controller.units_on_tiles.erase(player_combat_controller.currently_selected_tile)
-			player_combat_controller.units_on_tiles[tile] = selected_unit
 
-			selected_unit.global_transform.origin = tile.global_transform.origin
+			# Remove the current instance of the unit
+			player_combat_controller.remove_unit(selected_unit)
 
-			# Reset the previously selected tile to blue and set the new tile to green
-			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+			# Instantiate a new unit at the clicked tile
+			var new_unit = Node3D.new()
+			get_parent().add_child(new_unit)
+			new_unit.set_script(load("res://combat/resources/unitAssembler.gd"))
+			new_unit.unitParts = selected_unit.unitParts
+			new_unit.assembleUnit()
+
+			# Set the new unit's position to the clicked tile
+			new_unit.global_transform.origin = tile.global_transform.origin
+
+			# Add the new unit to the tile and update the units_on_tiles dictionary
+			player_combat_controller.units_on_tiles[tile] = new_unit
+
+			# Update the tile colors
+			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set new tile to red
 
 			# Update the selected tile reference
 			player_combat_controller.currently_selected_tile = tile
@@ -101,17 +113,25 @@ func handle_tile_click(tile):
 			# Clear the highlighted tiles
 			clear_highlighted_tiles()
 
-		elif player_combat_controller.units_on_tiles.has(tile):
+			# Deselect the unit after moving
+			DataPasser.passUnitInfo(null)
+			player_combat_controller.unit_to_place = null
+			player_combat_controller.placing_unit = false
+			player_combat_controller.unit_name_label.text = ""
+			player_combat_controller.currently_selected_tile = null
+
+		elif tile == player_combat_controller.currently_selected_tile or not tile in highlighted_tiles:
+			# If it's a blue or green tile, or if it's not in the highlighted range, deselect the unit
+			handle_empty_tile_click()
+		else:
 			# If the tile is occupied, select the unit on that tile
 			var unit_on_tile = player_combat_controller.units_on_tiles[tile]
 			_handle_unit_click(unit_on_tile)
-		else:
-			# If it's an unhighlighted tile or not in the range, do nothing or handle as necessary
-			handle_empty_tile_click()
 	else:
 		# Handle as necessary when not in combat
 		player_combat_controller.unitPlacer()
-		
+
+
 func handle_empty_tile_click():
 	# Clear the current selection and reset the label
 	DataPasser.passUnitInfo(null)
