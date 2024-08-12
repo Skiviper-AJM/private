@@ -10,6 +10,8 @@ const TILE_MATERIALS = [
 const TILE_HEIGHT := 1.0  
 const TILE_SIZE := 1.0
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
+var currently_selected_tile = null
+
 
 @export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
 @export_range(2, 35) var grid_size: int = 10
@@ -149,6 +151,10 @@ func _handle_tile_click(mouse_position):
 			if clicked_tile:
 				# If no unit is selected and the tile has a unit, select that unit's data
 				if DataPasser.selectedUnit == null and units_on_tiles.has(clicked_tile):
+					# Deselect the previously selected tile, if any
+					if currently_selected_tile != null:
+						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+
 					var unit_on_tile = units_on_tiles[clicked_tile]
 					
 					# Ensure you're passing the unit data, not the node instance itself
@@ -158,6 +164,13 @@ func _handle_tile_click(mouse_position):
 					placing_unit = false
 					unit_name_label.text = "Unit: " + unit_data.name
 					print("Selected unit from tile: ", unit_data.name)
+
+					# Set the tile color to green
+					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+					
+					# Update the currently selected tile reference
+					currently_selected_tile = clicked_tile
+					
 					return
 				
 				# Print the coordinates of the clicked tile to the console
@@ -295,7 +308,7 @@ func place_unit_on_tile(mouse_position: Vector2):
 				placed_units[unit_id] = new_model
 				units_on_tiles[closest_tile] = new_model
 				
-				# Change the tile color to red
+				# Set the tile color to red since the unit is placed
 				closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 				
 				# Add the unit to the queue to track placement order
@@ -309,12 +322,28 @@ func place_unit_on_tile(mouse_position: Vector2):
 				DataPasser.selectedUnit = null
 				placing_unit = false  # Reset the placing flag
 				unit_name_label.text = ""
+				
+				# If the currently_selected_tile is different from the new tile, revert the old one to blue (if no unit is on it) or red
+				if currently_selected_tile and currently_selected_tile != closest_tile:
+					print("Reverting previously selected tile color.")
+					
+					# Check if there's a unit on the currently selected tile
+					if not units_on_tiles.has(currently_selected_tile):
+						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+					else:
+						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+				
+				# Update the currently selected tile reference
+				currently_selected_tile = closest_tile
 			else:
 				print("No valid tile found for placement.")
 		else:
 			print("No raycast hit detected.")
 	else:
 		print("No unit to place or placing_unit flag is false.")
+
+
+
 
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
@@ -323,6 +352,7 @@ func remove_unit(unit):
 		for tile in units_on_tiles.keys():
 			if units_on_tiles[tile] == unit:
 				# Change the tile color back to blue
+				print("Reverting tile to blue after removing unit.")
 				tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 				
 				units_on_tiles.erase(tile)
@@ -340,6 +370,8 @@ func remove_unit(unit):
 		unit.queue_free()  # This will remove the unit from the scene
 	else:
 		print("Warning: Tried to remove a unit that is no longer valid or doesn't exist.")
+
+
 
 func _update_units_label():
 	var current_units := placed_units_queue.size()

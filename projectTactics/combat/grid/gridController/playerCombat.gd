@@ -270,7 +270,7 @@ func interact(delta):
 	%deniedIcon.visible = false
 
 func changeScene(newScene):
-	get_tree().paused = true
+	#get_tree().paused = true
 	%fade.visible = true
 	isStopped = true
 	var fadeTween:Tween = get_tree().create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
