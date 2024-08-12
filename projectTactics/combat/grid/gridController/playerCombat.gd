@@ -90,6 +90,8 @@ func _input(event):
 			$"../CombatGridUI".visible = false;
 		elif $"../CombatGridUI".visible == false: 
 			$"../CombatGridUI".visible = true;
+			$"../HexGrid".unitPlacer()
+		
 		
 		pause();
 	

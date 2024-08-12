@@ -27,10 +27,14 @@ layer = 5
 follow_viewport_enabled = true
 
 [node name="UnitPlaceUI" type="GridContainer" parent="CombatGridUI"]
-offset_left = 1268.0
-offset_top = 56.0
-offset_right = 1664.0
-offset_bottom = 199.0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -441.0
+offset_top = 45.0
+offset_right = -42.0
+offset_bottom = 242.0
+grow_horizontal = 0
 
 [node name="UnitsLabel" type="Label" parent="CombatGridUI/UnitPlaceUI"]
 layout_mode = 2
@@ -38,12 +42,20 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 48
 text = "Select Units X / Y "
-horizontal_alignment = 2
+horizontal_alignment = 1
 
 [node name="StartCombat" type="Button" parent="CombatGridUI/UnitPlaceUI"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "Start Combat"
+
+[node name="UnitName" type="Label" parent="CombatGridUI/UnitPlaceUI"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.815686, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 1
 
 [connection signal="button_down" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="combatInitiate"]
 [connection signal="button_up" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="startButtonReleased"]

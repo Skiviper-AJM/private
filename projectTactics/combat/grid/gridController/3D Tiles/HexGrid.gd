@@ -18,6 +18,7 @@ const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tsc
 
 # Label to display the number of units placed and max squad size
 @onready var units_label = $"../CombatGridUI/UnitPlaceUI/UnitsLabel" 
+@onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 
 # UI Button to block tile selection and unit placement
 @onready var ui_block_button = $"../CombatGridUI/BlockButton"  # Replace with the correct path to your UI button
@@ -71,6 +72,7 @@ func _input(event):
 	
 	if Input.is_action_just_pressed("interact"):
 		if DataPasser.selectedUnit != null: 
+			
 			unitPlacer()
 			
 	# Handle WASD keys for panning based on camera's facing direction
@@ -190,9 +192,18 @@ func _generate_grid():
 func unitPlacer():
 	# Set the flag and assign the unit to place
 	unit_to_place = DataPasser.selectedUnit
-	if unit_to_place:
+	
+	if unit_to_place != null:
 		placing_unit = true
 		print("Ready to place unit:", unit_to_place.name)
+		
+		unit_name_label.text = "Unit:  " + unit_to_place.name
+	
+	else:
+		placing_unit = false
+		
+		# Clear the UnitName label if no unit is selected
+		unit_name_label.text = ""
 
 func place_unit_on_tile(mouse_position: Vector2):
 	if placing_unit and unit_to_place:
@@ -280,6 +291,7 @@ func place_unit_on_tile(mouse_position: Vector2):
 				unit_to_place = null
 				DataPasser.selectedUnit = null
 				placing_unit = false  # Reset the placing flag
+				unit_name_label.text = ""
 			else:
 				print("No valid tile found for placement.")
 		else:
