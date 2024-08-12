@@ -35,6 +35,9 @@ var tiles = {}
 # Dictionary to track placed units by their instance ID
 var placed_units = {}
 
+# Dictionary to track units by tile
+var units_on_tiles = {}
+
 func _ready():
 	_generate_grid()
 	var camera = $Camera3D
@@ -172,11 +175,6 @@ func place_unit_on_tile(mouse_position: Vector2):
 		print("Placing unit...")
 		var unit_id = unit_to_place.get_instance_id()
 		
-		# Check if the unit with the same ID is already placed
-		if placed_units.has(unit_id):
-			print("Unit already placed, removing old instance...")
-			remove_unit(placed_units[unit_id])
-
 		var camera = $Camera3D
 		var from = camera.project_ray_origin(mouse_position)
 		var to = from + camera.project_ray_normal(mouse_position) * 50000
@@ -192,6 +190,24 @@ func place_unit_on_tile(mouse_position: Vector2):
 			var clicked_position = result.position
 			var closest_tile = _get_tile_with_tolerance(clicked_position)
 			if closest_tile:
+				# Check if the tile already has a unit
+				if units_on_tiles.has(closest_tile):
+					var existing_unit = units_on_tiles[closest_tile]
+					
+					# If the same unit is being placed on the same tile, do nothing
+					if existing_unit.get_instance_id() == unit_id:
+						print("Same unit is already on this tile. No action taken.")
+						return
+					
+					# Otherwise, remove the existing unit and place the new one
+					print("Another unit is on this tile. Removing existing unit...")
+					remove_unit(existing_unit)
+
+				# Check if the unit is already placed elsewhere
+				if placed_units.has(unit_id):
+					print("Unit is already placed on another tile. Removing from previous tile...")
+					remove_unit(placed_units[unit_id])
+
 				# Create and place the 3D model at the tile position
 				print("Creating new unit model...")
 				var new_model = Node3D.new()
@@ -220,9 +236,13 @@ func place_unit_on_tile(mouse_position: Vector2):
 					var bbox = new_model.get_aabb()
 					new_model.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
 
-				# Store the new unit in the placed_units dictionary
+				# Store the new unit in the placed_units dictionary and on the tile
 				placed_units[unit_id] = new_model
-
+				units_on_tiles[closest_tile] = new_model
+				
+				#clears unit selected
+				unit_to_place = null
+				DataPasser.selectedUnit = null
 				placing_unit = false  # Reset the placing flag
 			else:
 				print("No valid tile found for placement.")
@@ -233,3 +253,12 @@ func place_unit_on_tile(mouse_position: Vector2):
 
 func remove_unit(unit):
 	unit.queue_free()  # This will remove the unit from the scene
+	
+	# Find and remove the unit from the tiles dictionary
+	for tile in units_on_tiles.keys():
+		if units_on_tiles[tile] == unit:
+			units_on_tiles.erase(tile)
+			break
+	
+	# Remove the unit from the placed_units dictionary
+	placed_units.erase(unit.get_instance_id())
