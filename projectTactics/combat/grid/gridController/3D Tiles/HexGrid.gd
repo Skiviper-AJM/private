@@ -17,7 +17,7 @@ const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tsc
 @export var max_squad_size: int = 2  # Default max squad size
 
 # Label to display the number of units placed and max squad size
-@onready var units_label = $UnitsLabel  # Ensure this path is correct for your scene
+@onready var units_label = $"../UnitPlaceUI/UnitsLabel"  # Ensure this path is correct for your scene
 
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
 const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
@@ -297,3 +297,9 @@ func remove_unit(unit):
 func _update_units_label():
 	var current_units := placed_units_queue.size()
 	units_label.text = "Select Units: %d / %d" % [current_units, max_squad_size]
+
+
+func combatInitiate():
+	print("fite tiem")
+	
+	pass # Replace with function body.
