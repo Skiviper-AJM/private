@@ -75,16 +75,54 @@ func clear_highlighted_tiles():
 func handle_tile_click(tile):
 	if in_combat:
 		if tile in highlighted_tiles and player_combat_controller.units_on_tiles.has(player_combat_controller.currently_selected_tile):
-			player_combat_controller.move_unit_to_tile(tile)
+			# Get the unit on the currently selected tile
+			var selected_unit = player_combat_controller.units_on_tiles[player_combat_controller.currently_selected_tile]
+
+			if selected_unit:
+				# Move the selected unit to the new tile
+				_move_unit_to_tile(selected_unit, tile)
+			else:
+				print("No unit found on the currently selected tile to move.")
 		elif player_combat_controller.units_on_tiles.has(tile):
-			_handle_unit_click(player_combat_controller.units_on_tiles[tile])
+			# Select the unit on the clicked tile
+			var unit_on_tile = player_combat_controller.units_on_tiles[tile]
+			_handle_unit_click(unit_on_tile)
+			# Set the selected unit through DataPasser
+			DataPasser.passUnitInfo(unit_on_tile.unitParts)
 		else:
 			print("Clicked tile is not highlighted for movement.")
 	else:
 		# Handle as necessary when not in combat
 		player_combat_controller.unitPlacer()
 
+func _move_unit_to_tile(selected_unit, target_tile):
+	# Remove the unit from its current tile
+	var old_tile = player_combat_controller.currently_selected_tile
+	if old_tile:
+		player_combat_controller.units_on_tiles.erase(old_tile)
+		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 
+	# Set the new unit's position to the target tile
+	selected_unit.global_transform.origin = target_tile.global_transform.origin
+
+	# Update the units_on_tiles dictionary
+	player_combat_controller.units_on_tiles[target_tile] = selected_unit
+
+	# Update the tile colors
+	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set new tile to red
+
+	# Update the selected tile reference
+	player_combat_controller.currently_selected_tile = target_tile
+
+	# Clear the highlighted tiles
+	clear_highlighted_tiles()
+
+	# Deselect the unit after moving
+	DataPasser.passUnitInfo(null)
+	player_combat_controller.unit_to_place = null
+	player_combat_controller.placing_unit = false
+	player_combat_controller.unit_name_label.text = ""
+	print("Unit moved to new tile successfully.")
 
 
 func handle_empty_tile_click():

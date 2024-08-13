@@ -139,6 +139,13 @@ func _handle_tile_click(mouse_position):
 					# Select the unit on the tile and highlight tiles around it
 					var unit_on_tile = units_on_tiles[clicked_tile]
 					combat_manager._handle_unit_click(unit_on_tile)
+					# Ensure the unit is correctly set
+					DataPasser.passUnitInfo(unit_on_tile.unitParts)
+					print("Unit selected:", unit_on_tile.unitParts.name)
+				elif DataPasser.selectedUnit != null:
+					# Move the selected unit to the clicked tile
+					print("Moving selected unit:", DataPasser.selectedUnit.name)
+					combat_manager._move_unit_to_tile(DataPasser.selectedUnit, clicked_tile)
 				else:
 					print("No unit selected to move.")
 			else:
@@ -171,6 +178,7 @@ func _handle_tile_click(mouse_position):
 	else:
 		print("No raycast hit detected.")
 
+
 func _get_tile_with_tolerance(position, tolerance=0):
 	var closest_tile = null
 	var min_distance = INF
@@ -184,7 +192,7 @@ func _get_tile_with_tolerance(position, tolerance=0):
 
 func move_unit_to_tile(target_tile):
 	if currently_selected_tile and target_tile:
-		var unit = units_on_tiles[currently_selected_tile]
+		var unit = units_on_tiles.get(currently_selected_tile, null)
 		if unit != null:
 			# Remove the unit from its current tile
 			remove_unit(unit)
@@ -210,11 +218,6 @@ func move_unit_to_tile(target_tile):
 			# Update tile color
 			target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
-			# Clear selection
-			DataPasser.selectedUnit = null
-			placing_unit = false
-			unit_name_label.text = ""
-
 			# Revert the previously selected tile's color
 			if currently_selected_tile and currently_selected_tile != target_tile:
 				if not units_on_tiles.has(currently_selected_tile):
@@ -222,10 +225,17 @@ func move_unit_to_tile(target_tile):
 				else:
 					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 			currently_selected_tile = target_tile
+
+			# Clear selection only after the move is complete
+			DataPasser.passUnitInfo(null)
+			placing_unit = false
+			unit_name_label.text = ""
+
 		else:
 			print("No unit found on the selected tile.")
 	else:
 		print("No unit selected to move or target tile is null.")
+
 
 
 func _generate_grid():
