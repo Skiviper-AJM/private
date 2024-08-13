@@ -26,15 +26,15 @@ func _handle_unit_click(selected_unit):
 
 		clear_highlighted_tiles()
 
-		# Debug: What is selected_unit?
 		print("Selected unit type:", typeof(selected_unit), ", name:", selected_unit.name)
 
-		# Pass the correct instance
+		# Set the selected unit in the DataPasser for movement
 		DataPasser.passUnitInfo(selected_unit)
-		player_combat_controller.unit_to_place = selected_unit.unitParts
+		player_combat_controller.unit_to_place = selected_unit
 		player_combat_controller.placing_unit = false
-		player_combat_controller.unit_name_label.text = "Unit: " + selected_unit.unitParts.name
+		player_combat_controller.unit_name_label.text = "Unit: " + selected_unit.name
 
+		# Find the tile the selected unit is currently on
 		var selected_tile = null
 		for tile in player_combat_controller.units_on_tiles.keys():
 			if player_combat_controller.units_on_tiles[tile] == selected_unit:
@@ -74,7 +74,7 @@ func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
 		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 	highlighted_tiles.clear()
-	
+
 func handle_tile_click(tile):
 	if in_combat:
 		if tile in highlighted_tiles and player_combat_controller.units_on_tiles.has(player_combat_controller.currently_selected_tile):
@@ -90,8 +90,6 @@ func handle_tile_click(tile):
 			# Select the unit on the clicked tile
 			var unit_on_tile = player_combat_controller.units_on_tiles[tile]
 			_handle_unit_click(unit_on_tile)
-			# Set the selected unit through DataPasser
-			DataPasser.passUnitInfo(unit_on_tile.unitParts)
 		else:
 			print("Clicked tile is not highlighted for movement.")
 	else:
@@ -133,19 +131,3 @@ func _move_unit_to_tile(selected_unit, target_tile):
 	player_combat_controller.placing_unit = false
 	player_combat_controller.unit_name_label.text = ""
 	print("Unit moved to new tile successfully.")
-
-
-func handle_empty_tile_click():
-	# Clear the current selection and reset the label
-	DataPasser.passUnitInfo(null)
-	player_combat_controller.unit_to_place = null
-	player_combat_controller.placing_unit = false
-	player_combat_controller.unit_name_label.text = ""
-	
-	# Clear the currently selected tile reference and reset its color
-	if player_combat_controller.currently_selected_tile:
-		player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-		player_combat_controller.currently_selected_tile = null
-
-	# Clear all highlighted tiles (yellow tiles)
-	clear_highlighted_tiles()
