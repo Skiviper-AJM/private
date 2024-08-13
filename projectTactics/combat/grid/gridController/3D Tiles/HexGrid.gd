@@ -114,11 +114,11 @@ func _input(event):
 	# Skip any input processing related to unit placement when in combat mode
 	if combat_manager.in_combat:
 		return
-	
+		
 	if Input.is_action_just_pressed("interact"):
 		if DataPasser.selectedUnit != null: 
 			unitPlacer()
-		
+			
 	# Handle tile clicking
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_handle_tile_click(event.position)
@@ -448,5 +448,7 @@ func combatInitiate():
 	DataPasser.selectedUnit = null
 	$"../CombatGridUI/UnitPlaceUI/UnitsLabel".visible = false
 	$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
+	$"../CombatGridUI/UnitPlaceUI/UnitName".visible = false
+	$"../CombatGridUI/UnitPlaceUI/UnitName2".visible = true
 	combat_manager.combatInitiate()
 	print("fite tiem")

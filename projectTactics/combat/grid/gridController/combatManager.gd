@@ -1,9 +1,10 @@
-extends Node
+extends Node3D
 
 # A flag to determine whether the player is in combat mode
 var in_combat = false
 
 @onready var player_combat_controller = $"../HexGrid"
+@onready var camera = $"../HexGrid/Camera3D"  # Initialize the camera properly
 
 const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
@@ -15,20 +16,62 @@ const TILE_MATERIALS = [
 var highlighted_tiles := []
 var selected_unit_instance = null  # Store the instance of the selected unit
 
+func _ready():
+	set_process_input(true)
+
+func _input(event):
+	if event.is_action_pressed("interact"):
+		handle_unit_selection()
+
 func combatInitiate():
 	in_combat = true
 	player_combat_controller.block_placement = true  # Disable unit placement from inventory
 	print("Combat initiated. Unit selection from inventory disabled.")
 
+func handle_unit_selection():
+	if in_combat:
+		if selected_unit_instance:
+			# Reset the previously selected tile color to red
+			if player_combat_controller.currently_selected_tile:
+				player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
+
+		clear_highlighted_tiles()
+
+		# Raycast to find the tile and the unit instance on it
+		var from = camera.project_ray_origin(get_viewport().get_mouse_position())
+		var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * 50000
+
+		var space_state = get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.new()
+		query.from = from
+		query.to = to
+
+		var result = space_state.intersect_ray(query)
+
+		if result:
+			var clicked_position = result.position
+			var clicked_tile = player_combat_controller._get_tile_with_tolerance(clicked_position)
+			if clicked_tile:
+				if player_combat_controller.units_on_tiles.has(clicked_tile):
+					# Select the unit instance on the clicked tile
+					var unit_instance = player_combat_controller.units_on_tiles[clicked_tile]
+					_handle_unit_click(unit_instance)
+				else:
+					print("No unit instance found on the clicked tile.")
+			else:
+				print("No valid tile found.")
+		else:
+			print("No raycast hit detected.")
+
 func _handle_unit_click(unit_instance):
 	if in_combat:
 		if selected_unit_instance:
 			# Reset the previously selected tile color to red
-			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
+			if player_combat_controller.currently_selected_tile:
+				player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
 
 		clear_highlighted_tiles()
 
-		# Debugging
 		print("Switching to selected unit instance:", unit_instance)
 
 		# Ensure the unit_instance is a Node3D and not a resource reference
@@ -39,7 +82,6 @@ func _handle_unit_click(unit_instance):
 		# Set the instance as selected
 		selected_unit_instance = unit_instance
 
-		# Debugging to confirm the selection
 		print("Selected unit instance:", selected_unit_instance)
 
 		var selected_tile = null
@@ -98,7 +140,6 @@ func handle_tile_click(tile):
 	else:
 		print("Not in combat, using HexGrid's unitPlacer")
 		player_combat_controller.unitPlacer()
-
 
 func _move_unit_to_tile(selected_unit_instance, target_tile):
 	# Ensure that selected_unit_instance is a Node3D instance
