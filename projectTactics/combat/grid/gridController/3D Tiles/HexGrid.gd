@@ -63,6 +63,10 @@ func _ready():
 	camera.rotation_degrees.x = rotation_angle_x
 	camera.rotation_degrees.y = rotation_angle_y
 
+
+func buttonHover():
+	block_placement = true
+
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
@@ -114,13 +118,14 @@ func _input(event):
 	# Skip any input processing related to unit placement when in combat mode
 	if combat_manager.in_combat:
 		return
-		
+	
+	
 	if Input.is_action_just_pressed("interact"):
-		if DataPasser.selectedUnit != null: 
+		if DataPasser.selectedUnit != null and !block_placement: 
 			unitPlacer()
 			
 	# Handle tile clicking
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and !block_placement:
 		_handle_tile_click(event.position)
 
 func _handle_tile_click(mouse_position):
@@ -444,6 +449,7 @@ func _update_units_label():
 func buttonLeft():
 	block_placement = false;
 
+
 func combatInitiate():
 	DataPasser.selectedUnit = null
 	$"../CombatGridUI/UnitPlaceUI/UnitsLabel".visible = false
@@ -452,3 +458,5 @@ func combatInitiate():
 	$"../CombatGridUI/UnitPlaceUI/UnitName2".visible = true
 	combat_manager.combatInitiate()
 	print("fite tiem")
+
+

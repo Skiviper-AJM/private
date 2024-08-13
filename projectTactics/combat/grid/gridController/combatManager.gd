@@ -162,14 +162,22 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		var t = elapsed / duration
 		var interpolated_position = start_position.lerp(target_position, t)
 		unit_instance.global_transform.origin = interpolated_position
-		
+
+		# Calculate the direction to face
+		var direction = target_position - start_position
+		direction.y = 0  # Keep the height constant for rotation
+
+		# Rotate to face the direction
+		unit_instance.look_at(target_position, Vector3.UP)
+
 		# Wait for the next frame to continue updating
 		await get_tree().create_timer(0.01).timeout
 		
 		elapsed += 0.01
 
-	# Ensure the final position is set
+	# Ensure the final position and rotation are set
 	unit_instance.global_transform.origin = target_position
+	unit_instance.look_at(target_position, Vector3.UP)
 
 	# Update the units_on_tiles dictionary to reflect the new tile
 	var old_tile = player_combat_controller.currently_selected_tile
