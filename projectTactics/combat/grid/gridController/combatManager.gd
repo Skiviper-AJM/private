@@ -30,13 +30,6 @@ func combatInitiate():
 
 func handle_unit_selection():
 	if in_combat:
-		if selected_unit_instance:
-			# Reset the previously selected tile color to red
-			if player_combat_controller.currently_selected_tile:
-				player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
-
-		clear_highlighted_tiles()
-
 		# Raycast to find the tile and the unit instance on it
 		var from = camera.project_ray_origin(get_viewport().get_mouse_position())
 		var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * 50000
@@ -52,16 +45,30 @@ func handle_unit_selection():
 			var clicked_position = result.position
 			var clicked_tile = player_combat_controller._get_tile_with_tolerance(clicked_position)
 			if clicked_tile:
-				if player_combat_controller.units_on_tiles.has(clicked_tile):
-					# Select the unit instance on the clicked tile
-					var unit_instance = player_combat_controller.units_on_tiles[clicked_tile]
-					_handle_unit_click(unit_instance)
-				else:
-					print("No unit instance found on the clicked tile.")
+				handle_tile_click(clicked_tile)
 			else:
 				print("No valid tile found.")
 		else:
 			print("No raycast hit detected.")
+
+func handle_tile_click(tile):
+	if in_combat:
+		if player_combat_controller.units_on_tiles.has(tile):
+			# Always prioritize selecting a unit on the clicked tile
+			var unit_instance = player_combat_controller.units_on_tiles[tile]
+			_handle_unit_click(unit_instance)
+		elif selected_unit_instance:
+			# Only attempt movement if a unit is already selected
+			if tile in highlighted_tiles:
+				# Tile within range and empty, move the selected unit to this tile
+				print("Moving unit to tile:", tile)
+				_move_unit_to_tile(selected_unit_instance, tile)
+			else:
+				# Tile outside of range, deselect the unit
+				print("Clicked tile is outside of range. Deselecting unit.")
+				deselect_unit()
+		else:
+			print("No unit selected and clicked tile is empty.")
 
 func _handle_unit_click(unit_instance):
 	if in_combat:
@@ -98,6 +105,18 @@ func _handle_unit_click(unit_instance):
 		else:
 			print("Selected unit instance not found on any tile.")
 
+func deselect_unit():
+	# Deselect the currently selected unit and reset the tile color
+	if selected_unit_instance:
+		clear_highlighted_tiles()
+		if player_combat_controller.currently_selected_tile:
+			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+
+		selected_unit_instance = null
+		player_combat_controller.currently_selected_tile = null
+		player_combat_controller.unit_name_label.text = ""
+		print("Unit deselected.")
+
 func highlight_tiles_around_unit(selected_unit_instance, range):
 	var unit_tile = null
 	for tile in player_combat_controller.units_on_tiles.keys():
@@ -123,23 +142,6 @@ func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
 		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 	highlighted_tiles.clear()
-
-func handle_tile_click(tile):
-	if in_combat:
-		print("Combat Mode Active - Clicked Tile:", tile)
-		if tile in highlighted_tiles and selected_unit_instance:
-			print("Moving unit to tile:", tile)
-			_move_unit_to_tile(selected_unit_instance, tile)
-		elif player_combat_controller.units_on_tiles.has(tile):
-			# Select the unit instance on the clicked tile
-			var unit_instance = player_combat_controller.units_on_tiles[tile]
-			print("Tile has unit, selecting:", unit_instance)
-			_handle_unit_click(unit_instance)
-		else:
-			print("Tile clicked is not highlighted for movement.")
-	else:
-		print("Not in combat, using HexGrid's unitPlacer")
-		player_combat_controller.unitPlacer()
 
 func _move_unit_to_tile(selected_unit_instance, target_tile):
 	# Ensure that selected_unit_instance is a Node3D instance
