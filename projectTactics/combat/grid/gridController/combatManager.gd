@@ -164,11 +164,11 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		unit_instance.global_transform.origin = interpolated_position
 
 		# Calculate the direction to face
-		var direction = target_position - start_position
+		var direction = interpolated_position - target_position
 		direction.y = 0  # Keep the height constant for rotation
 
-		# Rotate to face the direction
-		unit_instance.look_at(target_position, Vector3.UP)
+		# Rotate to face the direction (reverse the direction vector)
+		unit_instance.look_at(interpolated_position + direction, Vector3.UP)
 
 		# Wait for the next frame to continue updating
 		await get_tree().create_timer(0.01).timeout
@@ -177,7 +177,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Ensure the final position and rotation are set
 	unit_instance.global_transform.origin = target_position
-	unit_instance.look_at(target_position, Vector3.UP)
+	unit_instance.look_at(target_position, Vector3.UP)  # Apply final rotation
 
 	# Update the units_on_tiles dictionary to reflect the new tile
 	var old_tile = player_combat_controller.currently_selected_tile
