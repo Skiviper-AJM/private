@@ -67,6 +67,10 @@ func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
 	
+	# Skip any input processing related to unit placement when in combat mode
+	if combat_manager.in_combat:
+		return
+	
 	if Input.is_action_just_pressed("interact"):
 		if DataPasser.selectedUnit != null: 
 			unitPlacer()
@@ -154,7 +158,7 @@ func _handle_tile_click(mouse_position):
 					if DataPasser.selectedUnit != null:
 						print("Replacing unit on tile with selected unit.")
 						remove_unit(units_on_tiles[clicked_tile])
-						place_unit_on_tile(mouse_position)
+						place_unit_on_tile(mouse_position) # <-- Convert mouse_position to Vector2
 					else:
 						var unit_on_tile = units_on_tiles[clicked_tile]
 						print("Selecting unit on tile:", unit_on_tile.name)
@@ -172,12 +176,11 @@ func _handle_tile_click(mouse_position):
 				else:
 					if placing_unit and DataPasser.selectedUnit != null:
 						print("Placing unit on empty tile...")
-						place_unit_on_tile(mouse_position)
+						place_unit_on_tile(mouse_position) # <-- Convert mouse_position to Vector2
 		else:
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
-
 
 func _get_tile_with_tolerance(position, tolerance=0):
 	var closest_tile = null
@@ -235,8 +238,6 @@ func move_unit_to_tile(target_tile):
 			print("No unit found on the selected tile.")
 	else:
 		print("No unit selected to move or target tile is null.")
-
-
 
 func _generate_grid():
 	var tile_index := 0
