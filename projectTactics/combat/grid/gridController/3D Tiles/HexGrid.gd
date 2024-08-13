@@ -67,14 +67,6 @@ func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
 	
-	# Skip any input processing related to unit placement when in combat mode
-	if combat_manager.in_combat:
-		return
-	
-	if Input.is_action_just_pressed("interact"):
-		if DataPasser.selectedUnit != null: 
-			unitPlacer()
-			
 	# Handle WASD keys for panning based on camera's facing direction
 	var input_vector := Vector3.ZERO
 	
@@ -117,7 +109,16 @@ func _input(event):
 			camera.fov = clamp(camera.fov - ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			camera.fov = clamp(camera.fov + ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
-
+	
+		
+	# Skip any input processing related to unit placement when in combat mode
+	if combat_manager.in_combat:
+		return
+	
+	if Input.is_action_just_pressed("interact"):
+		if DataPasser.selectedUnit != null: 
+			unitPlacer()
+		
 	# Handle tile clicking
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_handle_tile_click(event.position)
