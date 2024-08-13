@@ -84,18 +84,21 @@ func clear_highlighted_tiles():
 
 func handle_tile_click(tile):
 	if in_combat:
+		print("Combat Mode Active - Clicked Tile:", tile)
 		if tile in highlighted_tiles and selected_unit_instance:
-			# Move the selected instance to the new tile
+			print("Moving unit to tile:", tile)
 			_move_unit_to_tile(selected_unit_instance, tile)
 		elif player_combat_controller.units_on_tiles.has(tile):
 			# Select the unit instance on the clicked tile
 			var unit_instance = player_combat_controller.units_on_tiles[tile]
+			print("Tile has unit, selecting:", unit_instance)
 			_handle_unit_click(unit_instance)
 		else:
-			print("Clicked tile is not highlighted for movement.")
+			print("Tile clicked is not highlighted for movement.")
 	else:
-		# Handle as necessary when not in combat
+		print("Not in combat, using HexGrid's unitPlacer")
 		player_combat_controller.unitPlacer()
+
 
 func _move_unit_to_tile(selected_unit_instance, target_tile):
 	# Ensure that selected_unit_instance is a Node3D instance
