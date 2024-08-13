@@ -26,8 +26,11 @@ func _handle_unit_click(selected_unit):
 
 		clear_highlighted_tiles()
 
-		print("Switching to selected unit:", selected_unit.unitParts.name)
-		DataPasser.passUnitInfo(selected_unit.unitParts)
+		# Debug: What is selected_unit?
+		print("Selected unit type:", typeof(selected_unit), ", name:", selected_unit.name)
+
+		# Pass the correct instance
+		DataPasser.passUnitInfo(selected_unit)
 		player_combat_controller.unit_to_place = selected_unit.unitParts
 		player_combat_controller.placing_unit = false
 		player_combat_controller.unit_name_label.text = "Unit: " + selected_unit.unitParts.name
@@ -96,19 +99,26 @@ func handle_tile_click(tile):
 		player_combat_controller.unitPlacer()
 
 func _move_unit_to_tile(selected_unit, target_tile):
-	# Remove the unit from its current tile
+	# Ensure that selected_unit is a Node3D instance
+	if not selected_unit is Node3D:
+		print("Error: selected_unit is not a Node3D instance. Cannot move it.")
+		return
+	
+	# Directly move the specific instance on the map
+	print("Moving unit instance:", selected_unit, "to new tile:", target_tile)
+
+	# Set the new unit's position to the target tile
+	selected_unit.position = target_tile.global_transform.origin
+
+	# Update the units_on_tiles dictionary to reflect the new tile
 	var old_tile = player_combat_controller.currently_selected_tile
 	if old_tile:
 		player_combat_controller.units_on_tiles.erase(old_tile)
-		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
-
-	# Set the new unit's position to the target tile
-	selected_unit.global_transform.origin = target_tile.global_transform.origin
-
-	# Update the units_on_tiles dictionary
 	player_combat_controller.units_on_tiles[target_tile] = selected_unit
 
 	# Update the tile colors
+	if old_tile:
+		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set new tile to red
 
 	# Update the selected tile reference
