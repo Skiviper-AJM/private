@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 # A flag to determine whether the player is in combat mode
 var in_combat = false
@@ -34,7 +34,7 @@ func handle_unit_selection():
 		var from = camera.project_ray_origin(get_viewport().get_mouse_position())
 		var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * 50000
 
-		var space_state = get_world_3d().direct_space_state
+		var space_state = camera.get_world_3d().direct_space_state
 		var query = PhysicsRayQueryParameters3D.new()
 		query.from = from
 		query.to = to
@@ -62,7 +62,7 @@ func handle_tile_click(tile):
 			if tile in highlighted_tiles:
 				# Tile within range and empty, move the selected unit to this tile
 				print("Moving unit to tile:", tile)
-				_move_unit_to_tile(selected_unit_instance, tile)
+				move_unit_to_tile(selected_unit_instance, tile)
 			else:
 				# Tile outside of range, deselect the unit
 				print("Clicked tile is outside of range. Deselecting unit.")
@@ -143,23 +143,39 @@ func clear_highlighted_tiles():
 		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 	highlighted_tiles.clear()
 
-func _move_unit_to_tile(selected_unit_instance, target_tile):
-	# Ensure that selected_unit_instance is a Node3D instance
-	if not selected_unit_instance is Node3D:
-		print("Error: selected_unit_instance is not a Node3D instance. Cannot move it.")
+func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
+	# Ensure that unit_instance is a Node3D instance
+	if not unit_instance is Node3D:
+		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
-	
-	# Directly move the specific instance on the map
-	print("Moving unit instance:", selected_unit_instance, "to new tile:", target_tile)
 
-	# Set the new unit's position to the target tile
-	selected_unit_instance.position = target_tile.global_transform.origin
+	# Get the current and target positions
+	var start_position = unit_instance.global_transform.origin
+	var target_position = target_tile.global_transform.origin
+	target_position.y = start_position.y  # Keep the height constant
+
+	# Duration of movement
+	var duration = 1.0  # seconds
+	var elapsed = 0.0
+
+	while elapsed < duration:
+		var t = elapsed / duration
+		var interpolated_position = start_position.lerp(target_position, t)
+		unit_instance.global_transform.origin = interpolated_position
+		
+		# Wait for the next frame to continue updating
+		await get_tree().create_timer(0.01).timeout
+		
+		elapsed += 0.01
+
+	# Ensure the final position is set
+	unit_instance.global_transform.origin = target_position
 
 	# Update the units_on_tiles dictionary to reflect the new tile
 	var old_tile = player_combat_controller.currently_selected_tile
 	if old_tile:
 		player_combat_controller.units_on_tiles.erase(old_tile)
-	player_combat_controller.units_on_tiles[target_tile] = selected_unit_instance
+	player_combat_controller.units_on_tiles[target_tile] = unit_instance
 
 	# Update the tile colors
 	if old_tile:
