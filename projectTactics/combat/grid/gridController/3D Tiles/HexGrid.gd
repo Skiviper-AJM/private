@@ -14,7 +14,6 @@ var currently_selected_tile = null
 
 @onready var combat_manager = $"../combatManager"
 
-
 @export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
 @export_range(2, 35) var grid_size: int = 10
 
@@ -24,8 +23,6 @@ var currently_selected_tile = null
 @onready var units_label = $"../CombatGridUI/UnitPlaceUI/UnitsLabel" 
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 
-# UI Button to block tile selection and unit placement
-@onready var ui_block_button = $"../CombatGridUI/BlockButton"  # Replace with the correct path to your UI button
 var block_placement: bool = false  # Flag to block tile selection and unit placement
 
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
@@ -66,18 +63,12 @@ func _ready():
 	camera.rotation_degrees.x = rotation_angle_x
 	camera.rotation_degrees.y = rotation_angle_y
 
-
-func buttonHovered():
-	block_placement = true
-
-
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
 	
 	if Input.is_action_just_pressed("interact"):
 		if DataPasser.selectedUnit != null: 
-			
 			unitPlacer()
 			
 	# Handle WASD keys for panning based on camera's facing direction
@@ -127,7 +118,6 @@ func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_handle_tile_click(event.position)
 
-
 func _handle_tile_click(mouse_position):
 	var camera = $Camera3D
 	var from = camera.project_ray_origin(mouse_position)
@@ -145,23 +135,19 @@ func _handle_tile_click(mouse_position):
 		var clicked_tile = _get_tile_with_tolerance(clicked_position)
 		if clicked_tile:
 			if combat_manager.in_combat:
-				# Combat mode logic
 				if units_on_tiles.has(clicked_tile):
+					# Select the unit on the tile and highlight tiles around it
 					var unit_on_tile = units_on_tiles[clicked_tile]
-					print("Tile occupied by:", unit_on_tile.name)
 					combat_manager._handle_unit_click(unit_on_tile)
 				else:
-					if DataPasser.selectedUnit != null:
-						print("Cannot place units during combat.")
-					else:
-						print("No unit on this tile to select.")
+					print("No unit selected to move.")
 			else:
-				# Non-combat mode logic
+				# Non-combat mode logic remains unchanged
 				if units_on_tiles.has(clicked_tile):
 					if DataPasser.selectedUnit != null:
 						print("Replacing unit on tile with selected unit.")
-						remove_unit(units_on_tiles[clicked_tile])  # Remove the current occupant
-						place_unit_on_tile(mouse_position)  # Place the selected unit on the tile
+						remove_unit(units_on_tiles[clicked_tile])
+						place_unit_on_tile(mouse_position)
 					else:
 						var unit_on_tile = units_on_tiles[clicked_tile]
 						print("Selecting unit on tile:", unit_on_tile.name)
@@ -169,17 +155,13 @@ func _handle_tile_click(mouse_position):
 						unit_to_place = unit_on_tile.unitParts
 						placing_unit = false
 						unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
-
-						# Immediately set the tile to green
 						if currently_selected_tile != null:
-							# Revert the previously selected tile to red if it's occupied
 							if units_on_tiles.has(currently_selected_tile):
 								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 							else:
 								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-						
 						clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-						currently_selected_tile = clicked_tile  # Update the currently selected tile reference
+						currently_selected_tile = clicked_tile
 				else:
 					if placing_unit and DataPasser.selectedUnit != null:
 						print("Placing unit on empty tile...")
@@ -188,8 +170,6 @@ func _handle_tile_click(mouse_position):
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
-
-
 
 func _get_tile_with_tolerance(position, tolerance=0):
 	var closest_tile = null
@@ -201,6 +181,52 @@ func _get_tile_with_tolerance(position, tolerance=0):
 			min_distance = distance
 			closest_tile = tile
 	return closest_tile if min_distance < TILE_SIZE / 2 + tolerance else null
+
+func move_unit_to_tile(target_tile):
+	if currently_selected_tile and target_tile:
+		var unit = units_on_tiles[currently_selected_tile]
+		if unit != null:
+			# Remove the unit from its current tile
+			remove_unit(unit)
+			
+			# Create a new model for the unit at the target tile
+			print("Moving unit to new tile...")
+			var new_model = Node3D.new()
+			get_parent().add_child(new_model)
+			new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
+			new_model.unitParts = unit.unitParts
+			new_model.assembleUnit()
+			new_model.scale = unit_scale
+
+			# Place the unit on the target tile
+			var bbox = new_model.get_aabb()
+			new_model.position = target_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
+			
+			# Update the dictionaries
+			placed_units[new_model.get_instance_id()] = new_model
+			units_on_tiles[target_tile] = new_model
+			placed_units_queue.push_back(new_model)
+
+			# Update tile color
+			target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+
+			# Clear selection
+			DataPasser.selectedUnit = null
+			placing_unit = false
+			unit_name_label.text = ""
+
+			# Revert the previously selected tile's color
+			if currently_selected_tile and currently_selected_tile != target_tile:
+				if not units_on_tiles.has(currently_selected_tile):
+					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+				else:
+					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+			currently_selected_tile = target_tile
+		else:
+			print("No unit found on the selected tile.")
+	else:
+		print("No unit selected to move or target tile is null.")
+
 
 func _generate_grid():
 	var tile_index := 0
@@ -262,8 +288,6 @@ func unitPlacer():
 		
 		# Clear the UnitName label if no unit is selected
 		unit_name_label.text = ""
-
-
 
 func place_unit_on_tile(mouse_position: Vector2):
 	if placing_unit and unit_to_place:
@@ -375,9 +399,6 @@ func place_unit_on_tile(mouse_position: Vector2):
 	else:
 		print("No unit to place or placing_unit flag is false.")
 
-
-
-
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
 	if unit and is_instance_valid(unit):
@@ -404,13 +425,9 @@ func remove_unit(unit):
 	else:
 		print("Warning: Tried to remove a unit that is no longer valid or doesn't exist.")
 
-
-
 func _update_units_label():
 	var current_units := placed_units_queue.size()
 	units_label.text = "Select Units: %d / %d" % [current_units, max_squad_size]
-
-
 
 func buttonLeft():
 	block_placement = false;

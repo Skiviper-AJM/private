@@ -21,22 +21,17 @@ func combatInitiate():
 
 func _handle_unit_click(selected_unit):
 	if in_combat:
-		# Handle unit selection logic when in combat
 		if player_combat_controller.currently_selected_tile:
-			# Revert the previously selected tile to red if it's occupied
 			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
-		# Clear previous highlights
 		clear_highlighted_tiles()
 
-		# Update the selection to the new unit
 		print("Switching to selected unit:", selected_unit.unitParts.name)
 		DataPasser.passUnitInfo(selected_unit.unitParts)
 		player_combat_controller.unit_to_place = selected_unit.unitParts
 		player_combat_controller.placing_unit = false
 		player_combat_controller.unit_name_label.text = "Unit: " + selected_unit.unitParts.name
 
-		# Find the tile that contains this unit
 		var selected_tile = null
 		for tile in player_combat_controller.units_on_tiles.keys():
 			if player_combat_controller.units_on_tiles[tile] == selected_unit:
@@ -44,18 +39,14 @@ func _handle_unit_click(selected_unit):
 				break
 
 		if selected_tile:
-			# Set the current tile to green
 			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 			player_combat_controller.currently_selected_tile = selected_tile
-			
-			# Highlight tiles within the unit's speed range
+
 			highlight_tiles_around_unit(selected_unit, selected_unit.unitParts.speedRating)
 	else:
-		# If not in combat, allow the usual unit selection/placement
 		player_combat_controller.unitPlacer()
 
 func highlight_tiles_around_unit(selected_unit, range):
-	# Get the current position of the selected unit
 	var unit_tile = null
 	for tile in player_combat_controller.units_on_tiles.keys():
 		if player_combat_controller.units_on_tiles[tile] == selected_unit:
@@ -64,72 +55,36 @@ func highlight_tiles_around_unit(selected_unit, range):
 	
 	if unit_tile:
 		var unit_position = unit_tile.global_transform.origin
-		var tile_size = player_combat_controller.TILE_SIZE  # Access TILE_SIZE from HexGrid
+		var tile_size = player_combat_controller.TILE_SIZE
 		
-		# Iterate through all tiles
+		# Highlight tiles within range
 		for tile_key in player_combat_controller.tiles.keys():
 			var tile = player_combat_controller.tiles[tile_key]
-			var distance = unit_position.distance_to(tile.global_transform.origin)
-			
-			if distance <= range * tile_size and not player_combat_controller.units_on_tiles.has(tile):
+			var distance = tile.global_transform.origin.distance_to(unit_position)
+			if distance <= range * tile_size:
 				tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
 				highlighted_tiles.append(tile)
+	else:
+		print("No unit tile found to highlight.")
 
 func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
 		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 	highlighted_tiles.clear()
-
+	
 func handle_tile_click(tile):
 	if in_combat:
-		# Check if the tile is highlighted and unoccupied
-		if tile in highlighted_tiles and not player_combat_controller.units_on_tiles.has(tile):
-			# Move the selected unit to the clicked tile by removing and re-adding it
-			var selected_unit = player_combat_controller.units_on_tiles[player_combat_controller.currently_selected_tile]
-
-			# Remove the current instance of the unit
-			player_combat_controller.remove_unit(selected_unit)
-
-			# Instantiate a new unit at the clicked tile
-			var new_unit = Node3D.new()
-			get_parent().add_child(new_unit)
-			new_unit.set_script(load("res://combat/resources/unitAssembler.gd"))
-			new_unit.unitParts = selected_unit.unitParts
-			new_unit.assembleUnit()
-
-			# Set the new unit's position to the clicked tile
-			new_unit.global_transform.origin = tile.global_transform.origin
-
-			# Add the new unit to the tile and update the units_on_tiles dictionary
-			player_combat_controller.units_on_tiles[tile] = new_unit
-
-			# Update the tile colors
-			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
-			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set new tile to red
-
-			# Update the selected tile reference
-			player_combat_controller.currently_selected_tile = tile
-
-			# Clear the highlighted tiles
-			clear_highlighted_tiles()
-
-			# Deselect the unit after moving
-			DataPasser.passUnitInfo(null)
-			player_combat_controller.unit_to_place = null
-			player_combat_controller.placing_unit = false
-			player_combat_controller.unit_name_label.text = ""
-			player_combat_controller.currently_selected_tile = null
-
-		elif tile == player_combat_controller.currently_selected_tile or not tile in highlighted_tiles:
-			# If it's a blue or green tile, or if it's not in the highlighted range, deselect the unit
-			handle_empty_tile_click()
+		if tile in highlighted_tiles and player_combat_controller.units_on_tiles.has(player_combat_controller.currently_selected_tile):
+			player_combat_controller.move_unit_to_tile(tile)
+		elif player_combat_controller.units_on_tiles.has(tile):
+			_handle_unit_click(player_combat_controller.units_on_tiles[tile])
 		else:
-			# If the tile is occupied, select the unit on that tile
-			var unit_on_tile = player_combat_controller.units_on_tiles[tile]
-			_handle_unit_click(unit_on_tile)
+			print("Clicked tile is not highlighted for movement.")
 	else:
 		# Handle as necessary when not in combat
 		player_combat_controller.unitPlacer()
+
+
 
 
 func handle_empty_tile_click():
