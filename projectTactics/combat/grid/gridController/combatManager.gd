@@ -82,7 +82,9 @@ func handle_tile_click(tile):
 				print("Clicked tile is outside of range. Deselecting unit.")
 				deselect_unit()
 		else:
-			print("No unit selected or move mode not active, and clicked tile is empty.")
+			# If move mode is not active and the tile is empty, deselect the unit
+			print("Empty tile clicked. Deselecting unit.")
+			deselect_unit()
 
 func _handle_unit_click(unit_instance):
 	if in_combat:
