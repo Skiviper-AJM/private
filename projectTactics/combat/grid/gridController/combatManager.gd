@@ -339,3 +339,24 @@ func moveButton():
 
 func buttonLeft():
 	block_placement = false
+
+
+func centerCamera():
+	if selected_unit_instance:
+		# Get the current position of the selected unit
+		var unit_position = selected_unit_instance.global_transform.origin
+
+		# Set the camera's position, keeping the current Y position
+		var camera_position = camera.global_transform.origin
+		camera_position.x = unit_position.x
+		camera_position.z = unit_position.z
+
+		# Apply the new camera position
+		camera.global_transform.origin = camera_position
+
+		# Reset the camera's rotation
+		camera.rotation_degrees = Vector3(-90, 0, 0)  # -90 degrees on X-axis, 0 on Y and Z axes
+
+		print("Camera centered on selected unit at position: ", unit_position, " with rotation reset.")
+	else:
+		print("No unit selected to center camera.")
