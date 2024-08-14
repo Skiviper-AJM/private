@@ -152,7 +152,6 @@ func clear_highlighted_tiles():
 	highlighted_tiles.clear()
 
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
-	
 	# Clear selected name label
 	unit_name_label.text = ""
 	
@@ -183,13 +182,13 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Clear the highlighted tiles
 	clear_highlighted_tiles()
 	
-	# Set the tile to red after the movement is complete
-	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-
+	# Get the tiles along the path
+	var path_tiles = get_tiles_along_path(start_position, target_position)
 	
 	# Now perform the movement animation
 	var duration = 1.0  # seconds
 	var elapsed = 0.0
+	var previous_tile = null
 
 	while elapsed < duration:
 		var t = elapsed / duration
@@ -202,6 +201,17 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 		# Rotate to face the opposite direction
 		unit_instance.look_at(target_position + direction, Vector3.UP)
+
+		# Find the closest tile to the current interpolated position
+		var current_tile = get_closest_tile(interpolated_position)
+		if current_tile and current_tile != previous_tile:
+			# If moving to a new tile, set it to yellow
+			current_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
+
+			# Reset the previous tile color to blue if it's not the target
+			if previous_tile and previous_tile != target_tile:
+				previous_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+			previous_tile = current_tile
 
 		# Wait for the next frame to continue updating
 		await get_tree().create_timer(0.01).timeout
@@ -218,9 +228,37 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
-	
 	# Deselect the unit after the movement is complete
 	deselect_unit()
 
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
+
+# Calculate tiles along the path between two points
+func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
+	var path_tiles = []
+	var direction = (end_position - start_position).normalized()
+	var distance = start_position.distance_to(end_position)
+	var steps = int(distance / player_combat_controller.TILE_SIZE)
+
+	for i in range(steps + 1):
+		var current_position = start_position + direction * player_combat_controller.TILE_SIZE * i
+		var current_tile = get_closest_tile(current_position)
+		if current_tile and current_tile not in path_tiles:
+			path_tiles.append(current_tile)
+
+	return path_tiles
+
+# Find the closest tile to a given position
+func get_closest_tile(position: Vector3) -> Node:
+	var closest_tile = null
+	var min_distance = INF
+
+	for tile in player_combat_controller.tiles.values():
+		var distance = tile.global_transform.origin.distance_to(position)
+		if distance < min_distance:
+			min_distance = distance
+			closest_tile = tile
+
+	return closest_tile
