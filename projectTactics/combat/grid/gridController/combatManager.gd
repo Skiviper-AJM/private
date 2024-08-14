@@ -119,8 +119,9 @@ func _handle_unit_click(unit_instance):
 		if selected_tile:
 			player_combat_controller.currently_selected_tile = selected_tile
 
-			# Calculate the max move distance based on the newly selected tile
-			highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.unitParts.speedRating)
+			# Only highlight tiles if move mode is active
+			if move_mode_active:
+				highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.unitParts.speedRating)
 
 			# Update the selected tile and set the material to green after highlighting
 			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
@@ -317,9 +318,11 @@ func moveButton():
 	if selected_unit_instance:
 		print("Move mode activated for selected unit.")
 		move_mode_active = true  # Activate move mode
+
+		# Highlight the movement range when move mode is activated
+		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.unitParts.speedRating)
 	else:
 		print("No unit selected to move.")
 
 func buttonLeft():
 	block_placement = false
-	
