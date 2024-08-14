@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://dvtggwpom1wet"]
+[gd_scene load_steps=5 format=3 uid="uid://cdaoc6h2v1pg2"]
 
 [ext_resource type="Script" path="res://combat/grid/gridController/combatManager.gd" id="1_dxr7s"]
 [ext_resource type="Script" path="res://combat/grid/gridController/3D Tiles/HexGrid.gd" id="1_nbd6x"]

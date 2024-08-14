@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://dgcnywernqiut"]
+[gd_scene load_steps=6 format=3 uid="uid://doojprxus16q8"]
 
 [ext_resource type="PackedScene" uid="uid://c147eeo0husmh" path="res://combat/grid/gridController/3D Tiles/unit_hex.glb" id="1_gwb88"]
 

@@ -14,6 +14,6 @@ maxDurability = 3
 currentDurability = 3
 damage = 2
 armorRating = 0
-speedRating = 0
+speedRating = 2
 range = 0
 splash = 0

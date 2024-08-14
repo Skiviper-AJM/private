@@ -149,6 +149,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
 
+	# Deselect the unit immediately before starting the movement
+	deselect_unit()
+
 	# Get the current and target positions
 	var start_position = unit_instance.global_transform.origin
 	var target_position = target_tile.global_transform.origin
@@ -196,7 +199,5 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Clear the highlighted tiles
 	clear_highlighted_tiles()
 
-	# Deselect the unit after moving
-	selected_unit_instance = null
-	player_combat_controller.unit_name_label.text = ""
+	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")

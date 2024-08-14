@@ -451,6 +451,10 @@ func buttonLeft():
 
 
 func combatInitiate():
+	# prevents initiation of combat without selecting at least one unit
+	if placed_units_queue.size() < 1:
+		return
+	
 	DataPasser.selectedUnit = null
 	$"../CombatGridUI/UnitPlaceUI/UnitsLabel".visible = false
 	$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
