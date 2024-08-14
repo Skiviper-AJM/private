@@ -5,6 +5,7 @@ var in_combat = false
 
 @onready var player_combat_controller = $"../HexGrid"
 @onready var camera = $"../HexGrid/Camera3D"  # Initialize the camera properly
+@onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 
 const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
@@ -71,6 +72,10 @@ func handle_tile_click(tile):
 			print("No unit selected and clicked tile is empty.")
 
 func _handle_unit_click(unit_instance):
+	
+	#displays the name of the unit
+	unit_name_label.text = "Unit: " + unit_instance.unitParts.name
+	
 	if in_combat:
 		# Prevent selecting the unit if it is currently moving
 		if unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
@@ -147,6 +152,10 @@ func clear_highlighted_tiles():
 	highlighted_tiles.clear()
 
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
+	
+	#clear selected name label
+	unit_name_label.text = ""
+	
 	# Ensure that unit_instance is a Node3D instance
 	if not unit_instance is Node3D:
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")

@@ -454,12 +454,14 @@ func combatInitiate():
 	# prevents initiation of combat without selecting at least one unit
 	if placed_units_queue.size() < 1:
 		return
-	
+		
+	#delects current unit and sets its tile to red
+	currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
 	DataPasser.selectedUnit = null
+	unit_name_label.text = ""
 	$"../CombatGridUI/UnitPlaceUI/UnitsLabel".visible = false
 	$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
-	$"../CombatGridUI/UnitPlaceUI/UnitName".visible = false
-	$"../CombatGridUI/UnitPlaceUI/UnitName2".visible = true
+
 	combat_manager.combatInitiate()
 	print("fite tiem")
 
