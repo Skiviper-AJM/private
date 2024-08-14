@@ -361,3 +361,7 @@ func centerCamera():
 		print("Camera centered on selected unit at position: ", unit_position, " with X-axis rotation set to -90.")
 	else:
 		print("No unit selected to center camera.")
+
+
+func endTurn():
+	pass # Replace with function body.

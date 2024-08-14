@@ -62,24 +62,48 @@ theme_override_font_sizes/font_size = 48
 horizontal_alignment = 1
 
 [node name="Move" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "Move"
 
 [node name="Shoot" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "Shoot"
 
 [node name="Attack" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "Attack"
 
 [node name="CenterCam" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "Center Camera"
+
+[node name="UnitPlaceUI2" type="GridContainer" parent="CombatGridUI"]
+visible = false
+offset_left = 50.0
+offset_top = 45.0
+offset_right = 446.0
+offset_bottom = 171.0
+
+[node name="TurnCounter" type="Label" parent="CombatGridUI/UnitPlaceUI2"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
+theme_override_font_sizes/font_size = 48
+text = "Turn:            "
+horizontal_alignment = 1
+
+[node name="EndTurn" type="Button" parent="CombatGridUI/UnitPlaceUI2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "End Turn"
 
 [connection signal="button_down" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="combatInitiate"]
 [connection signal="button_up" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="startButtonReleased"]
@@ -105,3 +129,8 @@ text = "Center Camera"
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/CenterCam" to="HexGrid" method="buttonHover"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="buttonLeft"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/CenterCam" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="combatManager" method="endTurn"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="combatManager" method="buttonHover"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="combatManager" method="buttonLeft"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="HexGrid" method="buttonLeft"]
