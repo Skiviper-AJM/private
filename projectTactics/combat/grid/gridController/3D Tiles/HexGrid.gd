@@ -77,12 +77,10 @@ func _ready():
 		return item.itemType == ItemTypes.UNIT
 	)
 	
-	print(units.size())
-	#if units.size() > 0:
-	#	inCombat = true
-	#	var first_unit = units[0]
-	#else: 
-	#	%noUnits.visible = true
+	
+	if units.size() == 0:
+		%noUnits.visible = true
+		$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
 	
 
 
@@ -489,3 +487,9 @@ func combatInitiate():
 	print("fite tiem")
 
 
+
+
+func fleeCombat():
+	DataPasser.selectedUnit = null
+	%noUnits.visible = false
+	get_tree().change_scene_to_file(DataPasser.priorScene)

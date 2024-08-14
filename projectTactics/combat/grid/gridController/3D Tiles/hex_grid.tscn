@@ -105,6 +105,19 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "End Turn"
 
+[node name="noUnits" type="Button" parent="CombatGridUI"]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 0, 0.0196078, 1)
+top_level = true
+offset_left = 1286.0
+offset_top = 116.0
+offset_right = 1682.0
+offset_bottom = 208.0
+theme_override_font_sizes/font_size = 30
+text = "NO UNITS: 
+YOU MUST FLEE"
+
 [connection signal="button_down" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="combatInitiate"]
 [connection signal="button_up" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="startButtonReleased"]
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="buttonHover"]
@@ -134,3 +147,4 @@ text = "End Turn"
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="HexGrid" method="buttonHover"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="combatManager" method="buttonLeft"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/noUnits" to="HexGrid" method="fleeCombat"]

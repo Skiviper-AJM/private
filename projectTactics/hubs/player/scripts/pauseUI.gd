@@ -47,8 +47,6 @@ func combatMode():
 	if units.size() > 0:
 		inCombat = true
 		var first_unit = units[0]
-	else: 
-		%noUnits.visible = true
 	
 
 func unpause():

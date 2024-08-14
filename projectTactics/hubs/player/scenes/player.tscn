@@ -2604,21 +2604,6 @@ layout_mode = 1
 offset_left = -276.0
 offset_right = 324.0
 
-[node name="noUnits" type="Button" parent="UI/pauseMenu"]
-unique_name_in_owner = true
-visible = false
-modulate = Color(1, 0, 0.0196078, 1)
-top_level = true
-layout_mode = 0
-offset_left = 638.0
-offset_top = 390.0
-offset_right = 876.0
-offset_bottom = 482.0
-scale = Vector2(2, 2)
-theme_override_font_sizes/font_size = 30
-text = "NO UNITS: 
-YOU MUST FLEE"
-
 [node name="fade" type="Control" parent="UI"]
 unique_name_in_owner = true
 visible = false
@@ -2690,4 +2675,3 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 [connection signal="button_up" from="UI/pauseMenu/options/quitButton" to="UI/pauseMenu" method="openQuit"]
 [connection signal="button_up" from="UI/pauseMenu/options/fleeCombat" to="UI/pauseMenu" method="leaveCombat"]
 [connection signal="volumeChanged" from="UI/pauseMenu/settingsMenu" to="." method="updateSFXVolume"]
-[connection signal="pressed" from="UI/pauseMenu/noUnits" to="UI/pauseMenu" method="leaveCombat"]
