@@ -177,7 +177,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Update the tile colors
 	if old_tile:
 		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
-	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set new tile to red
+	
+	# Set the target tile to red and ensure it stays red
+	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 	# Clear the highlighted tiles
 	clear_highlighted_tiles()
@@ -213,6 +215,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 				previous_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 			previous_tile = current_tile
 
+		# Ensure the target tile remains red
+		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Ensure it stays red
+
 		# Wait for the next frame to continue updating
 		await get_tree().create_timer(0.01).timeout
 
@@ -233,6 +238,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
 
 
 # Calculate tiles along the path between two points
