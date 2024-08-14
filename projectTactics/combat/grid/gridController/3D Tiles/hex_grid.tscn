@@ -97,7 +97,7 @@ layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 48
-text = "Turn:            "
+text = "Turn: 1"
 horizontal_alignment = 1
 
 [node name="EndTurn" type="Button" parent="CombatGridUI/UnitPlaceUI2"]
