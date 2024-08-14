@@ -8,7 +8,7 @@ var in_combat = false
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 
 var block_placement: bool = false
-
+var move_mode_active: bool = false  # New variable to control movement mode
 
 const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
@@ -20,17 +20,15 @@ const TILE_MATERIALS = [
 var highlighted_tiles := []
 var selected_unit_instance = null  # Store the instance of the selected unit
 
-#prevents placing moving or interacting if a button if hovered over
+# Prevents placing, moving, or interacting if a button is hovered over
 func _ready():
 	set_process_input(true)
 
 func buttonHover():
 	block_placement = true
-	
-	pass # Replace with function body.
 
 func _input(event):
-	if event.is_action_pressed("interact") && !block_placement:
+	if event.is_action_pressed("interact") and not block_placement:
 		handle_unit_selection()
 
 func combatInitiate():
@@ -72,18 +70,19 @@ func handle_tile_click(tile):
 			# Always prioritize selecting a unit on the clicked tile
 			var unit_instance = player_combat_controller.units_on_tiles[tile]
 			_handle_unit_click(unit_instance)
-		elif selected_unit_instance:
-			# Only attempt movement if a unit is already selected
+		elif selected_unit_instance and move_mode_active:  # Check if move mode is active
+			# Only attempt movement if a unit is already selected and move mode is active
 			if tile in highlighted_tiles:
 				# Tile within range and empty, move the selected unit to this tile
 				print("Moving unit to tile:", tile)
 				move_unit_to_tile(selected_unit_instance, tile)
+				move_mode_active = false  # Reset move mode after moving
 			else:
 				# Tile outside of range, deselect the unit
 				print("Clicked tile is outside of range. Deselecting unit.")
 				deselect_unit()
 		else:
-			print("No unit selected and clicked tile is empty.")
+			print("No unit selected or move mode not active, and clicked tile is empty.")
 
 func _handle_unit_click(unit_instance):
 	if in_combat:
@@ -128,7 +127,6 @@ func _handle_unit_click(unit_instance):
 		else:
 			print("Selected unit instance not found on any tile.")
 
-			
 func deselect_unit(force_deselect = false):
 	# Deselect the currently selected unit and reset the tile color
 	if selected_unit_instance:
@@ -315,18 +313,13 @@ func any_unit_moving() -> bool:
 			return true
 	return false
 
-
 func moveButton():
-	pass # Replace with function body.
+	if selected_unit_instance:
+		print("Move mode activated for selected unit.")
+		move_mode_active = true  # Activate move mode
+	else:
+		print("No unit selected to move.")
 
-
-func shootButton():
-	pass # Replace with function body.
-
-
-func attackButton():
-	pass # Replace with function body.
-
-# controls when mouse leaves a button
 func buttonLeft():
 	block_placement = false
+	
