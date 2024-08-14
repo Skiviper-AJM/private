@@ -180,7 +180,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	player_combat_controller.units_on_tiles[target_tile] = unit_instance
 
 	# Update the tile colors
-	if old_tile:
+	if old_tile and old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[3]:  # Reset yellow tiles to blue
 		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 	
 	# Set the target tile to red and ensure it stays red
@@ -192,9 +192,10 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Get the tiles along the path
 	var path_tiles = get_tiles_along_path(start_position, target_position)
 	
-	# Highlight the entire path in yellow
+	# Highlight the entire path in yellow if the tile is blue
 	for tile in path_tiles:
-		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
+		if tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[0]:  # Only highlight if blue
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
 
 	# Now perform the movement animation
 	var duration = 1.0  # seconds
@@ -223,8 +224,8 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 		# Proceed only if current_tile is valid
 		if current_tile and current_tile != previous_tile:
-			# Reset the previous tile color to blue if it's not the target
-			if previous_tile and previous_tile != target_tile:
+			# Reset the previous tile color to blue if it's not the target and was yellow
+			if previous_tile and previous_tile != target_tile and previous_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[3]:
 				previous_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 			previous_tile = current_tile
 
@@ -245,7 +246,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Clear the path tiles after the unit has moved over them
 	for tile in path_tiles:
-		if tile != target_tile:
+		if tile != target_tile and tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[3]:
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 
 	# Mark the unit as not moving anymore
