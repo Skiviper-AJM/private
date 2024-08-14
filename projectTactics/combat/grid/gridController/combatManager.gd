@@ -2,10 +2,12 @@ extends Node
 
 # A flag to determine whether the player is in combat mode
 var in_combat = false
+var turnCount: int = 1  # Track the current turn count
 
 @onready var player_combat_controller = $"../HexGrid"
 @onready var camera = $"../HexGrid/Camera3D"  # Initialize the camera properly
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
+@onready var end_turn_button = $"../CombatGridUI/UnitPlaceUI/EndTurn"  # Reference to the end turn button
 
 var block_placement: bool = false
 var move_mode_active: bool = false  # New variable to control movement mode
@@ -23,6 +25,7 @@ var selected_unit_instance = null  # Store the instance of the selected unit
 # Prevents placing, moving, or interacting if a button is hovered over
 func _ready():
 	set_process_input(true)
+	update_end_turn_label()  # Update the button text at the start
 
 func buttonHover():
 	block_placement = true
@@ -192,7 +195,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
 
-	# Calculate the distance to the target tile
+	# Calculate the move distance
 	var start_position = unit_instance.global_transform.origin
 	var target_position = target_tile.global_transform.origin
 	var move_distance = start_position.distance_to(target_position) / player_combat_controller.TILE_SIZE
@@ -298,7 +301,6 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
 
-
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
 	var direction = (end_position - start_position).normalized()
@@ -353,9 +355,30 @@ func moveButton():
 	else:
 		print("No unit selected to move.")
 
+func endTurn():
+	# Increment the turn count
+	turnCount += 1
+
+	# Reset the remaining movement for all units
+	reset_all_units_movement()
+
+	# Update the end turn button text
+	update_end_turn_label()
+
+	print("Turn ended. Turn count is now ", turnCount)
+
+func reset_all_units_movement():
+	# Iterate through all units and reset their remaining movement to their full speed
+	for tile in player_combat_controller.units_on_tiles.keys():
+		var unit_instance = player_combat_controller.units_on_tiles[tile]
+		unit_instance.set_meta("remaining_movement", unit_instance.unitParts.speedRating)
+	print("All units' movement reset for the new turn.")
+
+func update_end_turn_label():
+	$"../CombatGridUI/UnitPlaceUI2/TurnCounter".text = "End Turn: " + str(turnCount)
+
 func buttonLeft():
 	block_placement = false
-
 
 func centerCamera():
 	if selected_unit_instance:
