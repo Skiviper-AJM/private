@@ -195,14 +195,17 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
 
-	# Calculate the move distance
+	# Calculate the move distance in terms of tile units
 	var start_position = unit_instance.global_transform.origin
 	var target_position = target_tile.global_transform.origin
 	var move_distance = start_position.distance_to(target_position) / player_combat_controller.TILE_SIZE
 
+	# Round move_distance to the nearest integer to align with the grid
+	move_distance = round(move_distance)
+
 	# Check if the unit has enough remaining movement to make this move
 	var remaining_movement = unit_instance.get_meta("remaining_movement")
-	if move_distance > remaining_movement + 0.1:  # Adding a small buffer
+	if move_distance > remaining_movement:
 		print("Not enough movement remaining.")
 		return
 
@@ -300,6 +303,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# The unit will remain selected after its move is completed.
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
 
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
