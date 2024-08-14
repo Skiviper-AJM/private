@@ -1,5 +1,13 @@
 extends Node3D
 
+
+enum ItemTypes {
+	ALL,
+	PART,
+	UNIT,
+	FISH
+}
+
 const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),   # Blue material
 	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
@@ -18,6 +26,7 @@ var currently_selected_tile = null
 @export_range(2, 35) var grid_size: int = 10
 
 @export var max_squad_size: int = 2  # Default max squad size
+@export var playerInfo : PlayerData
 
 # Label to display the number of units placed and max squad size
 @onready var units_label = $"../CombatGridUI/UnitPlaceUI/UnitsLabel" 
@@ -62,6 +71,19 @@ func _ready():
 	camera.position.z = grid_size
 	camera.rotation_degrees.x = rotation_angle_x
 	camera.rotation_degrees.y = rotation_angle_y
+	
+	playerInfo = FM.playerData
+	var units = playerInfo.inventory.keys().filter(func(item):
+		return item.itemType == ItemTypes.UNIT
+	)
+	
+	print(units.size())
+	#if units.size() > 0:
+	#	inCombat = true
+	#	var first_unit = units[0]
+	#else: 
+	#	%noUnits.visible = true
+	
 
 
 func buttonHover():
