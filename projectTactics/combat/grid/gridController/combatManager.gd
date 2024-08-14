@@ -186,9 +186,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Set the target tile to red and ensure it stays red
 	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
-	# Clear the highlighted tiles
+	# Clear the highlighted tiles (except for the path tiles)
 	clear_highlighted_tiles()
-	
+
 	# Get the tiles along the path
 	var path_tiles = get_tiles_along_path(start_position, target_position)
 	
@@ -243,6 +243,11 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Update the selected tile reference to the new position
 	player_combat_controller.currently_selected_tile = target_tile
 
+	# Clear the path tiles after the unit has moved over them
+	for tile in path_tiles:
+		if tile != target_tile:
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
@@ -251,6 +256,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
 
 
 
