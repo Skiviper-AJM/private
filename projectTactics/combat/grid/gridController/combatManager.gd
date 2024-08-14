@@ -72,6 +72,11 @@ func handle_tile_click(tile):
 
 func _handle_unit_click(unit_instance):
 	if in_combat:
+		# Prevent selecting the unit if it is currently moving
+		if unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
+			print("Cannot select unit: it is currently moving.")
+			return
+
 		if selected_unit_instance:
 			# Reset the previously selected tile color to red
 			if player_combat_controller.currently_selected_tile:
@@ -149,6 +154,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
 
+	# Mark the unit as moving
+	unit_instance.set_meta("moving", true)
+
 	# Deselect the unit immediately before starting the movement
 	deselect_unit()
 
@@ -157,32 +165,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	var target_position = target_tile.global_transform.origin
 	target_position.y = start_position.y  # Keep the height constant
 
-	# Duration of movement
-	var duration = 1.0  # seconds
-	var elapsed = 0.0
-
-	while elapsed < duration:
-		var t = elapsed / duration
-		var interpolated_position = start_position.lerp(target_position, t)
-		unit_instance.global_transform.origin = interpolated_position
-
-		# Calculate the direction to face
-		var direction = interpolated_position - target_position
-		direction.y = 0  # Keep the height constant for rotation
-
-		# Rotate to face the direction (reverse the direction vector)
-		unit_instance.look_at(interpolated_position + direction, Vector3.UP)
-
-		# Wait for the next frame to continue updating
-		await get_tree().create_timer(0.01).timeout
-		
-		elapsed += 0.01
-
-	# Ensure the final position and rotation are set
-	unit_instance.global_transform.origin = target_position
-	unit_instance.look_at(target_position, Vector3.UP)  # Apply final rotation
-
-	# Update the units_on_tiles dictionary to reflect the new tile
+	# Instantly update the units_on_tiles dictionary to reflect the new tile
 	var old_tile = player_combat_controller.currently_selected_tile
 	if old_tile:
 		player_combat_controller.units_on_tiles.erase(old_tile)
@@ -198,6 +181,34 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Clear the highlighted tiles
 	clear_highlighted_tiles()
+
+	# Now perform the movement animation
+	var duration = 1.0  # seconds
+	var elapsed = 0.0
+
+	while elapsed < duration:
+		var t = elapsed / duration
+		var interpolated_position = start_position.lerp(target_position, t)
+		unit_instance.global_transform.origin = interpolated_position
+
+		# Calculate the direction to face
+		var direction = start_position - target_position
+		direction.y = 0  # Keep the height constant for rotation
+
+		# Rotate to face the direction (reverse the direction vector)
+		unit_instance.look_at(target_position + direction, Vector3.UP)
+
+		# Wait for the next frame to continue updating
+		await get_tree().create_timer(0.01).timeout
+		
+		elapsed += 0.01
+
+	# Ensure the final position and rotation are set
+	unit_instance.global_transform.origin = target_position
+	unit_instance.look_at(target_position, Vector3.UP)  # Apply final rotation
+
+	# Mark the unit as not moving anymore
+	unit_instance.set_meta("moving", false)
 
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
