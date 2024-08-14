@@ -169,9 +169,9 @@ func highlight_tiles_around_unit(selected_unit_instance, range):
 		# Highlight tiles within range based on the current position
 		for tile_key in player_combat_controller.tiles.keys():
 			var tile = player_combat_controller.tiles[tile_key]
-			var distance = tile.global_transform.origin.distance_to(unit_position)
+			var distance = tile.global_transform.origin.distance_to(unit_position) / tile_size
 			# Only highlight if the tile is within range and is blue
-			if distance <= range * tile_size and tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[0]:  # Check if the tile is blue
+			if distance <= range and tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[0]:  # Check if the tile is blue
 				tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
 				highlighted_tiles.append(tile)
 	else:
@@ -189,9 +189,6 @@ func clear_highlighted_tiles():
 	highlighted_tiles.clear()
 
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
-	# Do not clear selected name label here, keep the unit selected
-	# unit_name_label.text = ""  # Removed to keep the unit selected
-	
 	# Ensure that unit_instance is a Node3D instance
 	if not unit_instance is Node3D:
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
@@ -302,6 +299,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# The unit will remain selected after its move is completed.
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
