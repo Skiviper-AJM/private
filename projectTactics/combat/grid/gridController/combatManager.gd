@@ -72,8 +72,6 @@ func handle_tile_click(tile):
 			print("No unit selected and clicked tile is empty.")
 
 func _handle_unit_click(unit_instance):
-	
-	
 	if in_combat:
 		# Prevent selecting the unit if it is currently moving
 		if unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
@@ -81,16 +79,16 @@ func _handle_unit_click(unit_instance):
 			return
 
 		if selected_unit_instance:
-			
 			# Reset the previously selected tile color to red
 			if player_combat_controller.currently_selected_tile:
 				player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-	
+
 		clear_highlighted_tiles()
-	
+
 		print("Switching to selected unit instance:", unit_instance)
 		# Display the name of the unit
 		unit_name_label.text = "Unit: " + unit_instance.unitParts.name
+
 		# Ensure the unit_instance is a Node3D and not a resource reference
 		if not unit_instance is Node3D:
 			print("Error: The selected unit is not a Node3D instance.")
@@ -107,14 +105,16 @@ func _handle_unit_click(unit_instance):
 				break
 
 		if selected_tile:
-			# Update the selected tile and set the material to green
 			player_combat_controller.currently_selected_tile = selected_tile
-			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 
 			# Calculate the max move distance based on the newly selected tile
 			highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.unitParts.speedRating)
+
+			# Update the selected tile and set the material to green after highlighting
+			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 		else:
 			print("Selected unit instance not found on any tile.")
+
 			
 func deselect_unit():
 	# Deselect the currently selected unit and reset the tile color
