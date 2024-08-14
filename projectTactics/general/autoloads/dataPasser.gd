@@ -4,5 +4,7 @@ extends Node
 
 var selectedUnit: Object
 
+var inActiveCombat: bool
+
 func passUnitInfo(item):
 	selectedUnit = item

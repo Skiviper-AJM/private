@@ -18,6 +18,7 @@ enum Rarities {
 
 var inCombat = false
 
+
 var selectedItem
 var selectedItemType:ItemTypes = ItemTypes.ALL
 
@@ -64,7 +65,10 @@ func openInventory():
 	%pauseMenuBalance.set_text("[center][color=#f8f644]" + str(playerInfo.balance
 		) + " [img=12]placeholder/goldIcon.png[/img]")
 	clearDisplayedItem()
-	%inventoryMenu.visible = true
+	if DataPasser.inActiveCombat == false:
+		%inventoryMenu.visible = true
+	else:
+		%inventoryMenu.visible = false
 	%saveMenu.visible = false
 	%settingsMenu.visible = false
 	refreshItems()

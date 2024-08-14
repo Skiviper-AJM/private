@@ -63,6 +63,7 @@ var placed_units_queue := []
 
 func _ready():
 	DataPasser.selectedUnit = null
+	DataPasser.inActiveCombat = false
 	_generate_grid()
 	_update_units_label()  # Initialize the label text
 	var camera = $Camera3D
@@ -472,9 +473,13 @@ func buttonLeft():
 
 func combatInitiate():
 	# prevents initiation of combat without selecting at least one unit
+	
+	
 	if placed_units_queue.size() < 1:
 		return
-		
+	
+	DataPasser.inActiveCombat = true
+	
 	#delects current unit and sets its tile to red
 	currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
 	DataPasser.selectedUnit = null

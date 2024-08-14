@@ -73,20 +73,23 @@ func handle_tile_click(tile):
 			# Always prioritize selecting a unit on the clicked tile
 			var unit_instance = player_combat_controller.units_on_tiles[tile]
 			_handle_unit_click(unit_instance)
+			end_move_mode()  # End move mode when another unit is selected
 		elif selected_unit_instance and move_mode_active:  # Check if move mode is active
 			# Only attempt movement if a unit is already selected and move mode is active
 			if tile in highlighted_tiles:
 				# Tile within range and empty, move the selected unit to this tile
 				print("Moving unit to tile:", tile)
 				move_unit_to_tile(selected_unit_instance, tile)
-				move_mode_active = false  # Reset move mode after moving
+				end_move_mode()  # End move mode after moving
 			else:
-				# Tile outside of range, deselect the unit
+				# Tile outside of range, deselect the unit and end move mode
 				print("Clicked tile is outside of range. Deselecting unit.")
+				end_move_mode()
 				deselect_unit()
 		else:
 			# If move mode is not active and the tile is empty, deselect the unit
 			print("Empty tile clicked. Deselecting unit.")
+			end_move_mode()
 			deselect_unit()
 
 func _handle_unit_click(unit_instance):
@@ -309,9 +312,6 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
 
-
-
-
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
 	var direction = (end_position - start_position).normalized()
@@ -357,19 +357,34 @@ func any_unit_moving() -> bool:
 	return false
 
 func moveButton():
-	if selected_unit_instance:
+	if selected_unit_instance and move_mode_active:
+		end_move_mode()  # If move mode is active, deactivate it
+	else:
 		print("Move mode activated for selected unit.")
 		move_mode_active = true  # Activate move mode
 
 		# Highlight the movement range when move mode is activated
 		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
-	else:
-		print("No unit selected to move.")
+
+func shootButton():
+	print("Shoot action selected.")
+	end_move_mode()  # End move mode when shooting
+	# Implement shooting logic here
+
+func attackButton():
+	print("Attack action selected.")
+	end_move_mode()  # End move mode when attacking
+	# Implement attack logic here
+
+func end_move_mode():
+	move_mode_active = false  # Deactivate move mode
+	clear_highlighted_tiles()  # Clear highlighted tiles
+	print("Move mode deactivated.")
 
 func endTurn():
 	# Increment the turn count
 	turnCount += 1
-
+	end_move_mode()  # End move mode at the end of a turn
 	# Reset the remaining movement for all units
 	reset_all_units_movement()
 
@@ -393,6 +408,9 @@ func buttonLeft():
 
 func centerCamera():
 	if selected_unit_instance:
+		print("Centering camera on selected unit.")
+		end_move_mode()  # End move mode when centering the camera
+
 		# Get the current position of the selected unit
 		var unit_position = selected_unit_instance.global_transform.origin
 
