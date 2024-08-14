@@ -199,7 +199,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	if old_tile and old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[3]:
 		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 	
-	# Set the target tile to red and ensure it stays red
+	# Set the target tile to red and ensure it stays red during movement
 	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 	# Clear the highlighted tiles (except for the path tiles)
@@ -245,7 +245,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 				previous_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 			previous_tile = current_tile
 
-		# Ensure the target tile remains red
+		# Ensure the target tile remains red during the move
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Ensure it stays red
 
 		# Wait for the next frame to continue updating
@@ -268,9 +268,13 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
+	# Turn the target tile green to indicate the unit has arrived
+	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+
 	# The unit will remain selected after its move is completed.
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []

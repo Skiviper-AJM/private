@@ -76,6 +76,11 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "Attack"
 
+[node name="CenterCam" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Center Camera"
+
 [connection signal="button_down" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="combatInitiate"]
 [connection signal="button_up" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="startButtonReleased"]
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="buttonHover"]
@@ -95,3 +100,8 @@ text = "Attack"
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Attack" to="HexGrid" method="buttonHover"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Attack" to="combatManager" method="buttonLeft"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Attack" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="moveButton"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="buttonHover"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/CenterCam" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="buttonLeft"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/CenterCam" to="HexGrid" method="buttonLeft"]
