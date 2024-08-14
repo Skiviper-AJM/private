@@ -78,10 +78,9 @@ func _handle_unit_click(unit_instance):
 			print("Cannot select unit: it is currently moving.")
 			return
 
-		if selected_unit_instance:
-			# Reset the previously selected tile color to red
-			if player_combat_controller.currently_selected_tile:
-				player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+		# If another unit is selected, deselect it without turning its tile red
+		if selected_unit_instance and selected_unit_instance != unit_instance:
+			deselect_unit(true)
 
 		clear_highlighted_tiles()
 
@@ -115,14 +114,16 @@ func _handle_unit_click(unit_instance):
 		else:
 			print("Selected unit instance not found on any tile.")
 
+
+
 			
-func deselect_unit():
+func deselect_unit(force_deselect = false):
 	# Deselect the currently selected unit and reset the tile color
 	if selected_unit_instance:
 		clear_highlighted_tiles()
 
-		# Only reset the tile color to red if the unit is not moving
-		if player_combat_controller.currently_selected_tile and not selected_unit_instance.get_meta("moving"):
+		# Only reset the tile color to red if the unit is not moving or if forced to deselect
+		if player_combat_controller.currently_selected_tile and (force_deselect or not selected_unit_instance.get_meta("moving")):
 			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 		selected_unit_instance = null
@@ -257,13 +258,14 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
-	# Deselect the unit after the movement is complete if it was the selected unit
+	# Deselect the unit only if it was the currently selected unit and not after finishing movement
 	if was_selected:
-		deselect_unit()
+		selected_unit_instance = null
+		player_combat_controller.currently_selected_tile = null
+		player_combat_controller.unit_name_label.text = ""
 
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
-
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
