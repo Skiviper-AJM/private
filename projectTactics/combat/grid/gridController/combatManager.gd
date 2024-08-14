@@ -187,6 +187,10 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Get the tiles along the path
 	var path_tiles = get_tiles_along_path(start_position, target_position)
 	
+	# Highlight the entire path in yellow
+	for tile in path_tiles:
+		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
+
 	# Now perform the movement animation
 	var duration = 1.0  # seconds
 	var elapsed = 0.0
@@ -207,9 +211,6 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		# Find the closest tile to the current interpolated position
 		var current_tile = get_closest_tile(interpolated_position)
 		if current_tile and current_tile != previous_tile:
-			# If moving to a new tile, set it to yellow
-			current_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
-
 			# Reset the previous tile color to blue if it's not the target
 			if previous_tile and previous_tile != target_tile:
 				previous_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
