@@ -120,7 +120,9 @@ func deselect_unit():
 	# Deselect the currently selected unit and reset the tile color
 	if selected_unit_instance:
 		clear_highlighted_tiles()
-		if player_combat_controller.currently_selected_tile:
+
+		# Only reset the tile color to red if the unit is not moving
+		if player_combat_controller.currently_selected_tile and not selected_unit_instance.get_meta("moving"):
 			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 		selected_unit_instance = null
@@ -168,6 +170,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as moving
 	unit_instance.set_meta("moving", true)
 
+	# Check if the moving unit is the currently selected unit
+	var was_selected = (unit_instance == selected_unit_instance)
+
 	# Get the current and target positions
 	var start_position = unit_instance.global_transform.origin
 	var target_position = target_tile.global_transform.origin
@@ -179,8 +184,8 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		player_combat_controller.units_on_tiles.erase(old_tile)
 	player_combat_controller.units_on_tiles[target_tile] = unit_instance
 
-	# Update the tile colors
-	if old_tile and old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[3]:  # Reset yellow tiles to blue
+	# Update the tile colors (reset yellow tiles to blue)
+	if old_tile and old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[3]:
 		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 	
 	# Set the target tile to red and ensure it stays red
@@ -252,13 +257,12 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
-	# Deselect the unit after the movement is complete
-	deselect_unit()
+	# Deselect the unit after the movement is complete if it was the selected unit
+	if was_selected:
+		deselect_unit()
 
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
-
-
 
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
