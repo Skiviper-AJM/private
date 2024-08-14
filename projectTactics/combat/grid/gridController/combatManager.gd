@@ -200,11 +200,16 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	var target_position = target_tile.global_transform.origin
 	var move_distance = start_position.distance_to(target_position) / player_combat_controller.TILE_SIZE
 
-	# Round move_distance to the nearest integer to align with the grid
-	move_distance = round(move_distance)
+	# Debugging output for calculated move distance
+	print("Calculated move distance (before flooring): ", move_distance)
+
+	# Floor the move distance to avoid overestimating
+	move_distance = floor(move_distance)
 
 	# Check if the unit has enough remaining movement to make this move
 	var remaining_movement = unit_instance.get_meta("remaining_movement")
+	print("Remaining movement before move: ", remaining_movement)
+
 	if move_distance > remaining_movement:
 		print("Not enough movement remaining.")
 		return
@@ -213,7 +218,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	unit_instance.set_meta("moving", true)
 
 	# Update the remaining movement after this move
-	unit_instance.set_meta("remaining_movement", remaining_movement - move_distance)
+	var new_remaining_movement = remaining_movement - move_distance
+	unit_instance.set_meta("remaining_movement", max(new_remaining_movement, 0))
+	print("New remaining movement after move: ", new_remaining_movement)
 
 	# Get the current and target positions
 	target_position.y = start_position.y  # Keep the height constant
@@ -303,6 +310,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# The unit will remain selected after its move is completed.
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
 
 
 
