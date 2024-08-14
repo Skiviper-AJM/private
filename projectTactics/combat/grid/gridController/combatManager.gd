@@ -163,8 +163,8 @@ func clear_highlighted_tiles():
 	highlighted_tiles.clear()
 
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
-	# Clear selected name label
-	unit_name_label.text = ""
+	# Do not clear selected name label here, keep the unit selected
+	# unit_name_label.text = ""  # Removed to keep the unit selected
 	
 	# Ensure that unit_instance is a Node3D instance
 	if not unit_instance is Node3D:
@@ -258,6 +258,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
+	# The unit will remain selected after its move is completed.
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
 
