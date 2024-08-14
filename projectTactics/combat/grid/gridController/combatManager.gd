@@ -182,7 +182,11 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Clear the highlighted tiles
 	clear_highlighted_tiles()
+	
+	# Set the tile to red after the movement is complete
+	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
+	
 	# Now perform the movement animation
 	var duration = 1.0  # seconds
 	var elapsed = 0.0
@@ -214,9 +218,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
-	# Set the tile to red after the movement is complete
-	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-
+	
 	# Deselect the unit after the movement is complete
 	deselect_unit()
 
