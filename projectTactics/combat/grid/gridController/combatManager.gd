@@ -214,7 +214,14 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		unit_instance.look_at(target_position + direction, Vector3.UP)
 
 		# Find the closest tile to the current interpolated position
-		var current_tile = get_closest_tile(interpolated_position)
+		var candidate_tiles = get_closest_tiles(interpolated_position)
+
+		# Select one tile randomly if there are multiple candidates
+		var current_tile = null
+		if candidate_tiles.size() > 0:
+			current_tile = candidate_tiles[randi() % candidate_tiles.size()]
+
+		# Proceed only if current_tile is valid
 		if current_tile and current_tile != previous_tile:
 			# Reset the previous tile color to blue if it's not the target
 			if previous_tile and previous_tile != target_tile:
@@ -247,30 +254,38 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 
 
-# Calculate tiles along the path between two points
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
 	var direction = (end_position - start_position).normalized()
 	var distance = start_position.distance_to(end_position)
-	var steps = int(distance / player_combat_controller.TILE_SIZE)
+	var steps = int(distance / player_combat_controller.TILE_SIZE) * 2  # Increase resolution by multiplying steps
 
 	for i in range(steps + 1):
-		var current_position = start_position + direction * player_combat_controller.TILE_SIZE * i
-		var current_tile = get_closest_tile(current_position)
-		if current_tile and current_tile not in path_tiles:
-			path_tiles.append(current_tile)
+		var current_position = start_position + direction * (distance / steps) * i
+		
+		# Get the closest tile and add randomness to choose between equally distant tiles
+		var candidate_tiles = get_closest_tiles(current_position)
+		if candidate_tiles.size() > 0:
+			var chosen_tile = candidate_tiles[randi() % candidate_tiles.size()]
+			if chosen_tile not in path_tiles:
+				path_tiles.append(chosen_tile)
 
 	return path_tiles
 
-# Find the closest tile to a given position
-func get_closest_tile(position: Vector3) -> Node:
-	var closest_tile = null
+
+# Modified function to get closest tiles, with randomness to break ties
+func get_closest_tiles(position: Vector3) -> Array:
+	var closest_tiles = []
 	var min_distance = INF
 
 	for tile in player_combat_controller.tiles.values():
 		var distance = tile.global_transform.origin.distance_to(position)
 		if distance < min_distance:
 			min_distance = distance
-			closest_tile = tile
+			closest_tiles.clear()
+			closest_tiles.append(tile)
+		elif distance == min_distance:
+			closest_tiles.append(tile)
 
-	return closest_tile
+	# Return all closest tiles for randomness in selection
+	return closest_tiles
