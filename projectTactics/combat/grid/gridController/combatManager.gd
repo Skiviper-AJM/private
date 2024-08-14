@@ -31,6 +31,11 @@ func combatInitiate():
 
 func handle_unit_selection():
 	if in_combat:
+		# Prevent selecting a unit if any unit is currently moving
+		if any_unit_moving():
+			print("Cannot select any unit while a unit is moving.")
+			return
+
 		# Raycast to find the tile and the unit instance on it
 		var from = camera.project_ray_origin(get_viewport().get_mouse_position())
 		var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * 50000
@@ -114,8 +119,6 @@ func _handle_unit_click(unit_instance):
 		else:
 			print("Selected unit instance not found on any tile.")
 
-
-
 			
 func deselect_unit(force_deselect = false):
 	# Deselect the currently selected unit and reset the tile color
@@ -170,9 +173,6 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Mark the unit as moving
 	unit_instance.set_meta("moving", true)
-
-	# Check if the moving unit is the currently selected unit
-	var was_selected = (unit_instance == selected_unit_instance)
 
 	# Get the current and target positions
 	var start_position = unit_instance.global_transform.origin
@@ -258,12 +258,6 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
-	# Deselect the unit only if it was the currently selected unit and not after finishing movement
-	if was_selected:
-		selected_unit_instance = null
-		player_combat_controller.currently_selected_tile = null
-		player_combat_controller.unit_name_label.text = ""
-
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
 
@@ -302,3 +296,11 @@ func get_closest_tiles(position: Vector3) -> Array:
 
 	# Return all closest tiles for randomness in selection
 	return closest_tiles
+
+
+func any_unit_moving() -> bool:
+	for tile in player_combat_controller.units_on_tiles.keys():
+		var unit_instance = player_combat_controller.units_on_tiles[tile]
+		if unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
+			return true
+	return false
