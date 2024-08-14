@@ -170,11 +170,13 @@ func highlight_tiles_around_unit(selected_unit_instance, range):
 		for tile_key in player_combat_controller.tiles.keys():
 			var tile = player_combat_controller.tiles[tile_key]
 			var distance = tile.global_transform.origin.distance_to(unit_position)
-			if distance <= range * tile_size:
+			# Only highlight if the tile is within range and is blue
+			if distance <= range * tile_size and tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[0]:  # Check if the tile is blue
 				tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
 				highlighted_tiles.append(tile)
 	else:
 		print("No unit tile found to highlight.")
+
 
 func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
