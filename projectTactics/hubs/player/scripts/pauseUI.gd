@@ -39,7 +39,7 @@ func _input(event):
 func combatMode():
 
 	$options/fleeCombat.visible = true
-
+	$inventoryMenu/filterMenu.visible = false
 	var units = playerInfo.inventory.keys().filter(func(item):
 		return item.itemType == ItemTypes.UNIT
 	)
@@ -77,6 +77,9 @@ func refreshItems():
 	
 	var allItems:Array = playerInfo.inventory.keys()
 	var filteredItems:Array = []
+	if inCombat == true:
+		selectedItemType = ItemTypes.UNIT
+		
 	if selectedItemType == ItemTypes.ALL: filteredItems = allItems;
 	else:
 		for item in allItems:
