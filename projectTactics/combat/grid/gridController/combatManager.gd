@@ -171,11 +171,12 @@ func highlight_tiles_around_unit(selected_unit_instance, range):
 			var tile = player_combat_controller.tiles[tile_key]
 			var distance = tile.global_transform.origin.distance_to(unit_position) / tile_size
 			# Only highlight if the tile is within range and is blue
-			if distance <= range and tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[0]:  # Check if the tile is blue
+			if distance <= range + 0.1 and tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[0]:  # Adding a small buffer
 				tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
 				highlighted_tiles.append(tile)
 	else:
 		print("No unit tile found to highlight.")
+
 
 
 func clear_highlighted_tiles():
@@ -201,7 +202,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Check if the unit has enough remaining movement to make this move
 	var remaining_movement = unit_instance.get_meta("remaining_movement")
-	if move_distance > remaining_movement:
+	if move_distance > remaining_movement + 0.1:  # Adding a small buffer
 		print("Not enough movement remaining.")
 		return
 
