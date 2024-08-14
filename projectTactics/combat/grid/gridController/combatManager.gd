@@ -94,8 +94,7 @@ func _handle_unit_click(unit_instance):
 		# Set the instance as selected
 		selected_unit_instance = unit_instance
 
-		print("Selected unit instance:", selected_unit_instance)
-
+		# Immediately update the current tile reference for this unit
 		var selected_tile = null
 		for tile in player_combat_controller.units_on_tiles.keys():
 			if player_combat_controller.units_on_tiles[tile] == unit_instance:
@@ -103,9 +102,11 @@ func _handle_unit_click(unit_instance):
 				break
 
 		if selected_tile:
-			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+			# Update the selected tile and set the material to green
 			player_combat_controller.currently_selected_tile = selected_tile
+			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 
+			# Calculate the max move distance based on the newly selected tile
 			highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.unitParts.speedRating)
 		else:
 			print("Selected unit instance not found on any tile.")
@@ -123,17 +124,14 @@ func deselect_unit():
 		print("Unit deselected.")
 
 func highlight_tiles_around_unit(selected_unit_instance, range):
-	var unit_tile = null
-	for tile in player_combat_controller.units_on_tiles.keys():
-		if player_combat_controller.units_on_tiles[tile] == selected_unit_instance:
-			unit_tile = tile
-			break
+	# Fetch the current tile based on the latest position of the unit
+	var unit_tile = player_combat_controller.currently_selected_tile
 	
 	if unit_tile:
 		var unit_position = unit_tile.global_transform.origin
 		var tile_size = player_combat_controller.TILE_SIZE
 		
-		# Highlight tiles within range
+		# Highlight tiles within range based on the current position
 		for tile_key in player_combat_controller.tiles.keys():
 			var tile = player_combat_controller.tiles[tile_key]
 			var distance = tile.global_transform.origin.distance_to(unit_position)
@@ -157,9 +155,6 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as moving
 	unit_instance.set_meta("moving", true)
 
-	# Deselect the unit immediately before starting the movement
-	deselect_unit()
-
 	# Get the current and target positions
 	var start_position = unit_instance.global_transform.origin
 	var target_position = target_tile.global_transform.origin
@@ -176,9 +171,6 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set new tile to red
 
-	# Update the selected tile reference
-	player_combat_controller.currently_selected_tile = target_tile
-
 	# Clear the highlighted tiles
 	clear_highlighted_tiles()
 
@@ -192,7 +184,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		unit_instance.global_transform.origin = interpolated_position
 
 		# Calculate the direction to face
-		var direction = start_position - target_position
+		var direction = target_position - start_position
 		direction.y = 0  # Keep the height constant for rotation
 
 		# Rotate to face the direction (reverse the direction vector)
@@ -207,8 +199,14 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	unit_instance.global_transform.origin = target_position
 	unit_instance.look_at(target_position, Vector3.UP)  # Apply final rotation
 
+	# Update the selected tile reference to the new position
+	player_combat_controller.currently_selected_tile = target_tile
+
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
+
+	# Deselect the unit after the movement is complete
+	deselect_unit()
 
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
