@@ -108,6 +108,10 @@ func _handle_unit_click(unit_instance):
 			print("Error: The selected unit is not a Node3D instance.")
 			return
 
+		# Initialize remaining movement if not set
+		if not unit_instance.has_meta("remaining_movement"):
+			unit_instance.set_meta("remaining_movement", unit_instance.unitParts.speedRating)
+
 		# Set the instance as selected
 		selected_unit_instance = unit_instance
 		$"../CombatGridUI/UnitPlaceUI/Move".visible = true
@@ -126,7 +130,7 @@ func _handle_unit_click(unit_instance):
 
 			# Only highlight tiles if move mode is active
 			if move_mode_active:
-				highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.unitParts.speedRating)
+				highlight_tiles_around_unit(selected_unit_instance, unit_instance.get_meta("remaining_movement"))
 
 			# Update the selected tile and set the material to green after highlighting
 			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
@@ -188,12 +192,24 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
 
+	# Calculate the distance to the target tile
+	var start_position = unit_instance.global_transform.origin
+	var target_position = target_tile.global_transform.origin
+	var move_distance = start_position.distance_to(target_position) / player_combat_controller.TILE_SIZE
+
+	# Check if the unit has enough remaining movement to make this move
+	var remaining_movement = unit_instance.get_meta("remaining_movement")
+	if move_distance > remaining_movement:
+		print("Not enough movement remaining.")
+		return
+
 	# Mark the unit as moving
 	unit_instance.set_meta("moving", true)
 
+	# Update the remaining movement after this move
+	unit_instance.set_meta("remaining_movement", remaining_movement - move_distance)
+
 	# Get the current and target positions
-	var start_position = unit_instance.global_transform.origin
-	var target_position = target_tile.global_transform.origin
 	target_position.y = start_position.y  # Keep the height constant
 
 	# Instantly update the units_on_tiles dictionary to reflect the new tile
@@ -333,7 +349,7 @@ func moveButton():
 		move_mode_active = true  # Activate move mode
 
 		# Highlight the movement range when move mode is activated
-		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.unitParts.speedRating)
+		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
 	else:
 		print("No unit selected to move.")
 
@@ -361,7 +377,3 @@ func centerCamera():
 		print("Camera centered on selected unit at position: ", unit_position, " with X-axis rotation set to -90.")
 	else:
 		print("No unit selected to center camera.")
-
-
-func endTurn():
-	pass # Replace with function body.
