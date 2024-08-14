@@ -110,7 +110,10 @@ func _handle_unit_click(unit_instance):
 
 		# Set the instance as selected
 		selected_unit_instance = unit_instance
-
+		$"../CombatGridUI/UnitPlaceUI/Move".visible = true
+		$"../CombatGridUI/UnitPlaceUI/Shoot".visible = true
+		$"../CombatGridUI/UnitPlaceUI/Attack".visible = true
+		$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = true
 		# Immediately update the current tile reference for this unit
 		var selected_tile = null
 		for tile in player_combat_controller.units_on_tiles.keys():
@@ -131,6 +134,10 @@ func _handle_unit_click(unit_instance):
 			print("Selected unit instance not found on any tile.")
 
 func deselect_unit(force_deselect = false):
+	$"../CombatGridUI/UnitPlaceUI/Attack".visible = false
+	$"../CombatGridUI/UnitPlaceUI/Move".visible = false
+	$"../CombatGridUI/UnitPlaceUI/Shoot".visible = false
+	$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = false
 	# Deselect the currently selected unit and reset the tile color
 	if selected_unit_instance:
 		clear_highlighted_tiles()
