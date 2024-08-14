@@ -26,6 +26,7 @@ var selected_unit_instance = null  # Store the instance of the selected unit
 func _ready():
 	set_process_input(true)
 	update_end_turn_label()  # Update the button text at the start
+	move_mode_active = false  # Ensure move mode starts as off
 
 func buttonHover():
 	block_placement = true
@@ -70,23 +71,25 @@ func handle_unit_selection():
 func handle_tile_click(tile):
 	if in_combat:
 		if player_combat_controller.units_on_tiles.has(tile):
-			# Always prioritize selecting a unit on the clicked tile
+			# Prioritize selecting a unit on the clicked tile
 			var unit_instance = player_combat_controller.units_on_tiles[tile]
 			_handle_unit_click(unit_instance)
 		elif selected_unit_instance and move_mode_active:  # Check if move mode is active
-			# Only attempt movement if a unit is already selected and move mode is active
 			if tile in highlighted_tiles:
 				# Tile within range and empty, move the selected unit to this tile
 				print("Moving unit to tile:", tile)
 				move_unit_to_tile(selected_unit_instance, tile)
 				move_mode_active = false  # Reset move mode after moving
 			else:
-				# Tile outside of range, deselect the unit
-				print("Clicked tile is outside of range. Deselecting unit.")
-				deselect_unit()
+				# Disable move mode if an empty tile outside of range is clicked
+				print("Clicked empty tile outside of range. Disabling move mode.")
+				clear_highlighted_tiles()
+				move_mode_active = false
 		else:
-			# If move mode is not active and the tile is empty, deselect the unit
-			print("Empty tile clicked. Deselecting unit.")
+			# Disable move mode if an empty tile is clicked
+			print("Empty tile clicked. Disabling move mode.")
+			clear_highlighted_tiles()
+			move_mode_active = false
 			deselect_unit()
 
 func _handle_unit_click(unit_instance):
@@ -145,11 +148,12 @@ func deselect_unit(force_deselect = false):
 	$"../CombatGridUI/UnitPlaceUI/Move".visible = false
 	$"../CombatGridUI/UnitPlaceUI/Shoot".visible = false
 	$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = false
-	# Deselect the currently selected unit and reset the tile color
-	if selected_unit_instance:
-		clear_highlighted_tiles()
+	# Clear highlights and disable move mode
+	clear_highlighted_tiles()
+	move_mode_active = false
 
-		# Only reset the tile color to red if the unit is not moving or if forced to deselect
+	if selected_unit_instance:
+		# Reset the tile color if necessary
 		if player_combat_controller.currently_selected_tile and (force_deselect or not selected_unit_instance.get_meta("moving")):
 			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
@@ -176,8 +180,6 @@ func highlight_tiles_around_unit(selected_unit_instance, range):
 				highlighted_tiles.append(tile)
 	else:
 		print("No unit tile found to highlight.")
-
-
 
 func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
@@ -311,9 +313,6 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
 
-
-
-
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
 	var direction = (end_position - start_position).normalized()
@@ -332,7 +331,6 @@ func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Arr
 
 	return path_tiles
 
-
 # Modified function to get closest tiles, with randomness to break ties
 func get_closest_tiles(position: Vector3) -> Array:
 	var closest_tiles = []
@@ -350,7 +348,6 @@ func get_closest_tiles(position: Vector3) -> Array:
 	# Return all closest tiles for randomness in selection
 	return closest_tiles
 
-
 func any_unit_moving() -> bool:
 	for tile in player_combat_controller.units_on_tiles.keys():
 		var unit_instance = player_combat_controller.units_on_tiles[tile]
@@ -360,11 +357,14 @@ func any_unit_moving() -> bool:
 
 func moveButton():
 	if selected_unit_instance:
-		print("Move mode activated for selected unit.")
-		move_mode_active = true  # Activate move mode
-
-		# Highlight the movement range when move mode is activated
-		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
+		if move_mode_active:
+			print("Move mode deactivated for selected unit.")
+			clear_highlighted_tiles()
+			move_mode_active = false  # Deactivate move mode
+		else:
+			print("Move mode activated for selected unit.")
+			move_mode_active = true  # Activate move mode
+			highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
 	else:
 		print("No unit selected to move.")
 
@@ -377,6 +377,10 @@ func endTurn():
 
 	# Update the end turn button text
 	update_end_turn_label()
+
+	# Clear highlights and disable move mode
+	clear_highlighted_tiles()
+	move_mode_active = false
 
 	print("Turn ended. Turn count is now ", turnCount)
 
@@ -413,3 +417,20 @@ func centerCamera():
 		print("Camera centered on selected unit at position: ", unit_position, " with X-axis rotation set to -90.")
 	else:
 		print("No unit selected to center camera.")
+
+
+func shootButton():
+	# Logic for shooting action...
+	print("Shoot action triggered.")
+
+	# Clear highlights and disable move mode
+	clear_highlighted_tiles()
+	move_mode_active = false
+
+func attackButton():
+	# Logic for attacking action...
+	print("Attack action triggered.")
+
+	# Clear highlights and disable move mode
+	clear_highlighted_tiles()
+	move_mode_active = false
