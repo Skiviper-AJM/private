@@ -148,7 +148,12 @@ func highlight_tiles_around_unit(selected_unit_instance, range):
 
 func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
-		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+		if player_combat_controller.units_on_tiles.has(tile):
+			# If the tile is occupied, ensure it stays red
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+		else:
+			# Otherwise, reset it to blue
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 	highlighted_tiles.clear()
 
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
