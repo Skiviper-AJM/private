@@ -7,6 +7,9 @@ var in_combat = false
 @onready var camera = $"../HexGrid/Camera3D"  # Initialize the camera properly
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 
+var block_placement: bool = false
+
+
 const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
@@ -17,11 +20,17 @@ const TILE_MATERIALS = [
 var highlighted_tiles := []
 var selected_unit_instance = null  # Store the instance of the selected unit
 
+#prevents placing moving or interacting if a button if hovered over
 func _ready():
 	set_process_input(true)
 
+func buttonHover():
+	block_placement = true
+	
+	pass # Replace with function body.
+
 func _input(event):
-	if event.is_action_pressed("interact"):
+	if event.is_action_pressed("interact") && !block_placement:
 		handle_unit_selection()
 
 func combatInitiate():
@@ -305,3 +314,19 @@ func any_unit_moving() -> bool:
 		if unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
 			return true
 	return false
+
+
+func moveButton():
+	pass # Replace with function body.
+
+
+func shootButton():
+	pass # Replace with function body.
+
+
+func attackButton():
+	pass # Replace with function body.
+
+# controls when mouse leaves a button
+func buttonLeft():
+	block_placement = false
