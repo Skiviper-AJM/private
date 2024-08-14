@@ -354,9 +354,10 @@ func centerCamera():
 		# Apply the new camera position
 		camera.global_transform.origin = camera_position
 
-		# Reset the camera's rotation
-		camera.rotation_degrees = Vector3(-90, 0, 0)  # -90 degrees on X-axis, 0 on Y and Z axes
+		# Reset the camera's X-axis rotation to -90, keeping the current Y and Z rotations
+		var current_rotation = camera.rotation_degrees
+		camera.rotation_degrees = Vector3(-90, current_rotation.y, current_rotation.z)
 
-		print("Camera centered on selected unit at position: ", unit_position, " with rotation reset.")
+		print("Camera centered on selected unit at position: ", unit_position, " with X-axis rotation set to -90.")
 	else:
 		print("No unit selected to center camera.")
