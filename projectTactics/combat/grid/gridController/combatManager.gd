@@ -73,8 +73,6 @@ func handle_tile_click(tile):
 
 func _handle_unit_click(unit_instance):
 	
-	#displays the name of the unit
-	unit_name_label.text = "Unit: " + unit_instance.unitParts.name
 	
 	if in_combat:
 		# Prevent selecting the unit if it is currently moving
@@ -83,14 +81,16 @@ func _handle_unit_click(unit_instance):
 			return
 
 		if selected_unit_instance:
+			
 			# Reset the previously selected tile color to red
 			if player_combat_controller.currently_selected_tile:
-				player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
-
+				player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+	
 		clear_highlighted_tiles()
-
+	
 		print("Switching to selected unit instance:", unit_instance)
-
+		# Display the name of the unit
+		unit_name_label.text = "Unit: " + unit_instance.unitParts.name
 		# Ensure the unit_instance is a Node3D and not a resource reference
 		if not unit_instance is Node3D:
 			print("Error: The selected unit is not a Node3D instance.")
@@ -115,13 +115,13 @@ func _handle_unit_click(unit_instance):
 			highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.unitParts.speedRating)
 		else:
 			print("Selected unit instance not found on any tile.")
-
+			
 func deselect_unit():
 	# Deselect the currently selected unit and reset the tile color
 	if selected_unit_instance:
 		clear_highlighted_tiles()
 		if player_combat_controller.currently_selected_tile:
-			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 		selected_unit_instance = null
 		player_combat_controller.currently_selected_tile = null
@@ -153,7 +153,7 @@ func clear_highlighted_tiles():
 
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	
-	#clear selected name label
+	# Clear selected name label
 	unit_name_label.text = ""
 	
 	# Ensure that unit_instance is a Node3D instance
@@ -213,6 +213,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
+
+	# Set the tile to red after the movement is complete
+	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 	# Deselect the unit after the movement is complete
 	deselect_unit()
