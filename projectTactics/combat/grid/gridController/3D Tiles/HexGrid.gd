@@ -496,6 +496,8 @@ func combatInitiate():
 	combat_manager.combatInitiate()
 	print("fite tiem")
 
+func get_all_tiles() -> Array:
+	return tiles.values()
 
 
 
