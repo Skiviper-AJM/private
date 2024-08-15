@@ -167,35 +167,32 @@ func _handle_tile_click(mouse_position):
 			if units_on_tiles.has(clicked_tile):
 				var unit_on_tile = units_on_tiles[clicked_tile]
 
-				# Check if the unit is an enemy
+				# Suppress interaction if the unit on the tile is an enemy
 				if unit_on_tile.is_in_group("enemy_units"):
-					print("Enemy unit detected on the tile. No action taken.")
-					return
-
-				# Handle combat unit selection
-				if combat_manager.in_combat:
+					print("Enemy unit detected on the tile. Input suppressed.")
+					return  # Suppress input for enemy units
+				
+				# Allow interaction with your own units
+				if not combat_manager.in_combat:
+					print("Selecting player unit on tile:", unit_on_tile.name)
+					DataPasser.passUnitInfo(unit_on_tile.unitParts)
+					unit_to_place = unit_on_tile.unitParts
+					placing_unit = false
+					unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
+					
+					# Update the selected tile's visual
+					if currently_selected_tile != null:
+						if units_on_tiles.has(currently_selected_tile):
+							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+						else:
+							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+					currently_selected_tile = clicked_tile
+				else:
+					# Handle combat unit selection
 					combat_manager._handle_unit_click(unit_on_tile)
 					DataPasser.passUnitInfo(unit_on_tile.unitParts)
 					print("Unit selected:", unit_on_tile.unitParts.name)
-				else:
-					# Handle non-combat unit selection and placement
-					if DataPasser.selectedUnit != null:
-						print("Replacing unit on tile with selected unit.")
-						remove_unit(units_on_tiles[clicked_tile])
-						place_unit_on_tile(clicked_position_2d)
-					else:
-						print("Selecting player unit on tile:", unit_on_tile.name)
-						DataPasser.passUnitInfo(unit_on_tile.unitParts)
-						unit_to_place = unit_on_tile.unitParts
-						placing_unit = false
-						unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
-						if currently_selected_tile != null:
-							if units_on_tiles.has(currently_selected_tile):
-								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-							else:
-								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-						clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-						currently_selected_tile = clicked_tile
 			else:
 				# Handle empty tile for unit placement
 				if placing_unit and DataPasser.selectedUnit != null:
@@ -205,7 +202,6 @@ func _handle_tile_click(mouse_position):
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
-
 
 
 
