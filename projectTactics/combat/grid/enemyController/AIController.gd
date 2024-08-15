@@ -93,9 +93,17 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 		# Scale the enemy unit appropriately
 		enemy_unit.scale = grid_controller.unit_scale  # Use the same unit scale as the player's units
 		
-		# Align the unit's position with the tile
-		var bbox = enemy_unit.get_aabb()
-		enemy_unit.position = target_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
+		# Access the foot nodes or the main geometry to get the bounding box
+		var mesh_instance = enemy_unit.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
+
+
+		if mesh_instance:
+			var bbox = mesh_instance.get_aabb()
+			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
+		else:
+			print("MeshInstance3D not found! Please check the path.")
+			# Fallback if necessary, perhaps by using some default offset
+			enemy_unit.position = target_tile.global_transform.origin
 		
 		# Add the enemy to the grid
 		grid_controller.add_child(enemy_unit)

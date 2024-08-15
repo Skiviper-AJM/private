@@ -24,7 +24,8 @@ var currently_selected_tile = null
 @onready var ai_controller = $"../aiController"
 
 @export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
-@export_range(2, 35) var grid_size: int = 10
+@export_range(2, 35) var grid_size: int = 10 #grid size is calculated as 2xgrid_size+1 in a square shape
+
 
 @export var max_squad_size: int = 2  # Default max squad size
 @export var playerInfo : PlayerData
@@ -288,7 +289,7 @@ func _generate_grid():
 			# Set the default material to blue
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 			tile_index += 1
-	#ai_controller._on_grid_generated()
+	ai_controller._on_grid_generated()
 
 
 
