@@ -1,6 +1,5 @@
 extends Node3D
 
-
 enum ItemTypes {
 	ALL,
 	PART,
@@ -24,8 +23,7 @@ var currently_selected_tile = null
 @onready var ai_controller = $"../aiController"
 
 @export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
-@export_range(2, 35) var grid_size: int = 6 #controlls the 'radius' of the square grid generated
-
+@export_range(2, 35) var grid_size: int = 10  # Controls the 'radius' of the square grid generated
 
 @export var max_squad_size: int = 2  # Default max squad size
 @export var playerInfo : PlayerData
@@ -41,7 +39,7 @@ const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
 const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
 const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
-const MAX_ROTATION_X := -60 # Maximum rotation angle on the x-axis (camera looks down slightly)
+const MAX_ROTATION_X := -60  # Maximum rotation angle on the x-axis (camera looks down slightly)
 const MIN_ROTATION_X := -90.0  # Minimum rotation angle on the x-axis (camera looks straight down)
 
 var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
@@ -67,9 +65,6 @@ func _ready():
 	DataPasser.selectedUnit = null
 	DataPasser.inActiveCombat = false
 	
-	
-	# Ensure this method triggers the grid generation
-
 	_generate_grid()
 	_update_units_label()  # Initialize the label text
 	var camera = $Camera3D
@@ -82,13 +77,11 @@ func _ready():
 	playerInfo = FM.playerData
 	var units = playerInfo.inventory.keys().filter(func(item):
 		return item.itemType == ItemTypes.UNIT
-	)	
+	)
+	
 	if units.size() == 0:
 		%noUnits.visible = true
 		$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
-	
-	
-
 
 func buttonHover():
 	block_placement = true
@@ -140,11 +133,9 @@ func _input(event):
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			camera.fov = clamp(camera.fov + ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
 	
-		
 	# Skip any input processing related to unit placement when in combat mode
 	if combat_manager.in_combat:
 		return
-	
 	
 	if Input.is_action_just_pressed("interact"):
 		if DataPasser.selectedUnit != null and !block_placement: 
@@ -192,7 +183,7 @@ func _handle_tile_click(mouse_position):
 					if DataPasser.selectedUnit != null:
 						print("Replacing unit on tile with selected unit.")
 						remove_unit(units_on_tiles[clicked_tile])
-						place_unit_on_tile(mouse_position) # <-- Convert mouse_position to Vector2
+						place_unit_on_tile(clicked_position_2d)
 					else:
 						var unit_on_tile = units_on_tiles[clicked_tile]
 						print("Selecting unit on tile:", unit_on_tile.name)
@@ -210,14 +201,13 @@ func _handle_tile_click(mouse_position):
 				else:
 					if placing_unit and DataPasser.selectedUnit != null:
 						print("Placing unit on empty tile...")
-						place_unit_on_tile(mouse_position) # <-- Convert mouse_position to Vector2
+						place_unit_on_tile(clicked_position_2d)
 		else:
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
 
-
-func _get_tile_with_tolerance(position: Vector2, tolerance=0):
+func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	var closest_tile = null
 	var min_distance = INF
 	print("Checking position: ", position)
@@ -243,9 +233,6 @@ func _get_tile_with_tolerance(position: Vector2, tolerance=0):
 		print("No closest tile found within tolerance.")
 
 	return closest_tile if min_distance < TILE_SIZE / 2 + tolerance else null
-
-
-
 
 func move_unit_to_tile(target_tile):
 	if currently_selected_tile and target_tile:
@@ -303,17 +290,16 @@ func _generate_grid():
 			var tile = HEX_TILE.instantiate()
 			add_child(tile)
 
-			# Adjust the tile's position so the top of the tile is at z=0
-			tile.translate(Vector3(tile_coordinates.x, -TILE_HEIGHT, tile_coordinates.y))
+			# Use a consistent Y for all tiles, which can be adjusted later if needed
+			tile.global_transform.origin = Vector3(tile_coordinates.x, 0, tile_coordinates.y)
 
 			tiles[Vector2(x, y)] = tile
 			tile_coordinates.y += TILE_SIZE
 			# Set the default material to blue
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 			tile_index += 1
+			print("Generated tile at: ", tile.global_transform.origin)
 	ai_controller._on_grid_generated()
-
-
 
 func unitPlacer():
 	# Set the flag and assign the unit to place
@@ -357,113 +343,98 @@ func unitPlacer():
 		# Clear the UnitName label if no unit is selected
 		unit_name_label.text = ""
 
-func place_unit_on_tile(mouse_position: Vector2):
+func place_unit_on_tile(clicked_position_2d: Vector2):
 	if placing_unit and unit_to_place:
 		print("Placing unit...")
 		var unit_id = unit_to_place.get_instance_id()
 		
-		var camera = $Camera3D
-		var from = camera.project_ray_origin(mouse_position)
-		var to = from + camera.project_ray_normal(mouse_position) * 50000
-
-		var space_state = get_world_3d().direct_space_state
-		var query = PhysicsRayQueryParameters3D.new()
-		query.from = from
-		query.to = to
-
-		var result = space_state.intersect_ray(query)
-
-		if result:
-			var clicked_position = result.position
-			var closest_tile = _get_tile_with_tolerance(clicked_position)
-			if closest_tile:
-				# Check if the tile already has a unit
-				if units_on_tiles.has(closest_tile):
-					var existing_unit = units_on_tiles[closest_tile]
-					
-					# If the same unit is being placed on the same tile, do nothing
-					if existing_unit.get_instance_id() == unit_id:
-						print("Same unit is already on this tile. No action taken.")
-						return
-					
-					# Otherwise, remove the existing unit and place the new one
-					print("Another unit is on this tile. Removing existing unit...")
-					remove_unit(existing_unit)
-
-				# Check if the unit is already placed elsewhere
-				if placed_units.has(unit_id):
-					print("Unit is already placed on another tile. Removing from previous tile...")
-					remove_unit(placed_units[unit_id])
-
-				# Check if the squad size is exceeded
-				if placed_units_queue.size() >= max_squad_size:
-					print("Max squad size reached. Removing the earliest placed unit...")
-					var oldest_unit = placed_units_queue.pop_front()
-					remove_unit(oldest_unit)
-
-				# Create and place the 3D model at the tile position
-				print("Creating new unit model...")
-				var new_model = Node3D.new()
-				get_parent().add_child(new_model)
-				new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
-				new_model.unitParts = unit_to_place
-				new_model.assembleUnit()
-
-				# Set the scale of the 3D model
-				new_model.scale = unit_scale  # Apply the unit scale
-
-				# Access the foot nodes using the full path
-				var left_foot_node = new_model.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
-				var right_foot_node = new_model.get_node_or_null("chestPivot/rLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
-
-				if left_foot_node and right_foot_node:
-					var left_foot_bbox = left_foot_node.get_aabb()
-					var right_foot_bbox = right_foot_node.get_aabb()
-
-					var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
-
-					new_model.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
-				else:
-					print("Foot nodes not found! Adjusting using the main bounding box.")
-					# Fallback to use the main bounding box
-					var bbox = new_model.get_aabb()
-					new_model.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
-
-				# Store the new unit in the placed_units dictionary and on the tile
-				placed_units[unit_id] = new_model
-				units_on_tiles[closest_tile] = new_model
+		var closest_tile = _get_tile_with_tolerance(clicked_position_2d)
+		if closest_tile:
+			# Check if the tile already has a unit
+			if units_on_tiles.has(closest_tile):
+				var existing_unit = units_on_tiles[closest_tile]
 				
-				# Set the tile color to red since the unit is placed
-				closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+				# If the same unit is being placed on the same tile, do nothing
+				if existing_unit.get_instance_id() == unit_id:
+					print("Same unit is already on this tile. No action taken.")
+					return
 				
-				# Add the unit to the queue to track placement order
-				placed_units_queue.push_back(new_model)
-				
-				# Update the label text
-				_update_units_label()
-				
-				# Clear unit selected
-				unit_to_place = null
-				DataPasser.selectedUnit = null
-				placing_unit = false  # Reset the placing flag
-				unit_name_label.text = ""
-				
-				# If the currently_selected_tile is different from the new tile, revert the old one to blue (if no unit is on it) or red
-				if currently_selected_tile and currently_selected_tile != closest_tile:
-					print("Reverting previously selected tile color.")
-					
-					# Check if there's a unit on the currently selected tile
-					if not units_on_tiles.has(currently_selected_tile):
-						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-					else:
-						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-				
-				# Update the currently selected tile reference
-				currently_selected_tile = closest_tile
+				# Otherwise, remove the existing unit and place the new one
+				print("Another unit is on this tile. Removing existing unit...")
+				remove_unit(existing_unit)
+
+			# Check if the unit is already placed elsewhere
+			if placed_units.has(unit_id):
+				print("Unit is already placed on another tile. Removing from previous tile...")
+				remove_unit(placed_units[unit_id])
+
+			# Check if the squad size is exceeded
+			if placed_units_queue.size() >= max_squad_size:
+				print("Max squad size reached. Removing the earliest placed unit...")
+				var oldest_unit = placed_units_queue.pop_front()
+				remove_unit(oldest_unit)
+
+			# Create and place the 3D model at the tile position
+			print("Creating new unit model...")
+			var new_model = Node3D.new()
+			get_parent().add_child(new_model)
+			new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
+			new_model.unitParts = unit_to_place
+			new_model.assembleUnit()
+
+			# Set the scale of the 3D model
+			new_model.scale = unit_scale  # Apply the unit scale
+
+			# Access the foot nodes using the full path
+			var left_foot_node = new_model.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
+			var right_foot_node = new_model.get_node_or_null("chestPivot/rLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
+
+			if left_foot_node and right_foot_node:
+				var left_foot_bbox = left_foot_node.get_aabb()
+				var right_foot_bbox = right_foot_node.get_aabb()
+
+				var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
+
+				new_model.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
 			else:
-				print("No valid tile found for placement.")
+				print("Foot nodes not found! Adjusting using the main bounding box.")
+				# Fallback to use the main bounding box
+				var bbox = new_model.get_aabb()
+				new_model.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
+
+			# Store the new unit in the placed_units dictionary and on the tile
+			placed_units[unit_id] = new_model
+			units_on_tiles[closest_tile] = new_model
+			
+			# Set the tile color to red since the unit is placed
+			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+			
+			# Add the unit to the queue to track placement order
+			placed_units_queue.push_back(new_model)
+			
+			# Update the label text
+			_update_units_label()
+			
+			# Clear unit selected
+			unit_to_place = null
+			DataPasser.selectedUnit = null
+			placing_unit = false  # Reset the placing flag
+			unit_name_label.text = ""
+			
+			# If the currently_selected_tile is different from the new tile, revert the old one to blue (if no unit is on it) or red
+			if currently_selected_tile and currently_selected_tile != closest_tile:
+				print("Reverting previously selected tile color.")
+				
+				# Check if there's a unit on the currently selected tile
+				if not units_on_tiles.has(currently_selected_tile):
+					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+				else:
+					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+			
+			# Update the currently selected tile reference
+			currently_selected_tile = closest_tile
 		else:
-			print("No raycast hit detected.")
+			print("No valid tile found for placement.")
 	else:
 		print("No unit to place or placing_unit flag is false.")
 
@@ -500,17 +471,15 @@ func _update_units_label():
 func buttonLeft():
 	block_placement = false;
 
-
 func combatInitiate():
 	# prevents initiation of combat without selecting at least one unit
-	
 	
 	if placed_units_queue.size() < 1:
 		return
 	
 	DataPasser.inActiveCombat = true
 	
-	#delects current unit and sets its tile to red
+	#deselect current unit and set its tile to red
 	currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
 	DataPasser.selectedUnit = null
 	unit_name_label.text = ""
@@ -520,11 +489,6 @@ func combatInitiate():
 	$"../CombatGridUI/UnitPlaceUI2".visible = true
 	combat_manager.combatInitiate()
 	print("fite tiem")
-
-func get_all_tiles() -> Array:
-	return tiles.values()
-
-
 
 func fleeCombat():
 	DataPasser.selectedUnit = null
