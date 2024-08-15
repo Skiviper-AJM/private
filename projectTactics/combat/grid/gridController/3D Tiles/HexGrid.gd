@@ -163,16 +163,22 @@ func _handle_tile_click(mouse_position):
 		var clicked_tile = _get_tile_with_tolerance(clicked_position_2d)
 
 		if clicked_tile:
-			# Check if the tile is occupied
+			print("Clicked on tile at position: ", clicked_position_2d)
+			
+			# Check if there is an enemy unit on the clicked tile
 			if units_on_tiles.has(clicked_tile):
 				var unit_on_tile = units_on_tiles[clicked_tile]
-
-				# Suppress interaction if the unit on the tile is an enemy
-				if unit_on_tile.is_in_group("enemy_units"):
-					print("Tile occupied by enemy. Suppressing input.")
-					return  # Do nothing if the tile has an enemy unit
 				
-				# Allow interaction with your own units
+				# Debug print to check if the unit is recognized as an enemy
+				if unit_on_tile.is_in_group("enemy_units"):
+					print("Enemy detected on tile at position: ", clicked_position_2d, " - Suppressing input.")
+					return  # Suppress further actions if an enemy unit is detected
+
+			# If no enemy unit, continue with existing functionality
+			if units_on_tiles.has(clicked_tile):
+				var unit_on_tile = units_on_tiles[clicked_tile]
+				
+				# Handle interaction with your own units
 				if not combat_manager.in_combat:
 					print("Selecting player unit on tile:", unit_on_tile.name)
 					DataPasser.passUnitInfo(unit_on_tile.unitParts)
@@ -194,6 +200,8 @@ func _handle_tile_click(mouse_position):
 					DataPasser.passUnitInfo(unit_on_tile.unitParts)
 					print("Unit selected:", unit_on_tile.unitParts.name)
 			else:
+				print("Tile is empty. Proceeding with placement if applicable.")
+				
 				# Handle empty tile for unit placement
 				if placing_unit and DataPasser.selectedUnit != null:
 					print("Placing unit on empty tile...")
@@ -202,6 +210,7 @@ func _handle_tile_click(mouse_position):
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
+
 
 
 
