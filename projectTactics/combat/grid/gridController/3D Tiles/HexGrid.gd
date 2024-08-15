@@ -212,29 +212,30 @@ func _handle_tile_click(mouse_position):
 func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	var closest_tile = null
 	var min_distance = INF
-	print("Checking position: ", position)
-	
+	var closest_tile_coords = Vector2.INF  # Initialize with a value that can't be a valid tile coordinate
+
 	for key in tiles.keys():
 		var tile = tiles[key]
 		# Convert position (Vector2) to Vector3 for distance calculation
 		var position_3d = Vector3(position.x, 0, position.y)  # Assuming Z is the vertical axis
-		
+
 		# Ensure both are in the same coordinate space (global)
 		var tile_global_position = tile.global_transform.origin
 		var distance = tile_global_position.distance_to(position_3d)
-		
-		print("Tile global position: ", tile_global_position, " Distance: ", distance)
-		
+
 		if distance < min_distance + tolerance:
 			min_distance = distance
 			closest_tile = tile
-	
+			closest_tile_coords = key  # Store the grid coordinates of the closest tile
+
 	if closest_tile:
-		print("Closest tile found at distance: ", min_distance)
+		print("Closest tile coordinates: ", closest_tile_coords)
 	else:
 		print("No closest tile found within tolerance.")
 
 	return closest_tile if min_distance < TILE_SIZE / 2 + tolerance else null
+
+
 
 func move_unit_to_tile(target_tile):
 	if currently_selected_tile and target_tile:
