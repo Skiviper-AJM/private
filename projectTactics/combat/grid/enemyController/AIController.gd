@@ -1,6 +1,6 @@
 extends Node
 
-@export var max_enemies: int = 1
+@export var max_enemies: int = 10
 @export var unit_part_count: int = 4  # This would be the number of different variants you have for each part
 @export var hex_grid: NodePath = "../HexGrid"  # Path to HexGrid node
 
