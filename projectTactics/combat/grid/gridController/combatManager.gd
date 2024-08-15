@@ -59,13 +59,15 @@ func handle_unit_selection():
 
 		if result:
 			var clicked_position = result.position
-			var clicked_tile = player_combat_controller._get_tile_with_tolerance(clicked_position)
+			var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to Vector2
+			var clicked_tile = player_combat_controller._get_tile_with_tolerance(clicked_position_2d)
 			if clicked_tile:
 				handle_tile_click(clicked_tile)
 			else:
 				print("No valid tile found.")
 		else:
 			print("No raycast hit detected.")
+
 
 func handle_tile_click(tile):
 	if in_combat:
