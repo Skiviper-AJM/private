@@ -122,6 +122,7 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 	else:
 		print("Error: Tile not found in the grid for position: ", tile)
 
+
 # Override input handling to prevent player interaction with tiles occupied by enemies
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

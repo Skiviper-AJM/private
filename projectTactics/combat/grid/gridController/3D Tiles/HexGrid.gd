@@ -448,6 +448,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 
 
 
+
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
 	if unit and is_instance_valid(unit):
