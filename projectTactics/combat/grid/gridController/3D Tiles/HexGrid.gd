@@ -161,32 +161,30 @@ func _handle_tile_click(mouse_position):
 		var clicked_position = result.position
 		var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to Vector2
 		var clicked_tile = _get_tile_with_tolerance(clicked_position_2d)
-		
+
 		if clicked_tile:
-			if combat_manager.in_combat:
-				if units_on_tiles.has(clicked_tile):
-					# Select the unit on the tile and highlight tiles around it
-					var unit_on_tile = units_on_tiles[clicked_tile]
+			# Check if the tile has a unit on it
+			if units_on_tiles.has(clicked_tile):
+				var unit_on_tile = units_on_tiles[clicked_tile]
+
+				# Check if the unit is an enemy
+				if unit_on_tile.is_in_group("enemy_units"):
+					print("Enemy unit detected on the tile. No action taken.")
+					return
+
+				# Handle combat unit selection
+				if combat_manager.in_combat:
 					combat_manager._handle_unit_click(unit_on_tile)
-					# Ensure the unit is correctly set
 					DataPasser.passUnitInfo(unit_on_tile.unitParts)
 					print("Unit selected:", unit_on_tile.unitParts.name)
-				elif DataPasser.selectedUnit != null:
-					# Move the selected unit to the clicked tile
-					print("Moving selected unit:", DataPasser.selectedUnit.name)
-					combat_manager._move_unit_to_tile(DataPasser.selectedUnit, clicked_tile)
 				else:
-					print("No unit selected to move.")
-			else:
-				# Non-combat mode logic remains unchanged
-				if units_on_tiles.has(clicked_tile):
+					# Handle non-combat unit selection and placement
 					if DataPasser.selectedUnit != null:
 						print("Replacing unit on tile with selected unit.")
 						remove_unit(units_on_tiles[clicked_tile])
 						place_unit_on_tile(clicked_position_2d)
 					else:
-						var unit_on_tile = units_on_tiles[clicked_tile]
-						print("Selecting unit on tile:", unit_on_tile.name)
+						print("Selecting player unit on tile:", unit_on_tile.name)
 						DataPasser.passUnitInfo(unit_on_tile.unitParts)
 						unit_to_place = unit_on_tile.unitParts
 						placing_unit = false
@@ -198,14 +196,18 @@ func _handle_tile_click(mouse_position):
 								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 						clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 						currently_selected_tile = clicked_tile
-				else:
-					if placing_unit and DataPasser.selectedUnit != null:
-						print("Placing unit on empty tile...")
-						place_unit_on_tile(clicked_position_2d)
+			else:
+				# Handle empty tile for unit placement
+				if placing_unit and DataPasser.selectedUnit != null:
+					print("Placing unit on empty tile...")
+					place_unit_on_tile(clicked_position_2d)
 		else:
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
+
+
+
 
 func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	var closest_tile = null
@@ -347,20 +349,25 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 	if placing_unit and unit_to_place:
 		print("Placing unit...")
 		var unit_id = unit_to_place.get_instance_id()
-		
+
 		var closest_tile = _get_tile_with_tolerance(clicked_position_2d)
 		if closest_tile:
 			# Check if the tile already has a unit
 			if units_on_tiles.has(closest_tile):
 				var existing_unit = units_on_tiles[closest_tile]
-				
+
+				# If the tile has an enemy unit, do nothing
+				if existing_unit.is_in_group("enemy_units"):
+					print("Enemy unit detected on the tile. Cannot place unit here.")
+					return
+
 				# If the same unit is being placed on the same tile, do nothing
 				if existing_unit.get_instance_id() == unit_id:
 					print("Same unit is already on this tile. No action taken.")
 					return
-				
+
 				# Otherwise, remove the existing unit and place the new one
-				print("Another unit is on this tile. Removing existing unit...")
+				print("Another player unit is on this tile. Replacing it...")
 				remove_unit(existing_unit)
 
 			# Check if the unit is already placed elsewhere
@@ -405,38 +412,41 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			# Store the new unit in the placed_units dictionary and on the tile
 			placed_units[unit_id] = new_model
 			units_on_tiles[closest_tile] = new_model
-			
+
 			# Set the tile color to red since the unit is placed
 			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-			
+
 			# Add the unit to the queue to track placement order
 			placed_units_queue.push_back(new_model)
-			
+
 			# Update the label text
 			_update_units_label()
-			
+
 			# Clear unit selected
 			unit_to_place = null
 			DataPasser.selectedUnit = null
 			placing_unit = false  # Reset the placing flag
 			unit_name_label.text = ""
-			
+
 			# If the currently_selected_tile is different from the new tile, revert the old one to blue (if no unit is on it) or red
 			if currently_selected_tile and currently_selected_tile != closest_tile:
 				print("Reverting previously selected tile color.")
-				
+
 				# Check if there's a unit on the currently selected tile
 				if not units_on_tiles.has(currently_selected_tile):
 					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 				else:
 					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-			
+
 			# Update the currently selected tile reference
 			currently_selected_tile = closest_tile
 		else:
 			print("No valid tile found for placement.")
 	else:
 		print("No unit to place or placing_unit flag is false.")
+
+
+
 
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
