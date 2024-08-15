@@ -1,7 +1,7 @@
 extends Node
 
 # Parameters you can adjust as needed
-@export var max_enemies: int = 5
+@export var max_enemies: int = 1
 @export var unit_part_count: int = 4  # Number of parts in the unit (assuming it's consistent across all units)
 @export var hex_grid: NodePath  # The path to your HexGrid node
 
@@ -13,7 +13,6 @@ func _on_grid_generated():
 		print("HexGrid not found!")
 		return
 	
-	var occupied_tiles = []
 	var num_enemies = randi() % max_enemies + 1
 	print("Generating ", num_enemies, " enemies.")
 	
@@ -21,35 +20,36 @@ func _on_grid_generated():
 		print("Generating enemy ", i + 1)
 		var enemy_unit = generate_random_enemy_instance()
 		
-		var tile = get_random_unoccupied_tile(occupied_tiles)
-		if tile:
-			occupied_tiles.append(tile)
-			print("Placing enemy on tile: ", tile)
-			place_enemy_on_tile(enemy_unit, tile)
-		else:
-			print("No available tile found for enemy ", i + 1)
+		# Place enemy at fixed position (0,0)
+		var tile_position = Vector2.ZERO
+		print("Placing enemy at fixed position: ", tile_position)
+		place_enemy_on_tile(enemy_unit, tile_position)
 
 # Generates a random enemy instance using the unit resource
 func generate_random_enemy_instance() -> Node3D:
 	print("Creating new enemy unit instance...")
+	
 	# Create a new Node3D to act as the root for the unit
 	var unit_instance = Node3D.new()
 	
-	# Apply the unitAssembler script to this node
+	# Apply the UnitAssembler script to this node
 	unit_instance.set_script(load("res://combat/resources/unitAssembler.gd"))
 	
+	# Check if the unit assembler script is applied correctly
+	if not unit_instance.has_method("assembleUnit"):
+		print("Failed to load UnitAssembler script or assembleUnit method not found.")
+		return null
+
 	# Initialize unitParts with a new instance of your custom Unit resource
 	unit_instance.unitParts = preload("res://combat/preassembledUnits/starterUnit.tres").duplicate()
 
-	# Set up random parts for the unit, assuming unitParts expects Node3D instances
-	unit_instance.unitParts.head = instantiate_part("head")
-	unit_instance.unitParts.chest = instantiate_part("chest")
-	unit_instance.unitParts.arm = instantiate_part("arm")
-	unit_instance.unitParts.leg = instantiate_part("leg")
-	unit_instance.unitParts.core = instantiate_part("core")
-	
 	# Assemble the unit with random parts
 	unit_instance.assembleUnit()
+	
+	# Verify that the hierarchy was created correctly
+	if unit_instance.get_child_count() == 0:
+		print("Error: UnitAssembler did not create any child nodes.")
+		return null
 	
 	print("Enemy unit created and assembled.")
 	
@@ -64,38 +64,21 @@ func instantiate_part(part_type: String) -> Node3D:
 
 	var part_instance = part_scene.instantiate()
 	print("Part instantiated: ", part_instance)
-	return part_instance  # Instantiate the scene
-
-# Finds a random unoccupied tile
-func get_random_unoccupied_tile(occupied_tiles: Array) -> Vector2:
-	print("Fetching all tiles from grid...")
-	var all_tiles = grid_controller.get_all_tiles()  # Assuming this returns an Array of tile nodes
-	print("Total available tiles: ", all_tiles.size())
-
-	var unoccupied_tiles = all_tiles.filter(func(tile): return !occupied_tiles.has(Vector2(round(tile.position.x), round(tile.position.z))))
-
-	if unoccupied_tiles.size() > 0:
-		var chosen_tile = unoccupied_tiles[randi() % unoccupied_tiles.size()]
-		print("Chosen tile for enemy: ", chosen_tile)
-		return Vector2(round(chosen_tile.position.x), round(chosen_tile.position.z))  # Convert Vector3 to Vector2 and round to nearest integer
-	else:
-		print("No unoccupied tiles found!")
-	return Vector2.ZERO
+	return part_instance
 
 # Places the enemy on the chosen tile
 func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
-	# Use rounded tile coordinates to find the tile in the dictionary
-	var rounded_tile = Vector2(round(tile.x), round(tile.y))
+	# Use fixed position (0,0) for the tile
+	var fixed_tile_position = Vector2.ZERO
 	
-	if grid_controller.tiles.has(rounded_tile):
-		var target_tile = grid_controller.tiles[rounded_tile]
+	if grid_controller.tiles.has(fixed_tile_position):
+		var target_tile = grid_controller.tiles[fixed_tile_position]
 		
 		# Scale the enemy unit appropriately
 		enemy_unit.scale = grid_controller.unit_scale  # Use the same unit scale as the player's units
 		
 		# Access the foot nodes or the main geometry to get the bounding box
 		var mesh_instance = enemy_unit.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
-
 
 		if mesh_instance:
 			var bbox = mesh_instance.get_aabb()
@@ -110,4 +93,4 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 		
 		print("Enemy unit placed on tile at position: ", enemy_unit.position)
 	else:
-		print("Error: Tile not found in the grid for position: ", rounded_tile)
+		print("Error: Tile not found in the grid for position: ", fixed_tile_position)
