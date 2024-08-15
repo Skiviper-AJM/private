@@ -163,14 +163,14 @@ func _handle_tile_click(mouse_position):
 		var clicked_tile = _get_tile_with_tolerance(clicked_position_2d)
 
 		if clicked_tile:
-			# Check if the tile has a unit on it
+			# Check if the tile is occupied
 			if units_on_tiles.has(clicked_tile):
 				var unit_on_tile = units_on_tiles[clicked_tile]
 
 				# Suppress interaction if the unit on the tile is an enemy
 				if unit_on_tile.is_in_group("enemy_units"):
-					print("Enemy unit detected on the tile. Input suppressed.")
-					return  # Suppress input for enemy units
+					print("Tile occupied by enemy. Suppressing input.")
+					return  # Do nothing if the tile has an enemy unit
 				
 				# Allow interaction with your own units
 				if not combat_manager.in_combat:
@@ -179,7 +179,7 @@ func _handle_tile_click(mouse_position):
 					unit_to_place = unit_on_tile.unitParts
 					placing_unit = false
 					unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
-					
+
 					# Update the selected tile's visual
 					if currently_selected_tile != null:
 						if units_on_tiles.has(currently_selected_tile):
@@ -202,7 +202,6 @@ func _handle_tile_click(mouse_position):
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
-
 
 
 
@@ -345,7 +344,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 	if placing_unit and unit_to_place:
 		print("Placing unit...")
 		var unit_id = unit_to_place.get_instance_id()
-		
+
 		var closest_tile = _get_tile_with_tolerance(clicked_position_2d)
 		if closest_tile:
 			# Check if the tile already has a unit
@@ -361,7 +360,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 				if existing_unit.get_instance_id() == unit_id:
 					print("Same unit is already on this tile. No action taken.")
 					return
-				
+
 				# Otherwise, remove the existing unit and place the new one
 				print("Another unit is on this tile. Removing existing unit...")
 				remove_unit(existing_unit)
@@ -370,12 +369,6 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			if placed_units.has(unit_id):
 				print("Unit is already placed on another tile. Removing from previous tile...")
 				remove_unit(placed_units[unit_id])
-
-			# Check if the squad size is exceeded
-			if placed_units_queue.size() >= max_squad_size:
-				print("Max squad size reached. Removing the earliest placed unit...")
-				var oldest_unit = placed_units_queue.pop_front()
-				remove_unit(oldest_unit)
 
 			# Create and place the 3D model at the tile position
 			print("Creating new unit model...")
@@ -408,41 +401,41 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			# Store the new unit in the placed_units dictionary and on the tile
 			placed_units[unit_id] = new_model
 			units_on_tiles[closest_tile] = new_model
-			
+
+			# Add to player group
+			new_model.add_to_group("player_units")
+
 			# Set the tile color to red since the unit is placed
 			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-			
+
 			# Add the unit to the queue to track placement order
 			placed_units_queue.push_back(new_model)
-			
+
 			# Update the label text
 			_update_units_label()
-			
+
 			# Clear unit selected
 			unit_to_place = null
 			DataPasser.selectedUnit = null
 			placing_unit = false  # Reset the placing flag
 			unit_name_label.text = ""
-			
+
 			# If the currently_selected_tile is different from the new tile, revert the old one to blue (if no unit is on it) or red
 			if currently_selected_tile and currently_selected_tile != closest_tile:
 				print("Reverting previously selected tile color.")
-				
+
 				# Check if there's a unit on the currently selected tile
 				if not units_on_tiles.has(currently_selected_tile):
 					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 				else:
 					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-			
+
 			# Update the currently selected tile reference
 			currently_selected_tile = closest_tile
 		else:
 			print("No valid tile found for placement.")
 	else:
 		print("No unit to place or placing_unit flag is false.")
-
-
-
 
 
 

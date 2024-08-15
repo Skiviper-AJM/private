@@ -96,10 +96,10 @@ func find_free_tile() -> Vector2:
 func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 	if grid_controller.tiles.has(tile):
 		var target_tile = grid_controller.tiles[tile]
-		
-		enemy_unit.scale = grid_controller.unit_scale  # Use the same unit scale as the player's units
 
-		# Access the foot nodes or the main geometry to get the bounding box
+		enemy_unit.scale = grid_controller.unit_scale
+
+		# Position the enemy unit on the tile
 		var left_foot_node = enemy_unit.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
 		var right_foot_node = enemy_unit.get_node_or_null("chestPivot/rLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
 
@@ -109,17 +109,16 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 			var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
 			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
 		else:
-			print("Foot nodes not found! Adjusting using a default offset.")
-			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, 1.1, 0)  # Fallback position adjustment
+			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, 1.1, 0)
 		
+		# Add the enemy to the HexGrid and mark the tile as occupied
 		grid_controller.add_child(enemy_unit)
-		
+		grid_controller.units_on_tiles[tile] = enemy_unit  # Track the enemy unit on the tile
+
+		# Update the tile's appearance to indicate it's occupied by an enemy
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = PURPLE_MATERIAL
-		
-		# Update the units_on_tiles dictionary
-		grid_controller.units_on_tiles[tile] = enemy_unit
-		print("Enemy unit placed on tile at position: ", tile, " Unit: ", enemy_unit)
-		print("Updated units_on_tiles: ", grid_controller.units_on_tiles)
+
+		print("Enemy unit placed on tile at position: ", tile, " with coordinates: ", target_tile.global_transform.origin)
 	else:
 		print("Error: Tile not found in the grid for position: ", tile)
 
