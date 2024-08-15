@@ -16,6 +16,10 @@ script = ExtResource("2_icscm")
 
 [node name="HexGrid" type="Node3D" parent="."]
 script = ExtResource("1_nbd6x")
+TILE_SIZE = null
+unit_scale = null
+grid_size = 20
+max_squad_size = null
 
 [node name="Camera3D" type="Camera3D" parent="HexGrid"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 3, 5, 3)

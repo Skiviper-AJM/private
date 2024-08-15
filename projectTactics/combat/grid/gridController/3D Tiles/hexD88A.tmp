@@ -13,6 +13,9 @@ script = ExtResource("1_dxr7s")
 
 [node name="aiController" type="Node" parent="."]
 script = ExtResource("2_icscm")
+max_enemies = null
+unit_part_count = null
+hex_grid = null
 
 [node name="HexGrid" type="Node3D" parent="."]
 script = ExtResource("1_nbd6x")

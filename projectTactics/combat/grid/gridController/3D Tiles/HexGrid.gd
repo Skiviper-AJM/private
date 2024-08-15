@@ -24,7 +24,7 @@ var currently_selected_tile = null
 @onready var ai_controller = $"../aiController"
 
 @export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
-@export_range(2, 35) var grid_size: int = 6 #grid size is calculated as 2xgrid_size+1 in a square shape
+@export_range(2, 35) var grid_size: int = 6 #controlls the 'radius' of the square grid generated
 
 
 @export var max_squad_size: int = 2  # Default max squad size
