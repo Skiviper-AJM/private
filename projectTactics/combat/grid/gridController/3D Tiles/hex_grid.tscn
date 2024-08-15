@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://cdaoc6h2v1pg2"]
+[gd_scene load_steps=6 format=3 uid="uid://cdaoc6h2v1pg2"]
 
 [ext_resource type="Script" path="res://combat/grid/gridController/combatManager.gd" id="1_dxr7s"]
 [ext_resource type="Script" path="res://combat/grid/gridController/3D Tiles/HexGrid.gd" id="1_nbd6x"]
+[ext_resource type="Script" path="res://combat/grid/enemyController/AIController.gd" id="2_icscm"]
 [ext_resource type="PackedScene" uid="uid://bpoag1rko7t2q" path="res://hubs/player/scenes/player.tscn" id="2_m6smf"]
 [ext_resource type="Script" path="res://combat/grid/gridController/playerCombat.gd" id="3_30t6i"]
 
@@ -9,6 +10,9 @@
 
 [node name="combatManager" type="Node" parent="."]
 script = ExtResource("1_dxr7s")
+
+[node name="aiController" type="Node" parent="."]
+script = ExtResource("2_icscm")
 
 [node name="HexGrid" type="Node3D" parent="."]
 script = ExtResource("1_nbd6x")

@@ -21,6 +21,7 @@ const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tsc
 var currently_selected_tile = null
 
 @onready var combat_manager = $"../combatManager"
+@onready var ai_controller = $"../aiController"
 
 @export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
 @export_range(2, 35) var grid_size: int = 10
@@ -64,6 +65,10 @@ var placed_units_queue := []
 func _ready():
 	DataPasser.selectedUnit = null
 	DataPasser.inActiveCombat = false
+	
+	
+	# Ensure this method triggers the grid generation
+
 	_generate_grid()
 	_update_units_label()  # Initialize the label text
 	var camera = $Camera3D
@@ -76,12 +81,11 @@ func _ready():
 	playerInfo = FM.playerData
 	var units = playerInfo.inventory.keys().filter(func(item):
 		return item.itemType == ItemTypes.UNIT
-	)
-	
-	
+	)	
 	if units.size() == 0:
 		%noUnits.visible = true
 		$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
+	
 	
 
 
@@ -284,6 +288,7 @@ func _generate_grid():
 			# Set the default material to blue
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 			tile_index += 1
+	ai_controller._on_grid_generated()
 
 func unitPlacer():
 	# Set the flag and assign the unit to place
