@@ -288,7 +288,9 @@ func _generate_grid():
 			# Set the default material to blue
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 			tile_index += 1
-	ai_controller._on_grid_generated()
+	#ai_controller._on_grid_generated()
+
+
 
 func unitPlacer():
 	# Set the flag and assign the unit to place

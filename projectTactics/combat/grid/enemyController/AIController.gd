@@ -14,17 +14,24 @@ func _on_grid_generated():
 		return
 	
 	var occupied_tiles = []
-
-	for i in range(randi() % max_enemies + 1):  # Generates between 1 and max_enemies
+	var num_enemies = randi() % max_enemies + 1
+	print("Generating ", num_enemies, " enemies.")
+	
+	for i in range(num_enemies):  # Generates between 1 and max_enemies
+		print("Generating enemy ", i + 1)
 		var enemy_unit = generate_random_enemy_instance()
 		
 		var tile = get_random_unoccupied_tile(occupied_tiles)
 		if tile:
 			occupied_tiles.append(tile)
+			print("Placing enemy on tile: ", tile)
 			place_enemy_on_tile(enemy_unit, tile)
+		else:
+			print("No available tile found for enemy ", i + 1)
 
 # Generates a random enemy instance using the unit resource
 func generate_random_enemy_instance() -> Node3D:
+	print("Creating new enemy unit instance...")
 	# Create a new Node3D to act as the root for the unit
 	var unit_instance = Node3D.new()
 	
@@ -44,34 +51,55 @@ func generate_random_enemy_instance() -> Node3D:
 	# Assemble the unit with random parts
 	unit_instance.assembleUnit()
 	
+	print("Enemy unit created and assembled.")
+	
 	return unit_instance
 
 # Helper function to instantiate the part scene
 func instantiate_part(part_type: String) -> Node3D:
+	print("Instantiating part: ", part_type)
 	var part_index = randi() % unit_part_count + 1
 	var part_type_capitalized = part_type.capitalize()
 	var part_scene = load("res://combat/parts/%s/unit%02d%s.tscn" % [part_type, part_index, part_type_capitalized])
 
-	return part_scene.instantiate()  # Instantiate the scene
-
+	var part_instance = part_scene.instantiate()
+	print("Part instantiated: ", part_instance)
+	return part_instance  # Instantiate the scene
 
 # Finds a random unoccupied tile
 func get_random_unoccupied_tile(occupied_tiles: Array) -> Vector2:
+	print("Fetching all tiles from grid...")
 	var all_tiles = grid_controller.get_all_tiles()  # Assuming this returns an Array of tile nodes
-	var unoccupied_tiles = all_tiles.filter(func(tile): return !occupied_tiles.has(Vector2(tile.position.x, tile.position.z)))
+	print("Total available tiles: ", all_tiles.size())
+
+	var unoccupied_tiles = all_tiles.filter(func(tile): return !occupied_tiles.has(Vector2(round(tile.position.x), round(tile.position.z))))
 
 	if unoccupied_tiles.size() > 0:
 		var chosen_tile = unoccupied_tiles[randi() % unoccupied_tiles.size()]
-		return Vector2(chosen_tile.position.x, chosen_tile.position.z)  # Convert Vector3 to Vector2
+		print("Chosen tile for enemy: ", chosen_tile)
+		return Vector2(round(chosen_tile.position.x), round(chosen_tile.position.z))  # Convert Vector3 to Vector2 and round to nearest integer
+	else:
+		print("No unoccupied tiles found!")
 	return Vector2.ZERO
 
-
-
-
+# Places the enemy on the chosen tile
 func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
-	if grid_controller.tiles.has(tile):
-		var target_tile = grid_controller.tiles[tile]
-		enemy_unit.position = target_tile.global_transform.origin  # Directly use the tile's position
-		grid_controller.add_child(enemy_unit)  # Adds the enemy to the HexGrid scene
+	# Use rounded tile coordinates to find the tile in the dictionary
+	var rounded_tile = Vector2(round(tile.x), round(tile.y))
+	
+	if grid_controller.tiles.has(rounded_tile):
+		var target_tile = grid_controller.tiles[rounded_tile]
+		
+		# Scale the enemy unit appropriately
+		enemy_unit.scale = grid_controller.unit_scale  # Use the same unit scale as the player's units
+		
+		# Align the unit's position with the tile
+		var bbox = enemy_unit.get_aabb()
+		enemy_unit.position = target_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
+		
+		# Add the enemy to the grid
+		grid_controller.add_child(enemy_unit)
+		
+		print("Enemy unit placed on tile at position: ", enemy_unit.position)
 	else:
-		print("Error: Tile not found in the grid!")
+		print("Error: Tile not found in the grid for position: ", rounded_tile)
