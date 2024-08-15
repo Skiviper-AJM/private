@@ -63,14 +63,18 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 		var target_tile = grid_controller.tiles[tile]
 		
 		enemy_unit.scale = grid_controller.unit_scale  # Use the same unit scale as the player's units
-		
-		var mesh_instance = enemy_unit.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
 
-		if mesh_instance:
-			var bbox = mesh_instance.get_aabb()
-			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
+		# Access the foot nodes or the main geometry to get the bounding box
+		var left_foot_node = enemy_unit.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
+		var right_foot_node = enemy_unit.get_node_or_null("chestPivot/rLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
+
+		if left_foot_node and right_foot_node:
+			var left_foot_bbox = left_foot_node.get_aabb()
+			var right_foot_bbox = right_foot_node.get_aabb()
+			var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
+			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
 		else:
-			print("MeshInstance3D not found! Adjusting using a default offset.")
+			print("Foot nodes not found! Adjusting using a default offset.")
 			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, 1.1, 0)  # Fallback position adjustment
 		
 		grid_controller.add_child(enemy_unit)
@@ -84,7 +88,6 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 		print("Error: Tile not found in the grid for position: ", tile)
 
 # Override input handling to prevent player interaction with tiles occupied by enemies
-# Override input handling to prevent player interaction with tiles occupied by enemies
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		var mouse_position = event.position
@@ -96,5 +99,3 @@ func _input(event):
 			if unit_on_tile != null and unit_on_tile.get_script().get_path() == "res://combat/resources/unitAssembler.gd":
 				print("Tile with an enemy unit clicked. Blocking interaction.")
 				return
-		
-
