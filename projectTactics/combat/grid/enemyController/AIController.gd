@@ -53,12 +53,16 @@ func generate_random_enemy_instance() -> Node3D:
 
 	unit_instance.assembleUnit()
 
+	# Add the unit to the 'enemy_units' group
+	unit_instance.add_to_group("enemy_units")
+
 	if unit_instance.get_child_count() == 0:
 		print("Error: UnitAssembler did not create any child nodes.")
 		return null
 
 	print("Enemy unit created and assembled with random parts.")
 	return unit_instance
+
 
 # Helper function to load a random part
 func load_random_part(part_name: String) -> Resource:
@@ -71,12 +75,22 @@ func load_random_part(part_name: String) -> Resource:
 
 
 
-# Function to find a free tile for placing an enemy
+# Function to find a random free tile for placing an enemy
 func find_free_tile() -> Vector2:
+	var free_tiles = []
+	
+	# Collect all free tiles
 	for tile_key in grid_controller.tiles.keys():
 		if not grid_controller.units_on_tiles.has(tile_key):
-			return tile_key
-	return Vector2(-1, -1)  # Fallback value if no free tile is found
+			free_tiles.append(tile_key)
+	
+	# If there are no free tiles, return a fallback value
+	if free_tiles.size() == 0:
+		return Vector2(-1, -1)
+	
+	# Pick a random tile from the list of free tiles
+	return free_tiles[randi_range(0, free_tiles.size() - 1)]
+
 
 # Places the enemy on the chosen tile
 func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
