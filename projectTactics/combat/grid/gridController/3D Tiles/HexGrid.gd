@@ -168,7 +168,9 @@ func _handle_tile_click(mouse_position):
 
 	if result:
 		var clicked_position = result.position
-		var clicked_tile = _get_tile_with_tolerance(clicked_position)
+		var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to Vector2
+		var clicked_tile = _get_tile_with_tolerance(clicked_position_2d)
+		
 		if clicked_tile:
 			if combat_manager.in_combat:
 				if units_on_tiles.has(clicked_tile):
@@ -214,16 +216,20 @@ func _handle_tile_click(mouse_position):
 	else:
 		print("No raycast hit detected.")
 
-func _get_tile_with_tolerance(position, tolerance=0):
+
+func _get_tile_with_tolerance(position: Vector2, tolerance=0):
 	var closest_tile = null
 	var min_distance = INF
 	for key in tiles.keys():
 		var tile = tiles[key]
-		var distance = tile.global_transform.origin.distance_to(position)
+		# Convert position (Vector2) to Vector3
+		var position_3d = Vector3(position.x, 0, position.y)  # Assuming Z is the vertical axis
+		var distance = tile.global_transform.origin.distance_to(position_3d)
 		if distance < min_distance + tolerance:
 			min_distance = distance
 			closest_tile = tile
 	return closest_tile if min_distance < TILE_SIZE / 2 + tolerance else null
+
 
 func move_unit_to_tile(target_tile):
 	if currently_selected_tile and target_tile:
