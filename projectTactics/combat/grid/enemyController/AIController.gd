@@ -116,11 +116,13 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 		
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = PURPLE_MATERIAL
 		
+		# Update the units_on_tiles dictionary
 		grid_controller.units_on_tiles[tile] = enemy_unit
-		
-		print("Enemy unit placed on tile at position: ", enemy_unit.position)
+		print("Enemy unit placed on tile at position: ", tile, " Unit: ", enemy_unit)
+		print("Updated units_on_tiles: ", grid_controller.units_on_tiles)
 	else:
 		print("Error: Tile not found in the grid for position: ", tile)
+
 
 
 # Override input handling to prevent player interaction with tiles occupied by enemies

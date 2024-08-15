@@ -205,6 +205,7 @@ func _handle_tile_click(mouse_position):
 
 
 
+
 func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	var closest_tile: Node3D = null
 	var min_distance: float = INF
