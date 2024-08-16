@@ -33,6 +33,8 @@ var currently_selected_tile = null
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 
 var block_placement: bool = false  # Flag to block tile selection and unit placement
+var enemyOccupied: bool = false  # Flag to block tile selection and unit placement
+
 
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
 const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
@@ -137,13 +139,15 @@ func _input(event):
 	if combat_manager.in_combat:
 		return
 	
-	if Input.is_action_just_pressed("interact"):
-		if DataPasser.selectedUnit != null and !block_placement: 
-			unitPlacer()
-			
-	# Handle tile clicking
+		# Handle tile clicking
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and !block_placement:
 		_handle_tile_click(event.position)
+	
+	if Input.is_action_just_pressed("interact"):
+		if DataPasser.selectedUnit != null and !block_placement and !enemyOccupied: 
+			unitPlacer()
+	
+
 
 func _handle_tile_click(mouse_position):
 	var camera = $Camera3D
@@ -171,8 +175,11 @@ func _handle_tile_click(mouse_position):
 				
 				# Debug print to check if the unit is recognized as an enemy
 				if unit_on_tile.is_in_group("enemy_units"):
+					enemyOccupied = true
 					print("Enemy detected on tile at position: ", clicked_position_2d, " - Suppressing input.")
 					return  # Suppress further actions if an enemy unit is detected
+				else:
+					enemyOccupied = false
 
 			# If no enemy unit, continue with existing functionality
 			if units_on_tiles.has(clicked_tile):

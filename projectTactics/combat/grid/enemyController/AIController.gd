@@ -45,8 +45,8 @@ func generate_random_enemy_instance() -> Node3D:
 	unit_instance.unitParts.core = load_random_part("core")
 
 	unit_instance.assembleUnit()
-	unit_instance.add_to_group("enemy_units")
 
+	# IMPORTANT: Do not add to the group here; it should be added after the node is in the scene tree.
 	if unit_instance.get_child_count() == 0:
 		print("Error: UnitAssembler did not create any child nodes.")
 		return null
@@ -94,26 +94,22 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile_position: Vector2):
 		else:
 			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, 1.1, 0)
 		
+		# IMPORTANT: Add the unit to the scene tree before adding it to the group.
 		grid_controller.add_child(enemy_unit)
 		
 		# Mark the tile as occupied by this enemy
 		grid_controller.units_on_tiles[tile_position] = enemy_unit
+		
+		# Add to enemy units group after adding to the scene tree
 		enemy_unit.add_to_group("enemy_units")
+
+		# Verify that the unit was correctly added to the group
+		if enemy_unit.is_in_group("enemy_units"):
+			print("Enemy unit successfully added to 'enemy_units' group.")
+		else:
+			print("Failed to add enemy unit to 'enemy_units' group.")
 
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = PURPLE_MATERIAL
 		print("Enemy unit placed on tile at position: ", tile_position, " with coordinates: ", target_tile.global_transform.origin)
 	else:
 		print("Error: Tile not found in the grid for position: ", tile_position)
-
-
-func _input(event):
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		var mouse_position = event.position
-		var clicked_tile = grid_controller._get_tile_with_tolerance(mouse_position)
-
-		if clicked_tile and grid_controller.units_on_tiles.has(clicked_tile):
-			var unit_on_tile = grid_controller.units_on_tiles[clicked_tile]
-			
-			if unit_on_tile != null and unit_on_tile.is_in_group("enemy_units"):
-				print("Tile with an enemy unit clicked. Blocking interaction.")
-				return
