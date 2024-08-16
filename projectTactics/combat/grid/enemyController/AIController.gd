@@ -72,9 +72,15 @@ func find_free_tile() -> Vector2:
 	
 	return free_tiles[randi_range(0, free_tiles.size() - 1)]
 
-func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
-	if grid_controller.tiles.has(tile):
-		var target_tile = grid_controller.tiles[tile]
+func place_enemy_on_tile(enemy_unit: Node3D, tile_position: Vector2):
+	if grid_controller.tiles.has(tile_position):
+		var target_tile = grid_controller.tiles[tile_position]
+		
+		# Check if the tile is already occupied by another unit
+		if grid_controller.units_on_tiles.has(tile_position):
+			print("Tile at position ", tile_position, " is already occupied. Cannot place enemy.")
+			return
+		
 		enemy_unit.scale = grid_controller.unit_scale
 
 		var left_foot_node = enemy_unit.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
@@ -89,12 +95,16 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile: Vector2):
 			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, 1.1, 0)
 		
 		grid_controller.add_child(enemy_unit)
-		grid_controller.units_on_tiles[tile] = enemy_unit
+		
+		# Mark the tile as occupied by this enemy
+		grid_controller.units_on_tiles[tile_position] = enemy_unit
+		enemy_unit.add_to_group("enemy_units")
 
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = PURPLE_MATERIAL
-		print("Enemy unit placed on tile at position: ", tile, " with coordinates: ", target_tile.global_transform.origin)
+		print("Enemy unit placed on tile at position: ", tile_position, " with coordinates: ", target_tile.global_transform.origin)
 	else:
-		print("Error: Tile not found in the grid for position: ", tile)
+		print("Error: Tile not found in the grid for position: ", tile_position)
+
 
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
