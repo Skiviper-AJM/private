@@ -349,6 +349,17 @@ func unitPlacer():
 		# Clear the UnitName label if no unit is selected
 		unit_name_label.text = ""
 
+# Add this method to track enemy positions
+func add_enemy_to_grid(enemy_unit: Node3D, tile_position: Vector2):
+	if not units_on_tiles.has(tile_position):
+		units_on_tiles[tile_position] = enemy_unit
+		enemy_unit.add_to_group("enemy_units")
+
+func remove_enemy_from_grid(tile_position: Vector2):
+	if units_on_tiles.has(tile_position):
+		units_on_tiles.erase(tile_position)
+
+# Modify your place_unit_on_tile function to include an enemy check
 func place_unit_on_tile(clicked_position_2d: Vector2):
 	if placing_unit and unit_to_place:
 		print("Placing unit...")

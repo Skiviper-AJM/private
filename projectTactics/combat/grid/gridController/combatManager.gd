@@ -198,6 +198,13 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
 
+	# Prevent moving onto a tile occupied by an enemy
+	if player_combat_controller.units_on_tiles.has(target_tile):
+		var existing_unit = player_combat_controller.units_on_tiles[target_tile]
+		if existing_unit.is_in_group("enemy_units"):
+			print("Cannot move to a tile occupied by an enemy unit.")
+			return
+
 	# Calculate the move distance in terms of tile units
 	var start_position = unit_instance.global_transform.origin
 	var target_position = target_tile.global_transform.origin
@@ -313,6 +320,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# The unit will remain selected after its move is completed.
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
