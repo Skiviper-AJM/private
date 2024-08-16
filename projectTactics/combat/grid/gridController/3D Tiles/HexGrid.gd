@@ -359,7 +359,6 @@ func remove_enemy_from_grid(tile_position: Vector2):
 	if units_on_tiles.has(tile_position):
 		units_on_tiles.erase(tile_position)
 
-# Modify your place_unit_on_tile function to include an enemy check
 func place_unit_on_tile(clicked_position_2d: Vector2):
 	if placing_unit and unit_to_place:
 		print("Placing unit...")
@@ -385,10 +384,19 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 				print("Another unit is on this tile. Removing existing unit...")
 				remove_unit(existing_unit)
 
-			# Check if the unit is already placed elsewhere
-			if placed_units.has(unit_id):
-				print("Unit is already placed on another tile. Removing from previous tile...")
+			# Temporarily remove the unit from the queue if it’s already placed
+			var was_unit_already_placed = placed_units.has(unit_id)
+			if was_unit_already_placed:
+				print("Unit is already placed, removing from current position.")
+				placed_units_queue.erase(placed_units[unit_id])
 				remove_unit(placed_units[unit_id])
+
+			# Check if the max squad size has been reached after accounting for the move
+			if placed_units_queue.size() >= max_squad_size:
+				# If the limit is reached, remove the oldest placed unit
+				var oldest_unit = placed_units_queue.pop_front()
+				remove_unit(oldest_unit)
+				print("Max squad size reached. Removing the oldest placed unit.")
 
 			# Create and place the 3D model at the tile position
 			print("Creating new unit model...")
@@ -428,7 +436,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			# Set the tile color to red since the unit is placed
 			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
-			# Add the unit to the queue to track placement order
+			# Add the unit back to the queue if it was already placed before
 			placed_units_queue.push_back(new_model)
 
 			# Update the label text
@@ -456,6 +464,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			print("No valid tile found for placement.")
 	else:
 		print("No unit to place or placing_unit flag is false.")
+
 
 
 
