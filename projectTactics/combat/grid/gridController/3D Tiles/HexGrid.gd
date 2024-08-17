@@ -167,55 +167,45 @@ func _handle_tile_click(mouse_position):
 
 		if clicked_tile:
 			print("Clicked on tile at position: ", clicked_position_2d)
-			
-			# Check if there is an enemy unit on the clicked tile
+
+			# Check if there is a unit on the clicked tile
 			if units_on_tiles.has(clicked_tile):
 				var unit_on_tile = units_on_tiles[clicked_tile]
-				
-				# Check if the unit belongs to the enemy group or player group
-				if unit_on_tile.is_in_group("enemy_units") or unit_on_tile.is_in_group("player_units"):
-					enemyOccupied = true
-					print("Enemy or player unit detected on tile at position: ", clicked_position_2d, " - Suppressing input.")
-					return  # Suppress further actions if an enemy or player unit is detected
-				else:
-					enemyOccupied = false
 
-			# If no enemy unit, continue with existing functionality
-			if units_on_tiles.has(clicked_tile):
-				var unit_on_tile = units_on_tiles[clicked_tile]
-				
-				# Handle interaction with your own units
-				if not combat_manager.in_combat:
-					print("Selecting player unit on tile:", unit_on_tile.name)
-					DataPasser.passUnitInfo(unit_on_tile.unitParts)
-					unit_to_place = unit_on_tile.unitParts
-					placing_unit = false
-					unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
+				# If we are placing a unit, block placement if the tile is occupied
+				if placing_unit:
+					if unit_on_tile.is_in_group("enemy_units") or unit_on_tile.is_in_group("player_units"):
+						print("Tile is occupied by an enemy or player unit. Blocking placement.")
+						return
 
-					# Update the selected tile's visual
-					if currently_selected_tile != null:
-						if units_on_tiles.has(currently_selected_tile):
-							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-						else:
-							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-					currently_selected_tile = clicked_tile
+				# If not placing a unit, select the unit on the tile
 				else:
-					# Handle combat unit selection
-					combat_manager._handle_unit_click(unit_on_tile)
-					DataPasser.passUnitInfo(unit_on_tile.unitParts)
-					print("Unit selected:", unit_on_tile.unitParts.name)
-			else:
-				print("Tile is empty. Proceeding with placement if applicable.")
-				
-				# Handle empty tile for unit placement
-				if placing_unit and DataPasser.selectedUnit != null:
-					print("Placing unit on empty tile...")
-					place_unit_on_tile(clicked_position_2d)
+					if unit_on_tile.is_in_group("player_units"):
+						print("Selecting player unit on tile:", unit_on_tile.name)
+						DataPasser.passUnitInfo(unit_on_tile.unitParts)
+						unit_to_place = unit_on_tile.unitParts
+						placing_unit = false
+						unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
+
+						# Update the selected tile's visual
+						if currently_selected_tile != null:
+							if units_on_tiles.has(currently_selected_tile):
+								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+							else:
+								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+						clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+						currently_selected_tile = clicked_tile
+						return
+
+			# If the tile is empty and we're placing a unit, allow placement
+			if placing_unit and DataPasser.selectedUnit != null:
+				print("Placing unit on empty tile...")
+				place_unit_on_tile(clicked_position_2d)
 		else:
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
+
 
 func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	var closest_tile: Node3D = null
