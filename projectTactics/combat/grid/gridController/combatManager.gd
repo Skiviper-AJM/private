@@ -127,6 +127,7 @@ func _handle_unit_click(unit_instance):
 			deselect_unit(true)
 
 		clear_highlighted_tiles()
+		clear_splash_highlighted_tiles()  # Clear any splash highlights when a new unit is selected
 
 		print("Switching to selected unit instance:", unit_instance)
 		# Display the name of the unit
@@ -337,6 +338,7 @@ func any_unit_moving() -> bool:
 
 func moveButton():
 	clear_highlighted_tiles()  # Clear any existing highlights
+	clear_splash_highlighted_tiles()  # Clear any splash highlights
 	if selected_unit_instance and move_mode_active:
 		end_move_mode()  # If move mode is active, deactivate it
 	else:
@@ -348,12 +350,14 @@ func moveButton():
 
 func shootButton():
 	clear_highlighted_tiles()  # Clear any existing highlights
+	clear_splash_highlighted_tiles()  # Clear any splash highlights
 	print("Shoot action selected.")
 	end_move_mode()  # End move mode when shooting
 	# Implement shooting logic here
 
 func attackButton():
 	clear_highlighted_tiles()  # Clear any existing highlights
+	clear_splash_highlighted_tiles()  # Clear any splash highlights
 	print("Attack action selected.")
 	end_move_mode()  # End move mode when attacking
 
@@ -442,7 +446,7 @@ func handle_splash_highlighting():
 		var hover_position_2d = Vector2(hover_position.x, hover_position.z)  # Convert to Vector2
 		var hover_tile = player_combat_controller._get_tile_with_tolerance(hover_position_2d)
 
-		if hover_tile and hover_tile != current_hover_tile:
+		if hover_tile and hover_tile != current_hover_tile and hover_tile in highlighted_tiles:
 			clear_splash_highlighted_tiles()  # Clear previous splash highlights
 			current_hover_tile = hover_tile
 			
@@ -461,8 +465,11 @@ func highlight_splash_area(center_tile, splash_radius):
 		var distance = tile.global_transform.origin.distance_to(center_position) / tile_size
 		
 		if distance <= splash_radius and tile != center_tile:
-			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[4]  # Set to orange
-			splash_highlighted_tiles.append(tile)
+			# Only highlight tiles that are originally blue or attack-highlighted (red)
+			var material_override = tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
+			if material_override == TILE_MATERIALS[0] or material_override == TILE_MATERIALS[2]:
+				tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[4]  # Set to orange
+				splash_highlighted_tiles.append(tile)
 
 func end_move_mode():
 	move_mode_active = false  # Deactivate move mode
