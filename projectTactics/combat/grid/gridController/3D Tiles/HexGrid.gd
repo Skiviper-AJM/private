@@ -182,7 +182,6 @@ func _handle_tile_click(mouse_position):
 				if units_on_tiles.has(tiles[coord]):
 					var unit_on_tile = units_on_tiles[tiles[coord]]
 					print("Unit detected on tile, unit instance ID: ", unit_on_tile.get_instance_id())
-
 					# Handle detection of enemy units to suppress input
 					if unit_on_tile.is_in_group("enemy_units"):
 						print("Enemy spotted on tile at coordinates: ", coord)
