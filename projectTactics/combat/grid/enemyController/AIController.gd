@@ -28,7 +28,6 @@ func _on_grid_generated():
 			print("Placing enemy at tile position: ", tile_position)
 			grid_controller.place_unit_on_tile(tile_position, enemy_unit, false) # Passing `false` to indicate it's an enemy unit
 
-
 func generate_random_enemy_instance() -> Node3D:
 	print("Creating new enemy unit instance...")
 	var unit_instance = Node3D.new()
@@ -66,10 +65,21 @@ func find_free_tile() -> Vector2:
 	var free_tiles = []
 	
 	for tile_key in grid_controller.tiles.keys():
-		if not grid_controller.units_on_tiles.has(tile_key):
+		# Check if the tile is within valid grid bounds and not occupied by any unit
+		if is_tile_in_bounds(tile_key) and not grid_controller.units_on_tiles.has(tile_key):
 			free_tiles.append(tile_key)
 	
 	if free_tiles.size() == 0:
 		return Vector2(-1, -1)
 	
-	return free_tiles[randi_range(0, free_tiles.size() - 1)]
+	# Randomly select a tile from the free tiles list
+	var selected_tile_key = free_tiles[randi_range(0, free_tiles.size() - 1)]
+	print("Selected free tile: ", selected_tile_key)
+	
+	# Directly return the selected tile key without tolerance check
+	return selected_tile_key
+
+func is_tile_in_bounds(tile_key: Vector2) -> bool:
+	# Ensure the tile is within grid bounds
+	#print("Checking bounds for tile: ", tile_key)
+	return abs(tile_key.x) <= grid_controller.grid_size and abs(tile_key.y) <= grid_controller.grid_size

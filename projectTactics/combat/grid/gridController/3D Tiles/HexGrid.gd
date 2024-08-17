@@ -369,33 +369,21 @@ func remove_enemy_from_grid(tile_position: Vector2):
 	if units_on_tiles.has(tile_position):
 		units_on_tiles.erase(tile_position)
 
-func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_player: bool = true):
-	print("Placing unit...")
-	var unit_resource = unit_to_place.unitParts  # Use the resource of the unit
+func place_unit_on_tile(tile_position: Vector2, unit_to_place: Node3D, is_player: bool = true):
+	print("Placing unit at tile position: ", tile_position)
+	
+	# Directly retrieve the tile using the position from the tiles dictionary
+	var target_tile = tiles.get(tile_position, null)
 
-	# Ensure only one instance of each unit resource is placed
-	if is_player:
-		for existing_unit in placed_units_queue:
-			if existing_unit.unitParts == unit_resource:
-				print("Unit with this resource already placed, removing the existing one.")
-				remove_unit(existing_unit)
-				break
-
-	# Enforce max_squad_size before adding the new unit
-	if is_player and placed_units_queue.size() >= max_squad_size:
-		print("Max squad size exceeded, removing the oldest unit.")
-		remove_unit(placed_units_queue.front())  # Remove the oldest unit (first in the queue)
-
-	var closest_tile = _get_tile_with_tolerance(clicked_position_2d)
-	if closest_tile:
-		print("Closest tile instance ID: ", closest_tile.get_instance_id())
-
+	if target_tile:
+		print("Target tile found: ", target_tile.get_instance_id())
+		
 		# Check if the tile already has a unit
-		if units_on_tiles.has(closest_tile):
-			var existing_unit = units_on_tiles[closest_tile]
+		if units_on_tiles.has(target_tile):
+			var existing_unit = units_on_tiles[target_tile]
 			print("Existing unit instance ID: ", existing_unit.get_instance_id())
 
-			# Block placement if the tile is occupied by another unit
+			# Block placement if the tile is occupied by another unit of the same type
 			if (is_player and existing_unit.is_in_group("player_units")) or (not is_player and existing_unit.is_in_group("enemy_units")):
 				print("Cannot place unit on a tile occupied by another unit of the same type.")
 				return
@@ -418,30 +406,29 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 
 			var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
 
-			unit_to_place.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
+			unit_to_place.position = target_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
 		else:
 			print("Foot nodes not found! Adjusting using the main bounding box.")
 			# Fallback to use the main bounding box
 			var bbox = unit_to_place.get_aabb()
-			unit_to_place.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
-
+			unit_to_place.position = target_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
 
 		# Store the unit in the correct dictionary and assign the correct group
-		units_on_tiles[closest_tile] = unit_to_place
+		units_on_tiles[target_tile] = unit_to_place
 		if is_player:
 			# Add the unit to the queue (remove first if it's already there to avoid duplicates)
 			_remove_unit_from_queue(unit_to_place)
 			placed_units_queue.push_back(unit_to_place)
-			placed_units[unit_resource] = unit_to_place
+			placed_units[unit_to_place.unitParts] = unit_to_place
 			unit_to_place.add_to_group("player_units")
 		else:
 			unit_to_place.add_to_group("enemy_units")
 
 		# Set the tile color accordingly
 		if is_player:
-			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red for player
+			target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red for player
 		else:
-			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[6]  # Set to purple for enemy
+			target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[6]  # Set to purple for enemy
 
 		# Add the unit to the scene tree if it wasn't already
 		if not is_instance_valid(unit_to_place.get_parent()):
@@ -452,16 +439,17 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 			_update_units_label()
 
 		# Update the currently selected tile reference if needed
-		if is_player and currently_selected_tile and currently_selected_tile != closest_tile:
+		if is_player and currently_selected_tile and currently_selected_tile != target_tile:
 			_deselect_tile(currently_selected_tile)
-		currently_selected_tile = closest_tile
+		currently_selected_tile = target_tile
 
 		# Deselect the unit after placement
 		DataPasser.selectedUnit = null
 		placing_unit = false
 		unit_name_label.text = ""
 	else:
-		print("No valid tile found for placement.")
+		print("No valid tile found at position: ", tile_position)
+
 
 
 
