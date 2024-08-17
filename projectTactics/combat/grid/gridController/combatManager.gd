@@ -250,11 +250,9 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Calculate the direction to the target
 	var direction = (target_position - start_position).normalized()
 
-	# Adjust the rotation to face the correct direction
+	# Adjust the rotation to face the correct direction (backwards)
 	unit_instance.look_at(target_position, Vector3.UP)
-
-	# Rotate the unit 180 degrees to face backward
-	unit_instance.rotate_y(deg_to_rad(180))
+	unit_instance.rotate_y(deg_to_rad(180))  # Rotate to face backwards
 
 	# Now perform the movement animation
 	var duration = 0.5  # seconds per tile
@@ -269,10 +267,8 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 		await get_tree().create_timer(0.01).timeout
 		elapsed += 0.01
 
-	# Ensure the final position and rotation are set
+	# Ensure the final position is set
 	unit_instance.global_transform.origin = target_position
-	unit_instance.look_at(target_position, Vector3.UP)  # Apply final rotation
-	unit_instance.rotate_y(deg_to_rad(180))  # Rotate to face backward
 
 	# Update the units_on_tiles dictionary
 	player_combat_controller.units_on_tiles.erase(start_tile)
