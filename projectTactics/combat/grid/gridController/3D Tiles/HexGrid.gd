@@ -182,6 +182,7 @@ func _handle_tile_click(mouse_position):
 				if units_on_tiles.has(tiles[coord]):
 					var unit_on_tile = units_on_tiles[tiles[coord]]
 					print("Unit detected on tile, unit instance ID: ", unit_on_tile.get_instance_id())
+					
 					# Handle detection of enemy units to suppress input
 					if unit_on_tile.is_in_group("enemy_units"):
 						print("Enemy spotted on tile at coordinates: ", coord)
@@ -207,7 +208,6 @@ func _handle_tile_click(mouse_position):
 						_select_tile(clicked_tile)
 						currently_selected_tile = clicked_tile
 						return
-
 				else:
 					print("No unit detected on tile coordinates: ", coord)
 					enemyOccupied = false
@@ -215,7 +215,20 @@ func _handle_tile_click(mouse_position):
 					# If we are placing a unit, place it on the empty tile
 					if placing_unit and DataPasser.selectedUnit != null:
 						print("Placing unit on empty tile...")
-						place_unit_on_tile(clicked_position_2d, DataPasser.selectedUnit)
+
+						var unit_instance: Node3D
+
+						if DataPasser.selectedUnit is Resource:
+							# Instantiate the unit if it's a resource
+							unit_instance = Node3D.new()
+							unit_instance.set_script(load("res://combat/resources/unitAssembler.gd"))
+							unit_instance.unitParts = DataPasser.selectedUnit
+							unit_instance.assembleUnit()
+						else:
+							# Otherwise, it's already a Node3D instance
+							unit_instance = DataPasser.selectedUnit
+
+						place_unit_on_tile(clicked_position_2d, unit_instance, true)  # true for player unit
 						return
 			else:
 				print("No matching coordinates found for clicked tile.")
@@ -223,6 +236,7 @@ func _handle_tile_click(mouse_position):
 			print("No valid tile found.")  # If no tile is found
 	else:
 		print("No raycast hit detected.")  # If raycast doesn't hit anything
+
 
 
 
