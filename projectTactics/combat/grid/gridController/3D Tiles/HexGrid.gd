@@ -392,6 +392,19 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 	print("Placing unit...")
 	var unit_id = unit_to_place.get_instance_id()
 
+	# Ensure only one instance of each unit type is placed
+	if is_player:
+		for existing_unit in placed_units_queue:
+			if existing_unit.unitParts.name == unit_to_place.unitParts.name:
+				print("Unit of this type already placed, removing the existing one.")
+				remove_unit(existing_unit)
+				break
+
+	# Enforce max_squad_size
+	if is_player and placed_units_queue.size() >= max_squad_size:
+		print("Max squad size exceeded, removing the oldest unit.")
+		remove_unit(placed_units_queue.front())  # Remove the oldest unit (first in the queue)
+
 	var closest_tile = _get_tile_with_tolerance(clicked_position_2d)
 	if closest_tile:
 		print("Closest tile instance ID: ", closest_tile.get_instance_id())
@@ -445,7 +458,6 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 		else:
 			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow for enemy
 
-
 		# Add the unit to the scene tree if it wasn't already
 		if not is_instance_valid(unit_to_place.get_parent()):
 			add_child(unit_to_place)
@@ -458,8 +470,14 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 		if is_player and currently_selected_tile and currently_selected_tile != closest_tile:
 			_deselect_tile(currently_selected_tile)
 		currently_selected_tile = closest_tile
+
+		# Deselect the unit after placement
+		DataPasser.selectedUnit = null
+		placing_unit = false
+		unit_name_label.text = ""
 	else:
 		print("No valid tile found for placement.")
+
 
 
 
