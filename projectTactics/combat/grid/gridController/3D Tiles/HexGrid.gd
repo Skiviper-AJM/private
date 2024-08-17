@@ -91,10 +91,6 @@ func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
 
-	# First, check if enemyOccupied is true, return early to suppress input
-	if enemyOccupied:
-		print("Input suppressed due to enemyOccupied flag.")
-		return
 
 	# Handle WASD keys for panning based on camera's facing direction
 	var input_vector := Vector3.ZERO
