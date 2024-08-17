@@ -172,29 +172,33 @@ func _handle_tile_click(mouse_position):
 			if units_on_tiles.has(clicked_tile):
 				var unit_on_tile = units_on_tiles[clicked_tile]
 
-				# If we are placing a unit, block placement if the tile is occupied
+				# Handle selection logic for player units
+				if unit_on_tile.is_in_group("player_units"):
+					# Swap the selected unit to the newly clicked player unit
+					print("Swapping selection to player unit on tile:", unit_on_tile.name)
+					
+					# Deselect the currently selected unit's tile
+					if currently_selected_tile != null:
+						if units_on_tiles.has(currently_selected_tile):
+							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+						else:
+							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+
+					# Select the new unit
+					DataPasser.passUnitInfo(unit_on_tile.unitParts)
+					unit_to_place = unit_on_tile.unitParts
+					placing_unit = false
+					unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
+
+					# Update the selected tile's visual to green
+					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+					currently_selected_tile = clicked_tile
+					return
+
+				# If we are placing a unit, block placement if the tile is occupied by any unit
 				if placing_unit:
 					if unit_on_tile.is_in_group("enemy_units") or unit_on_tile.is_in_group("player_units"):
 						print("Tile is occupied by an enemy or player unit. Blocking placement.")
-						return
-
-				# If not placing a unit, select the unit on the tile
-				else:
-					if unit_on_tile.is_in_group("player_units"):
-						print("Selecting player unit on tile:", unit_on_tile.name)
-						DataPasser.passUnitInfo(unit_on_tile.unitParts)
-						unit_to_place = unit_on_tile.unitParts
-						placing_unit = false
-						unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
-
-						# Update the selected tile's visual
-						if currently_selected_tile != null:
-							if units_on_tiles.has(currently_selected_tile):
-								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-							else:
-								currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-						clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-						currently_selected_tile = clicked_tile
 						return
 
 			# If the tile is empty and we're placing a unit, allow placement
@@ -205,6 +209,8 @@ func _handle_tile_click(mouse_position):
 			print("No valid tile found.")
 	else:
 		print("No raycast hit detected.")
+
+
 
 
 func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
