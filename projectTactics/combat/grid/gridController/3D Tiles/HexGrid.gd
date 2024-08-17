@@ -12,6 +12,9 @@ const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),    # Red material
 	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/orange.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/white.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/purple.tres")
 ]
 
 const TILE_HEIGHT := 1.0  
@@ -242,9 +245,10 @@ func _handle_tile_click(mouse_position):
 
 
 func _deselect_tile(tile):
-	if units_on_tiles.has(tile):
+	
+	if units_on_tiles.has(tile) && currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override != TILE_MATERIALS[6]:
 		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-	else:
+	elif currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override != TILE_MATERIALS[6]:
 		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
 func _select_tile(tile):
@@ -437,7 +441,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 		if is_player:
 			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red for player
 		else:
-			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow for enemy
+			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[6]  # Set to purple for enemy
 
 		# Add the unit to the scene tree if it wasn't already
 		if not is_instance_valid(unit_to_place.get_parent()):
@@ -505,7 +509,8 @@ func combatInitiate():
 	DataPasser.inActiveCombat = true
 	
 	# Deselect current unit and set its tile to red
-	currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
+	if currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override != TILE_MATERIALS[6]:
+		currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
 	DataPasser.selectedUnit = null
 	unit_name_label.text = ""
 	

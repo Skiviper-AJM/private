@@ -70,13 +70,12 @@ func handle_unit_selection():
 					else:
 						print("Cannot select this unit: it belongs to the enemy.")
 				else:
-					print("No unit detected on tile.")
+					# No unit detected on the tile; deselect current unit if selected
+					handle_tile_click(clicked_tile)
 			else:
 				print("No valid tile found.")
 		else:
 			print("No raycast hit detected.")
-
-
 
 func handle_tile_click(tile):
 	if in_combat:
@@ -158,7 +157,6 @@ func _handle_unit_click(unit_instance):
 			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 		else:
 			print("Selected unit instance not found on any tile.")
-
 
 func deselect_unit(force_deselect = false):
 	$"../CombatGridUI/UnitPlaceUI/Attack".visible = false
