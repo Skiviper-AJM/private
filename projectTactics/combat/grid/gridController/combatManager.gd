@@ -18,6 +18,7 @@ const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/orange.tres"),  # Added for splash highlight
+	preload("res://combat/grid/gridController/3D Tiles/materials/white.tres"),  # Added for central splash highlight
 ]
 
 var highlighted_tiles := []
@@ -425,9 +426,11 @@ func clear_highlighted_tiles():
 func clear_splash_highlighted_tiles():
 	for tile in splash_highlighted_tiles:
 		var material_override = tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
-		# Reset only orange tiles back to their original state
+		# Reset orange tiles back to their original state
 		if material_override == TILE_MATERIALS[4]:
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+		elif material_override == TILE_MATERIALS[5]:  # Clear the central tile
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set back to red
 	splash_highlighted_tiles.clear()
 
 func handle_splash_highlighting():
@@ -460,6 +463,10 @@ func highlight_splash_area(center_tile, splash_radius):
 	var center_position = center_tile.global_transform.origin
 	var tile_size = player_combat_controller.TILE_SIZE
 
+	# Highlight the center tile in white
+	center_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[5]  # Set to white
+	splash_highlighted_tiles.append(center_tile)
+	
 	for tile_key in player_combat_controller.tiles.keys():
 		var tile = player_combat_controller.tiles[tile_key]
 		var distance = tile.global_transform.origin.distance_to(center_position) / tile_size
