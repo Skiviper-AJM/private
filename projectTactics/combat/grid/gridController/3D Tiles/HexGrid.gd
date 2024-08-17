@@ -471,6 +471,11 @@ func place_unit_on_tile(position: Vector2, unit_to_place: Node3D, is_player: boo
 			print("A unit with the same parts is already placed. Removing the existing unit.")
 			remove_unit(existing_unit)
 
+		# Enforce max_squad_size before adding the new unit
+		if is_player and placed_units_queue.size() >= max_squad_size:
+			print("Max squad size exceeded, removing the oldest unit.")
+			remove_unit(placed_units_queue.front())  # Remove the oldest unit (first in the queue)
+
 		# Check if the tile already has a unit
 		if units_on_tiles.has(target_tile):
 			var existing_unit_on_tile = units_on_tiles[target_tile]
