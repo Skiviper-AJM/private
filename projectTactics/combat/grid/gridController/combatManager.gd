@@ -240,10 +240,11 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as moving
 	unit_instance.set_meta("moving", true)
 
-	# Update the remaining movement after this move
+	# Update the remaining movement after this move and floor it
 	var new_remaining_movement = remaining_movement - move_distance
+	new_remaining_movement = floor(new_remaining_movement)  # Ensure it's rounded down
 	unit_instance.set_meta("remaining_movement", max(new_remaining_movement, 0))
-	print("New remaining movement after move: ", new_remaining_movement)
+	print("New remaining movement after move (floored): ", new_remaining_movement)
 
 	# Get the current and target positions
 	target_position.y = start_position.y  # Keep the height constant
@@ -333,6 +334,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# The unit will remain selected after its move is completed.
 	# Print confirmation of successful move
 	print("Unit moved to new tile successfully.")
+
 
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:

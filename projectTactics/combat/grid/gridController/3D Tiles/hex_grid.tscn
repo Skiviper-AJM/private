@@ -70,17 +70,17 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "Move"
 
-[node name="Shoot" type="Button" parent="CombatGridUI/UnitPlaceUI"]
-visible = false
-layout_mode = 2
-theme_override_font_sizes/font_size = 34
-text = "Shoot"
-
 [node name="Attack" type="Button" parent="CombatGridUI/UnitPlaceUI"]
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 34
 text = "Attack"
+
+[node name="Shoot" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Special"
 
 [node name="CenterCam" type="Button" parent="CombatGridUI/UnitPlaceUI"]
 visible = false
@@ -130,16 +130,16 @@ YOU MUST FLEE"
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Move" to="HexGrid" method="buttonHover"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Move" to="combatManager" method="buttonLeft"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Move" to="HexGrid" method="buttonLeft"]
-[connection signal="button_down" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="shootButton"]
-[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="buttonHover"]
-[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Shoot" to="HexGrid" method="buttonHover"]
-[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="buttonLeft"]
-[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Shoot" to="HexGrid" method="buttonLeft"]
 [connection signal="button_down" from="CombatGridUI/UnitPlaceUI/Attack" to="combatManager" method="attackButton"]
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Attack" to="combatManager" method="buttonHover"]
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Attack" to="HexGrid" method="buttonHover"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Attack" to="combatManager" method="buttonLeft"]
 [connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Attack" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="shootButton"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="buttonHover"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Shoot" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="buttonLeft"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Shoot" to="HexGrid" method="buttonLeft"]
 [connection signal="button_down" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="centerCamera"]
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="buttonHover"]
 [connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/CenterCam" to="HexGrid" method="buttonHover"]
