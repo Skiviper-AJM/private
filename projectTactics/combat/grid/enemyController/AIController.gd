@@ -1,6 +1,6 @@
 extends Node
 
-@export var max_enemies: int = 10
+@export var max_enemies: int = 2
 @export var unit_part_count: int = 4
 @export var hex_grid: NodePath = "../HexGrid"
 
@@ -14,7 +14,7 @@ func _on_grid_generated():
 		print("HexGrid not found!")
 		return
 	
-	var num_enemies = randi() % max_enemies + 1
+	var num_enemies = max_enemies #randi() % max_enemies + 1
 	print("Generating ", num_enemies, " enemies.")
 	
 	for i in range(num_enemies):
