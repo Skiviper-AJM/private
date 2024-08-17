@@ -134,6 +134,8 @@ func openQuit():
 	
 func leaveCombat():
 	DataPasser.selectedUnit = null
+	DataPasser.inActiveCombat = false
+	$inventoryMenu/filterMenu.visible = true
 	$options/fleeCombat.visible = false
 	unpause()
 	get_tree().change_scene_to_file(DataPasser.priorScene)

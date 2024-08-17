@@ -521,6 +521,7 @@ func combatInitiate():
 	print("fite tiem")
 
 func fleeCombat():
+	DataPasser.inActiveCombat = false
 	DataPasser.selectedUnit = null
 	%noUnits.visible = false
 	get_tree().change_scene_to_file(DataPasser.priorScene)
