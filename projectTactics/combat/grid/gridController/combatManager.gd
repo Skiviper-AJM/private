@@ -163,10 +163,12 @@ func deselect_unit(force_deselect = false):
 	$"../CombatGridUI/UnitPlaceUI/Move".visible = false
 	$"../CombatGridUI/UnitPlaceUI/Shoot".visible = false
 	$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = false
+	
+	# Clear all highlighted tiles
+	clear_highlighted_tiles()
+	
 	# Deselect the currently selected unit and reset the tile color
 	if selected_unit_instance:
-		clear_highlighted_tiles()
-
 		# Only reset the tile color to red if the unit is not moving or if forced to deselect
 		if player_combat_controller.currently_selected_tile and (force_deselect or not selected_unit_instance.get_meta("moving")):
 			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
@@ -175,6 +177,7 @@ func deselect_unit(force_deselect = false):
 		player_combat_controller.currently_selected_tile = null
 		player_combat_controller.unit_name_label.text = ""
 		print("Unit deselected.")
+
 
 func highlight_tiles_around_unit(selected_unit_instance, range):
 	# Fetch the current tile based on the latest position of the unit
@@ -195,15 +198,6 @@ func highlight_tiles_around_unit(selected_unit_instance, range):
 	else:
 		print("No unit tile found to highlight.")
 
-func clear_highlighted_tiles():
-	for tile in highlighted_tiles:
-		if player_combat_controller.units_on_tiles.has(tile):
-			# If the tile is occupied, ensure it stays red
-			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-		else:
-			# Otherwise, reset it to blue
-			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
-	highlighted_tiles.clear()
 
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Ensure that unit_instance is a Node3D instance
@@ -341,6 +335,7 @@ func any_unit_moving() -> bool:
 	return false
 
 func moveButton():
+	clear_highlighted_tiles()  # Clear any existing highlights
 	if selected_unit_instance and move_mode_active:
 		end_move_mode()  # If move mode is active, deactivate it
 	else:
@@ -349,16 +344,82 @@ func moveButton():
 
 		# Highlight the movement range when move mode is activated
 		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
-
+		
 func shootButton():
+	clear_highlighted_tiles()  # Clear any existing highlights
 	print("Shoot action selected.")
 	end_move_mode()  # End move mode when shooting
 	# Implement shooting logic here
 
 func attackButton():
+	clear_highlighted_tiles()  # Clear any existing highlights
 	print("Attack action selected.")
 	end_move_mode()  # End move mode when attacking
-	# Implement attack logic here
+
+	# Calculate and highlight the attack range
+	if selected_unit_instance:
+		highlight_attack_range(selected_unit_instance)
+	else:
+		print("No unit selected for attack.")
+
+var originally_blue_tiles = []  # List to track which tiles were originally blue
+
+func highlight_attack_range(unit_instance):
+	# Initialize variables to store the highest range and splash rating
+	var max_range = 0
+	var max_splash = 0
+
+	# Manually retrieve the parts from the unitParts
+	var parts = [unit_instance.unitParts.head, unit_instance.unitParts.arm, unit_instance.unitParts.leg, unit_instance.unitParts.core, unit_instance.unitParts.chest]
+	
+	for part in parts:
+		if part.name != "head":
+			max_range = max(max_range, part.range)
+			max_splash = max(max_splash, part.splash)
+
+	print("Calculated max range:", max_range, "and max splash:", max_splash)
+
+	# Fetch the current tile based on the latest position of the unit
+	var unit_tile = player_combat_controller.currently_selected_tile
+	
+	if unit_tile:
+		var unit_position = unit_tile.global_transform.origin
+		var tile_size = player_combat_controller.TILE_SIZE
+		
+		# Highlight tiles within range based on the current position
+		for tile_key in player_combat_controller.tiles.keys():
+			var tile = player_combat_controller.tiles[tile_key]
+			var distance = tile.global_transform.origin.distance_to(unit_position) / tile_size
+			
+			if tile == unit_tile:
+				continue  # Skip the tile the unit is standing on to keep it green
+
+			var material_override = tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
+
+			if material_override == TILE_MATERIALS[0]:  # Check if the tile is currently blue
+				if max_range == 1 and distance <= max_range + max_splash:
+					# Highlight all adjacent tiles (melee attack)
+					tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+					highlighted_tiles.append(tile)
+					originally_blue_tiles.append(tile)  # Track this tile as originally blue
+				elif max_range > 1 and distance <= max_range + max_splash and distance > 1:
+					# Highlight tiles outside the immediate surrounding area (ranged attack)
+					tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+					highlighted_tiles.append(tile)
+					originally_blue_tiles.append(tile)  # Track this tile as originally blue
+	else:
+		print("No unit tile found to highlight attack range.")
+
+func clear_highlighted_tiles():
+	for tile in highlighted_tiles:
+		var material_override = tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
+		# Reset to blue if it was originally blue or if it's currently yellow or red
+		if tile in originally_blue_tiles or material_override == TILE_MATERIALS[2] or material_override == TILE_MATERIALS[3]:
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+	highlighted_tiles.clear()
+	originally_blue_tiles.clear()  # Clear the tracking list
+
+
 
 func end_move_mode():
 	move_mode_active = false  # Deactivate move mode
