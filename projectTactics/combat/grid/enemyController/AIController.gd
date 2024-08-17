@@ -5,6 +5,7 @@ extends Node
 @export var hex_grid: NodePath = "../HexGrid"
 
 @onready var grid_controller = $"../HexGrid"
+@onready var root_node = $"../.."  # Get the 3DGrid node (parent of HexGrid)
 
 const PURPLE_MATERIAL = preload("res://combat/grid/gridController/3D Tiles/materials/purple.tres")
 
@@ -46,7 +47,7 @@ func generate_random_enemy_instance() -> Node3D:
 
 	unit_instance.assembleUnit()
 
-	# IMPORTANT: Do not add to the group here; it should be added after the node is in the scene tree.
+	# Check if the unit has been successfully assembled
 	if unit_instance.get_child_count() == 0:
 		print("Error: UnitAssembler did not create any child nodes.")
 		return null
@@ -94,8 +95,8 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile_position: Vector2):
 		else:
 			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, 1.1, 0)
 		
-		# IMPORTANT: Add the unit to the scene tree before adding it to the group.
-		grid_controller.add_child(enemy_unit)
+		# Add the enemy unit as a child of the 3DGrid node
+		root_node.add_child(enemy_unit)
 		
 		# Mark the tile as occupied by this enemy
 		grid_controller.units_on_tiles[tile_position] = enemy_unit
