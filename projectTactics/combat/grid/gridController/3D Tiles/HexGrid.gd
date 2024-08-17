@@ -277,47 +277,24 @@ func move_unit_to_tile(target_tile):
 	if currently_selected_tile and target_tile:
 		var unit = units_on_tiles.get(currently_selected_tile, null)
 		if unit != null:
-			# Remove the unit from its current tile
-			remove_unit(unit)
-			
-			# Create a new model for the unit at the target tile
-			print("Moving unit to new tile...")
-			var new_model = Node3D.new()
-			add_child(new_model)
-			new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
-			new_model.unitParts = unit.unitParts
-			new_model.assembleUnit()
-			new_model.scale = unit_scale
+			# Remove the unit from its current tile and update the placement queue
+			print("Moving unit to new tile and updating its position in the queue...")
+			_remove_unit_from_queue(unit)
 
-			# Place the unit on the target tile
-			var bbox = new_model.get_aabb()
-			new_model.position = target_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
-			
-			# Update the dictionaries
-			placed_units[new_model.get_instance_id()] = new_model
-			units_on_tiles[target_tile] = new_model
-			
-
-			placed_units_queue.push_back(new_model)
-
-			# Update tile color
-			target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-
-			# Revert the previously selected tile's color
-			if currently_selected_tile and currently_selected_tile != target_tile:
-				_deselect_tile(currently_selected_tile)
-
-			currently_selected_tile = target_tile
-
-			# Clear selection only after the move is complete
-			DataPasser.passUnitInfo(null)
-			placing_unit = false
-			unit_name_label.text = ""
-
+			# Now place the unit on the new tile, treating it as a fresh placement
+			place_unit_on_tile(Vector2(target_tile.global_transform.origin.x, target_tile.global_transform.origin.z), unit, true)
 		else:
 			print("No unit found on the selected tile.")
 	else:
 		print("No unit selected to move or target tile is null.")
+
+func _remove_unit_from_queue(unit):
+	# Find and remove the unit from the queue
+	if placed_units_queue.has(unit):
+		placed_units_queue.erase(unit)
+
+
+
 
 func _generate_grid():
 	var tile_index := 0
@@ -400,7 +377,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 				remove_unit(existing_unit)
 				break
 
-	# Enforce max_squad_size
+	# Enforce max_squad_size before adding the new unit
 	if is_player and placed_units_queue.size() >= max_squad_size:
 		print("Max squad size exceeded, removing the oldest unit.")
 		remove_unit(placed_units_queue.front())  # Remove the oldest unit (first in the queue)
@@ -447,8 +424,10 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 		# Store the unit in the correct dictionary and assign the correct group
 		units_on_tiles[closest_tile] = unit_to_place
 		if is_player:
-			unit_to_place.add_to_group("player_units")
+			# Add the unit to the queue (remove first if it's already there to avoid duplicates)
+			_remove_unit_from_queue(unit_to_place)
 			placed_units_queue.push_back(unit_to_place)
+			unit_to_place.add_to_group("player_units")
 		else:
 			unit_to_place.add_to_group("enemy_units")
 
