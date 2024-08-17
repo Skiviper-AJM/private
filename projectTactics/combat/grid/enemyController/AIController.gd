@@ -26,7 +26,7 @@ func _on_grid_generated():
 			print("No suitable tile found for enemy placement.")
 		else:
 			print("Placing enemy at tile position: ", tile_position)
-			grid_controller.place_unit_on_tile(tile_position, enemy_unit, false) # Passing `false` to indicate it's an enemy unit
+			grid_controller.enemy_place_unit_on_tile(tile_position, enemy_unit, false) # Passing `false` to indicate it's an enemy unit
 
 func generate_random_enemy_instance() -> Node3D:
 	print("Creating new enemy unit instance...")
