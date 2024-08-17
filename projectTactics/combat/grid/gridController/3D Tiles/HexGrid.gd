@@ -139,7 +139,7 @@ func _input(event):
 	if combat_manager.in_combat:
 		return
 	
-		# Handle tile clicking
+	# Handle tile clicking
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and !block_placement:
 		_handle_tile_click(event.position)
 	
@@ -147,7 +147,6 @@ func _input(event):
 		if DataPasser.selectedUnit != null and !block_placement and !enemyOccupied: 
 			unitPlacer()
 	
-
 
 func _handle_tile_click(mouse_position):
 	var camera = $Camera3D
@@ -173,11 +172,11 @@ func _handle_tile_click(mouse_position):
 			if units_on_tiles.has(clicked_tile):
 				var unit_on_tile = units_on_tiles[clicked_tile]
 				
-				# Debug print to check if the unit is recognized as an enemy
-				if unit_on_tile.is_in_group("enemy_units"):
+				# Check if the unit belongs to the enemy group or player group
+				if unit_on_tile.is_in_group("enemy_units") or unit_on_tile.is_in_group("player_units"):
 					enemyOccupied = true
-					print("Enemy detected on tile at position: ", clicked_position_2d, " - Suppressing input.")
-					return  # Suppress further actions if an enemy unit is detected
+					print("Enemy or player unit detected on tile at position: ", clicked_position_2d, " - Suppressing input.")
+					return  # Suppress further actions if an enemy or player unit is detected
 				else:
 					enemyOccupied = false
 
@@ -218,9 +217,6 @@ func _handle_tile_click(mouse_position):
 	else:
 		print("No raycast hit detected.")
 
-
-
-
 func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	var closest_tile: Node3D = null
 	var min_distance: float = INF
@@ -243,9 +239,6 @@ func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	else:
 		print("No valid tile found or out of bounds.")
 		return null
-
-
-
 
 func move_unit_to_tile(target_tile):
 	if currently_selected_tile and target_tile:
@@ -471,9 +464,6 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			print("No valid tile found for placement.")
 	else:
 		print("No unit to place or placing_unit flag is false.")
-
-
-
 
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
