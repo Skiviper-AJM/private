@@ -270,7 +270,7 @@ func move_unit_to_tile(target_tile):
 			# Create a new model for the unit at the target tile
 			print("Moving unit to new tile...")
 			var new_model = Node3D.new()
-			get_parent().add_child(new_model)
+			add_child(new_model)
 			new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
 			new_model.unitParts = unit.unitParts
 			new_model.assembleUnit()
@@ -419,7 +419,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			# Create and place the 3D model at the tile position
 			print("Creating new unit model...")
 			var new_model = Node3D.new()
-			get_parent().add_child(new_model)
+			add_child(new_model)
 			new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
 			new_model.unitParts = unit_to_place
 			new_model.assembleUnit()

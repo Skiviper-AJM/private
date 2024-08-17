@@ -96,7 +96,7 @@ func place_enemy_on_tile(enemy_unit: Node3D, tile_position: Vector2):
 			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, 1.1, 0)
 		
 		# Add the enemy unit as a child of the 3DGrid node
-		root_node.add_child(enemy_unit)
+		grid_controller.add_child(enemy_unit)
 		
 		# Mark the tile as occupied by this enemy
 		grid_controller.units_on_tiles[tile_position] = enemy_unit
