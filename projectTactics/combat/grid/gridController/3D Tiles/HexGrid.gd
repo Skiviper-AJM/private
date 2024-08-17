@@ -35,7 +35,6 @@ var currently_selected_tile = null
 var block_placement: bool = false  # Flag to block tile selection and unit placement
 var enemyOccupied: bool = false  # Flag to block tile selection and unit placement
 
-
 const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
 const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
@@ -91,7 +90,12 @@ func buttonHover():
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
-	
+
+	# First, check if enemyOccupied is true, return early to suppress input
+	if enemyOccupied:
+		print("Input suppressed due to enemyOccupied flag.")
+		return
+
 	# Handle WASD keys for panning based on camera's facing direction
 	var input_vector := Vector3.ZERO
 	
@@ -135,18 +139,17 @@ func _input(event):
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			camera.fov = clamp(camera.fov + ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
 	
-	# Skip any input processing related to unit placement when in combat mode
-	if combat_manager.in_combat:
+	# Skip any input processing related to unit placement when in combat mode or block_placement is true
+	if combat_manager.in_combat or block_placement:
 		return
 	
 	# Handle tile clicking
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and !block_placement:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_handle_tile_click(event.position)
 	
 	if Input.is_action_just_pressed("interact"):
 		if DataPasser.selectedUnit != null and !block_placement and !enemyOccupied: 
 			unitPlacer()
-	
 
 func _handle_tile_click(mouse_position):
 	var camera = $Camera3D
@@ -161,54 +164,72 @@ func _handle_tile_click(mouse_position):
 	var result = space_state.intersect_ray(query)
 
 	if result:
+		print("Raycast hit detected at position: ", result.position)  # Verify the raycast hit
+
 		var clicked_position = result.position
 		var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to Vector2
 		var clicked_tile = _get_tile_with_tolerance(clicked_position_2d)
 
 		if clicked_tile:
-			print("Clicked on tile at position: ", clicked_position_2d)
+			# Look for the coordinates by checking the dictionary keys
+			for coord in tiles.keys():
+				if tiles[coord] == clicked_tile:
+					print("Checking units on tile coordinates: ", coord)
 
-			# Check if there is a unit on the clicked tile
-			if units_on_tiles.has(clicked_tile):
-				var unit_on_tile = units_on_tiles[clicked_tile]
+					# Check if there is a unit on the tile at these coordinates
+					if units_on_tiles.has(coord):
+						var unit_on_tile = units_on_tiles[coord]
 
-				# Handle selection logic for player units
-				if unit_on_tile.is_in_group("player_units"):
-					# Swap the selected unit to the newly clicked player unit
-					print("Swapping selection to player unit on tile:", unit_on_tile.name)
-					
-					# Deselect the currently selected unit's tile
-					if currently_selected_tile != null:
-						if units_on_tiles.has(currently_selected_tile):
-							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-						else:
-							currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+						# Handle detection of enemy units to suppress input
+						if unit_on_tile.is_in_group("enemy_units"):
+							print("Enemy spotted on tile at coordinates: ", coord)
+							enemyOccupied = true
+							return  # Early return to block further processing
 
-					# Select the new unit
-					DataPasser.passUnitInfo(unit_on_tile.unitParts)
-					unit_to_place = unit_on_tile.unitParts
-					placing_unit = false
-					unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
+						# Handle selection logic for player units
+						if unit_on_tile.is_in_group("player_units"):
+							enemyOccupied = false  # Reset flag since player unit is selected
+							print("Swapping selection to player unit on tile:", unit_on_tile.name)
 
-					# Update the selected tile's visual to green
-					clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-					currently_selected_tile = clicked_tile
-					return
+							# Deselect the currently selected unit's tile
+							if currently_selected_tile != null:
+								if units_on_tiles.has(currently_selected_tile):
+									currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+								else:
+									currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
-				# If we are placing a unit, block placement if the tile is occupied by any unit
-				if placing_unit:
-					if unit_on_tile.is_in_group("enemy_units") or unit_on_tile.is_in_group("player_units"):
-						print("Tile is occupied by an enemy or player unit. Blocking placement.")
-						return
+							# Select the new unit
+							DataPasser.passUnitInfo(unit_on_tile.unitParts)
+							unit_to_place = unit_on_tile.unitParts
+							placing_unit = false
+							unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
+
+							# Update the selected tile's visual to green
+							clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+							currently_selected_tile = clicked_tile
+							return
+
+						# If we are placing a unit, block placement if the tile is occupied by any unit
+						if placing_unit:
+							if unit_on_tile.is_in_group("enemy_units") or unit_on_tile.is_in_group("player_units"):
+								print("Tile is occupied by an enemy or player unit. Blocking placement.")
+								return
+					else:
+						print("No unit detected on tile coordinates: ", coord)
+						# No unit on the clicked tile, reset enemyOccupied flag
+						enemyOccupied = false
+
+					break  # Stop after finding the correct tile coordinates
 
 			# If the tile is empty and we're placing a unit, allow placement
 			if placing_unit and DataPasser.selectedUnit != null:
 				print("Placing unit on empty tile...")
 				place_unit_on_tile(clicked_position_2d)
 		else:
-			print("No valid tile found.")
+			print("No valid tile found.")  # If no tile is found
 	else:
-		print("No raycast hit detected.")
+		print("No raycast hit detected.")  # If raycast doesn't hit anything
+
 
 
 
