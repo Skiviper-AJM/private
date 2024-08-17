@@ -16,4 +16,4 @@ damage = 10
 armorRating = 0
 speedRating = 0
 range = 4
-splash = 1
+splash = 0
