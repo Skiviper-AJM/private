@@ -91,7 +91,6 @@ func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
 
-
 	# Handle WASD keys for panning based on camera's facing direction
 	var input_vector := Vector3.ZERO
 	
@@ -187,12 +186,9 @@ func _handle_tile_click(mouse_position):
 							enemyOccupied = false  # Reset flag since player unit is selected
 							print("Swapping selection to player unit on tile:", unit_on_tile.name)
 
-							# Deselect the currently selected unit's tile
+							# Deselect the currently selected tile's visual
 							if currently_selected_tile != null:
-								if units_on_tiles.has(currently_selected_tile):
-									currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-								else:
-									currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
+								_deselect_tile(currently_selected_tile)
 
 							# Select the new unit
 							DataPasser.passUnitInfo(unit_on_tile.unitParts)
@@ -201,7 +197,7 @@ func _handle_tile_click(mouse_position):
 							unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
 
 							# Update the selected tile's visual to green
-							clicked_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+							_select_tile(clicked_tile)
 							currently_selected_tile = clicked_tile
 							return
 
@@ -212,7 +208,6 @@ func _handle_tile_click(mouse_position):
 								return
 					else:
 						print("No unit detected on tile coordinates: ", coord)
-						# No unit on the clicked tile, reset enemyOccupied flag
 						enemyOccupied = false
 
 					break  # Stop after finding the correct tile coordinates
@@ -226,9 +221,14 @@ func _handle_tile_click(mouse_position):
 	else:
 		print("No raycast hit detected.")  # If raycast doesn't hit anything
 
+func _deselect_tile(tile):
+	if units_on_tiles.has(tile):
+		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+	else:
+		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
-
-
+func _select_tile(tile):
+	tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 
 func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	var closest_tile: Node3D = null
@@ -283,10 +283,8 @@ func move_unit_to_tile(target_tile):
 
 			# Revert the previously selected tile's color
 			if currently_selected_tile and currently_selected_tile != target_tile:
-				if not units_on_tiles.has(currently_selected_tile):
-					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-				else:
-					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+				_deselect_tile(currently_selected_tile)
+
 			currently_selected_tile = target_tile
 
 			# Clear selection only after the move is complete
@@ -343,14 +341,10 @@ func unitPlacer():
 			if tile_with_unit != null:
 				# Deselect the previously selected tile, if any
 				if currently_selected_tile != null:
-					# Revert the old tile's color
-					if not units_on_tiles.has(currently_selected_tile):
-						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-					else:
-						currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+					_deselect_tile(currently_selected_tile)
 
 				# Set the new tile color to green
-				tile_with_unit.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+				_select_tile(tile_with_unit)
 				
 				# Update the currently selected tile reference
 				currently_selected_tile = tile_with_unit
@@ -379,10 +373,13 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 
 		var closest_tile = _get_tile_with_tolerance(clicked_position_2d)
 		if closest_tile:
+			print("Closest tile instance ID: ", closest_tile.get_instance_id())
+
 			# Check if the tile already has a unit
 			if units_on_tiles.has(closest_tile):
 				var existing_unit = units_on_tiles[closest_tile]
-				
+				print("Existing unit instance ID: ", existing_unit.get_instance_id())
+
 				# Check if the existing unit belongs to the enemy group
 				if existing_unit.is_in_group("enemy_units"):
 					print("Cannot place unit on a tile occupied by an enemy unit.")
@@ -408,6 +405,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			if placed_units_queue.size() >= max_squad_size:
 				# If the limit is reached, remove the oldest placed unit
 				var oldest_unit = placed_units_queue.pop_front()
+				print("Removing oldest placed unit with ID: ", oldest_unit.get_instance_id())
 				remove_unit(oldest_unit)
 				print("Max squad size reached. Removing the oldest placed unit.")
 
@@ -442,6 +440,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			# Store the new unit in the placed_units dictionary and on the tile
 			placed_units[unit_id] = new_model
 			units_on_tiles[closest_tile] = new_model
+			print("Placed unit instance ID: ", new_model.get_instance_id(), " on tile ID: ", closest_tile.get_instance_id())
 
 			# Add to player group
 			new_model.add_to_group("player_units")
@@ -463,13 +462,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 
 			# If the currently_selected_tile is different from the new tile, revert the old one to blue (if no unit is on it) or red
 			if currently_selected_tile and currently_selected_tile != closest_tile:
-				print("Reverting previously selected tile color.")
-
-				# Check if there's a unit on the currently selected tile
-				if not units_on_tiles.has(currently_selected_tile):
-					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
-				else:
-					currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+				_deselect_tile(currently_selected_tile)
 
 			# Update the currently selected tile reference
 			currently_selected_tile = closest_tile
@@ -520,7 +513,7 @@ func combatInitiate():
 	
 	DataPasser.inActiveCombat = true
 	
-	#deselect current unit and set its tile to red
+	# Deselect current unit and set its tile to red
 	currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
 	DataPasser.selectedUnit = null
 	unit_name_label.text = ""
