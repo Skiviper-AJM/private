@@ -367,13 +367,13 @@ func remove_enemy_from_grid(tile_position: Vector2):
 
 func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_player: bool = true):
 	print("Placing unit...")
-	var unit_id = unit_to_place.get_instance_id()
+	var unit_resource = unit_to_place.unitParts  # Use the resource of the unit
 
-	# Ensure only one instance of each unit type is placed
+	# Ensure only one instance of each unit resource is placed
 	if is_player:
 		for existing_unit in placed_units_queue:
-			if existing_unit.unitParts.name == unit_to_place.unitParts.name:
-				print("Unit of this type already placed, removing the existing one.")
+			if existing_unit.unitParts == unit_resource:
+				print("Unit with this resource already placed, removing the existing one.")
 				remove_unit(existing_unit)
 				break
 
@@ -391,7 +391,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 			var existing_unit = units_on_tiles[closest_tile]
 			print("Existing unit instance ID: ", existing_unit.get_instance_id())
 
-			# Block placement if the tile is occupied by another unit of the same type
+			# Block placement if the tile is occupied by another unit
 			if (is_player and existing_unit.is_in_group("player_units")) or (not is_player and existing_unit.is_in_group("enemy_units")):
 				print("Cannot place unit on a tile occupied by another unit of the same type.")
 				return
@@ -421,12 +421,14 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 			var bbox = unit_to_place.get_aabb()
 			unit_to_place.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
 
+
 		# Store the unit in the correct dictionary and assign the correct group
 		units_on_tiles[closest_tile] = unit_to_place
 		if is_player:
 			# Add the unit to the queue (remove first if it's already there to avoid duplicates)
 			_remove_unit_from_queue(unit_to_place)
 			placed_units_queue.push_back(unit_to_place)
+			placed_units[unit_resource] = unit_to_place
 			unit_to_place.add_to_group("player_units")
 		else:
 			unit_to_place.add_to_group("enemy_units")
@@ -460,6 +462,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_
 
 
 
+
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
 	if unit and is_instance_valid(unit):
@@ -473,10 +476,9 @@ func remove_unit(unit):
 				units_on_tiles.erase(tile)
 				break
 
-		# Remove the unit from the placed_units dictionary
-		placed_units.erase(unit.get_instance_id())
-
-		# Remove the unit from the placement queue
+		# Remove the unit from the placed_units dictionary and queue
+		var unit_resource = unit.unitParts
+		placed_units.erase(unit_resource)
 		placed_units_queue.erase(unit)
 
 		# Update the label text
@@ -485,6 +487,7 @@ func remove_unit(unit):
 		unit.queue_free()  # This will remove the unit from the scene
 	else:
 		print("Warning: Tried to remove a unit that is no longer valid or doesn't exist.")
+
 
 func _update_units_label():
 	var current_units := placed_units_queue.size()
