@@ -243,6 +243,14 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	var start_position = start_tile.global_transform.origin
 	var target_position = target_tile.global_transform.origin
 
+	# Calculate the distance to move
+	var distance_to_move = start_position.distance_to(target_position) / player_combat_controller.TILE_SIZE
+
+	# Check if the unit has enough remaining movement
+	if unit_instance.get_meta("remaining_movement") < distance_to_move:
+		print("Unit does not have enough remaining movement to move to the target tile.")
+		return
+
 	# Preserve the Y position from the start
 	var initial_y = unit_instance.global_transform.origin.y
 	target_position.y = initial_y  # Ensure the Y-axis remains unchanged
@@ -278,7 +286,12 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 	start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 
-	print("Unit moved to tile: ", target_tile.global_transform.origin)
+	# Decrement the remaining movement by the distance moved
+	var remaining_movement = unit_instance.get_meta("remaining_movement")
+	unit_instance.set_meta("remaining_movement", remaining_movement - distance_to_move)
+
+	print("Unit moved to tile: ", target_tile.global_transform.origin, " Remaining movement: ", unit_instance.get_meta("remaining_movement"))
+
 
 
 
