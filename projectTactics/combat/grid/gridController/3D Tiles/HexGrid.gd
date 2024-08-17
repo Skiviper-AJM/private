@@ -166,60 +166,67 @@ func _handle_tile_click(mouse_position):
 		var clicked_tile = _get_tile_with_tolerance(clicked_position_2d)
 
 		if clicked_tile:
+			print("Clicked tile instance ID: ", clicked_tile.get_instance_id())
+
 			# Look for the coordinates by checking the dictionary keys
-			for coord in tiles.keys():
-				if tiles[coord] == clicked_tile:
-					print("Checking units on tile coordinates: ", coord)
+			var coord = null
+			for key in tiles.keys():
+				if tiles[key] == clicked_tile:
+					coord = key
+					break
 
-					# Check if there is a unit on the tile at these coordinates
-					if units_on_tiles.has(coord):
-						var unit_on_tile = units_on_tiles[coord]
+			if coord != null:
+				print("Tile coordinates detected: ", coord)
 
-						# Handle detection of enemy units to suppress input
-						if unit_on_tile.is_in_group("enemy_units"):
-							print("Enemy spotted on tile at coordinates: ", coord)
-							enemyOccupied = true
-							return  # Early return to block further processing
+				# Check if there is a unit on the tile at these coordinates
+				if units_on_tiles.has(tiles[coord]):
+					var unit_on_tile = units_on_tiles[tiles[coord]]
+					print("Unit detected on tile, unit instance ID: ", unit_on_tile.get_instance_id())
 
-						# Handle selection logic for player units
-						if unit_on_tile.is_in_group("player_units"):
-							enemyOccupied = false  # Reset flag since player unit is selected
-							print("Swapping selection to player unit on tile:", unit_on_tile.name)
+					# Handle detection of enemy units to suppress input
+					if unit_on_tile.is_in_group("enemy_units"):
+						print("Enemy spotted on tile at coordinates: ", coord)
+						enemyOccupied = true
+						return  # Early return to block further processing
 
-							# Deselect the currently selected tile's visual
-							if currently_selected_tile != null:
-								_deselect_tile(currently_selected_tile)
+					# Handle selection logic for player units
+					if unit_on_tile.is_in_group("player_units"):
+						enemyOccupied = false  # Reset flag since player unit is selected
+						print("Swapping selection to player unit on tile:", unit_on_tile.name)
 
-							# Select the new unit
-							DataPasser.passUnitInfo(unit_on_tile.unitParts)
-							unit_to_place = unit_on_tile.unitParts
-							placing_unit = false
-							unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
+						# Deselect the currently selected tile's visual
+						if currently_selected_tile != null:
+							_deselect_tile(currently_selected_tile)
 
-							# Update the selected tile's visual to green
-							_select_tile(clicked_tile)
-							currently_selected_tile = clicked_tile
-							return
+						# Select the new unit
+						DataPasser.passUnitInfo(unit_on_tile.unitParts)
+						unit_to_place = unit_on_tile.unitParts
+						placing_unit = false
+						unit_name_label.text = "Unit: " + unit_on_tile.unitParts.name
 
-						# If we are placing a unit, block placement if the tile is occupied by any unit
-						if placing_unit:
-							if unit_on_tile.is_in_group("enemy_units") or unit_on_tile.is_in_group("player_units"):
-								print("Tile is occupied by an enemy or player unit. Blocking placement.")
-								return
-					else:
-						print("No unit detected on tile coordinates: ", coord)
-						enemyOccupied = false
+						# Update the selected tile's visual to green
+						_select_tile(clicked_tile)
+						currently_selected_tile = clicked_tile
+						return
 
-					break  # Stop after finding the correct tile coordinates
+				else:
+					print("No unit detected on tile coordinates: ", coord)
+					enemyOccupied = false
 
-			# If the tile is empty and we're placing a unit, allow placement
-			if placing_unit and DataPasser.selectedUnit != null:
-				print("Placing unit on empty tile...")
-				place_unit_on_tile(clicked_position_2d)
+					# If we are placing a unit, place it on the empty tile
+					if placing_unit and DataPasser.selectedUnit != null:
+						print("Placing unit on empty tile...")
+						place_unit_on_tile(clicked_position_2d)
+						return
+			else:
+				print("No matching coordinates found for clicked tile.")
 		else:
 			print("No valid tile found.")  # If no tile is found
 	else:
 		print("No raycast hit detected.")  # If raycast doesn't hit anything
+
+
+
 
 func _deselect_tile(tile):
 	if units_on_tiles.has(tile):
