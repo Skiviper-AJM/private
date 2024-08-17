@@ -253,6 +253,9 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Adjust the rotation to face the correct direction
 	unit_instance.look_at(target_position, Vector3.UP)
 
+	# Rotate the unit 180 degrees to face backward
+	unit_instance.rotate_y(deg_to_rad(180))
+
 	# Now perform the movement animation
 	var duration = 0.5  # seconds per tile
 	var elapsed = 0.0
@@ -269,6 +272,7 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Ensure the final position and rotation are set
 	unit_instance.global_transform.origin = target_position
 	unit_instance.look_at(target_position, Vector3.UP)  # Apply final rotation
+	unit_instance.rotate_y(deg_to_rad(180))  # Rotate to face backward
 
 	# Update the units_on_tiles dictionary
 	player_combat_controller.units_on_tiles.erase(start_tile)
@@ -279,6 +283,7 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 
 	print("Unit moved to tile: ", target_tile.global_transform.origin)
+
 
 
 
