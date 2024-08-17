@@ -62,11 +62,20 @@ func handle_unit_selection():
 			var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to Vector2
 			var clicked_tile = player_combat_controller._get_tile_with_tolerance(clicked_position_2d)
 			if clicked_tile:
-				handle_tile_click(clicked_tile)
+				# Check if there is a unit on the clicked tile
+				if player_combat_controller.units_on_tiles.has(clicked_tile):
+					var unit_instance = player_combat_controller.units_on_tiles[clicked_tile]
+					if unit_instance.is_in_group("player_units"):
+						handle_tile_click(clicked_tile)
+					else:
+						print("Cannot select this unit: it belongs to the enemy.")
+				else:
+					print("No unit detected on tile.")
 			else:
 				print("No valid tile found.")
 		else:
 			print("No raycast hit detected.")
+
 
 
 func handle_tile_click(tile):
@@ -99,6 +108,11 @@ func _handle_unit_click(unit_instance):
 		# Prevent selecting the unit if it is currently moving
 		if unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
 			print("Cannot select unit: it is currently moving.")
+			return
+
+		# Check if the unit is a player unit
+		if not unit_instance.is_in_group("player_units"):
+			print("Cannot select this unit: it belongs to the enemy.")
 			return
 
 		# If another unit is selected, deselect it without turning its tile red
@@ -144,6 +158,7 @@ func _handle_unit_click(unit_instance):
 			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 		else:
 			print("Selected unit instance not found on any tile.")
+
 
 func deselect_unit(force_deselect = false):
 	$"../CombatGridUI/UnitPlaceUI/Attack".visible = false
