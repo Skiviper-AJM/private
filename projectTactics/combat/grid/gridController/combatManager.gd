@@ -218,122 +218,67 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 			print("Cannot move to a tile occupied by an enemy unit.")
 			return
 
-	# Calculate the move distance in terms of tile units
-	var start_position = unit_instance.global_transform.origin
-	var target_position = target_tile.global_transform.origin
-	var move_distance = start_position.distance_to(target_position) / player_combat_controller.TILE_SIZE
-
-	# Debugging output for calculated move distance
-	print("Calculated move distance (before flooring): ", move_distance)
-
-	# Floor the move distance to avoid overestimating
-	move_distance = floor(move_distance)
-
-	# Check if the unit has enough remaining movement to make this move
-	var remaining_movement = unit_instance.get_meta("remaining_movement")
-	print("Remaining movement before move: ", remaining_movement)
-
-	if move_distance > remaining_movement:
-		print("Not enough movement remaining.")
-		return
-
-	# Mark the unit as moving
-	unit_instance.set_meta("moving", true)
-
-	# Update the remaining movement after this move and floor it
-	var new_remaining_movement = remaining_movement - move_distance
-	new_remaining_movement = floor(new_remaining_movement)  # Ensure it's rounded down
-	unit_instance.set_meta("remaining_movement", max(new_remaining_movement, 0))
-	print("New remaining movement after move (floored): ", new_remaining_movement)
-
-	# Get the current and target positions
-	target_position.y = start_position.y  # Keep the height constant
-
-	# Instantly update the units_on_tiles dictionary to reflect the new tile
-	var old_tile = player_combat_controller.currently_selected_tile
-	if old_tile:
-		player_combat_controller.units_on_tiles.erase(old_tile)
-
-		# Reset the old tile color to blue before moving
-		old_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
-	
-	player_combat_controller.units_on_tiles[target_tile] = unit_instance
-
-	# Set the target tile to red and ensure it stays red during movement
-	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-
-	# Clear the highlighted tiles (except for the path tiles)
-	clear_highlighted_tiles()
-
 	# Get the tiles along the path
-	var path_tiles = get_tiles_along_path(start_position, target_position)
-	
-	# Highlight the entire path in yellow if the tile is blue
+	var path_tiles = get_tiles_along_path(unit_instance.global_transform.origin, target_tile.global_transform.origin)
+
+	# Iterate over each tile in the path and move the unit one tile at a time
 	for tile in path_tiles:
-		if tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[0]:  # Only highlight if blue
-			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow
+		if unit_instance.get_meta("remaining_movement") <= 0:
+			break  # Stop if the unit has no remaining movement
+
+		# Move the unit to the current tile
+		await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, tile)
+		player_combat_controller.currently_selected_tile = tile  # Update the current tile
+
+	# Mark the unit as not moving anymore
+	unit_instance.set_meta("moving", false)
+
+	# Set the target tile green to indicate the unit has arrived
+	player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+
+	print("Unit moved successfully with remaining movement: ", unit_instance.get_meta("remaining_movement"))
+
+func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: Node3D):
+	# Get the current and target positions
+	var start_position = start_tile.global_transform.origin
+	var target_position = target_tile.global_transform.origin
+
+	# Preserve the Y position from the start
+	var initial_y = unit_instance.global_transform.origin.y
+	target_position.y = initial_y  # Ensure the Y-axis remains unchanged
+
+	# Calculate the direction to the target
+	var direction = (target_position - start_position).normalized()
+
+	# Adjust the rotation to face the correct direction
+	unit_instance.look_at(target_position, Vector3.UP)
 
 	# Now perform the movement animation
-	var duration = 1.0  # seconds
+	var duration = 0.5  # seconds per tile
 	var elapsed = 0.0
-	var previous_tile = null
 
 	while elapsed < duration:
 		var t = elapsed / duration
 		var interpolated_position = start_position.lerp(target_position, t)
+		interpolated_position.y = initial_y  # Keep Y constant during interpolation
 		unit_instance.global_transform.origin = interpolated_position
 
-		# Invert the direction to face the opposite way
-		var direction = start_position - target_position
-		direction.y = 0  # Keep the height constant for rotation
-
-		# Rotate to face the opposite direction
-		unit_instance.look_at(target_position + direction, Vector3.UP)
-
-		# Find the closest tile to the current interpolated position
-		var candidate_tiles = get_closest_tiles(interpolated_position)
-
-		# Select one tile randomly if there are multiple candidates
-		var current_tile = null
-		if candidate_tiles.size() > 0:
-			current_tile = candidate_tiles[randi() % candidate_tiles.size()]
-
-		# Proceed only if current_tile is valid
-		if current_tile and current_tile != previous_tile:
-			# Reset the previous tile color to blue if it's not the target and was yellow
-			if previous_tile and previous_tile != target_tile and previous_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[3]:
-				previous_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
-			previous_tile = current_tile
-
-		# Ensure the target tile remains red during the move
-		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Ensure it stays red
-
-		# Wait for the next frame to continue updating
 		await get_tree().create_timer(0.01).timeout
-
 		elapsed += 0.01
 
 	# Ensure the final position and rotation are set
 	unit_instance.global_transform.origin = target_position
 	unit_instance.look_at(target_position, Vector3.UP)  # Apply final rotation
 
-	# Update the selected tile reference to the new position
-	player_combat_controller.currently_selected_tile = target_tile
+	# Update the units_on_tiles dictionary
+	player_combat_controller.units_on_tiles.erase(start_tile)
+	player_combat_controller.units_on_tiles[target_tile] = unit_instance
 
-	# Clear the path tiles after the unit has moved over them
-	for tile in path_tiles:
-		if tile != target_tile and tile.get_node("unit_hex/mergedBlocks(Clone)").material_override == TILE_MATERIALS[3]:
-			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+	# Set the tile color accordingly
+	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+	start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set old tile back to blue
 
-	# Mark the unit as not moving anymore
-	unit_instance.set_meta("moving", false)
-
-	# Turn the target tile green to indicate the unit has arrived
-	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-
-	# The unit will remain selected after its move is completed.
-	# Print confirmation of successful move
-	print("Unit moved to new tile successfully.")
+	print("Unit moved to tile: ", target_tile.global_transform.origin)
 
 
 
