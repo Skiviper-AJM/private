@@ -465,19 +465,25 @@ func place_unit_on_tile(position: Vector2, unit_to_place: Node3D, is_player: boo
 	if target_tile:
 		print("Target tile found: ", target_tile.get_instance_id())
 
+		# Check if a unit with the same unitParts is already placed
+		if placed_units.has(unit_to_place.unitParts):
+			var existing_unit = placed_units[unit_to_place.unitParts]
+			print("A unit with the same parts is already placed. Removing the existing unit.")
+			remove_unit(existing_unit)
+
 		# Check if the tile already has a unit
 		if units_on_tiles.has(target_tile):
-			var existing_unit = units_on_tiles[target_tile]
-			print("Existing unit instance ID: ", existing_unit.get_instance_id())
+			var existing_unit_on_tile = units_on_tiles[target_tile]
+			print("Existing unit instance ID on tile: ", existing_unit_on_tile.get_instance_id())
 
 			# Block placement if the tile is occupied by another unit of the same type
-			if (is_player and existing_unit.is_in_group("player_units")) or (not is_player and existing_unit.is_in_group("enemy_units")):
+			if (is_player and existing_unit_on_tile.is_in_group("player_units")) or (not is_player and existing_unit_on_tile.is_in_group("enemy_units")):
 				print("Cannot place unit on a tile occupied by another unit of the same type.")
 				return
 
 			# Remove the existing unit if the placement is allowed
-			print("Removing existing unit to place a new one...")
-			remove_unit(existing_unit)
+			print("Removing existing unit on the tile to place a new one...")
+			remove_unit(existing_unit_on_tile)
 
 		# Create and place the 3D model at the tile position
 		print("Creating new unit model...")
