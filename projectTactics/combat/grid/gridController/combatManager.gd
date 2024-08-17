@@ -17,10 +17,14 @@ const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/orange.tres"),  # Added for splash highlight
 ]
 
 var highlighted_tiles := []
+var originally_blue_tiles = []  # List to track which tiles were originally blue
+var splash_highlighted_tiles = []  # List to track splash-highlighted tiles
 var selected_unit_instance = null  # Store the instance of the selected unit
+var current_hover_tile = null  # Track the current tile under the mouse
 
 # Prevents placing, moving, or interacting if a button is hovered over
 func _ready():
@@ -33,6 +37,10 @@ func buttonHover():
 func _input(event):
 	if event.is_action_pressed("interact") and not block_placement:
 		handle_unit_selection()
+	
+	# Highlight splash area when hovering over an attack tile
+	if in_combat and selected_unit_instance and event is InputEventMouseMotion:
+		handle_splash_highlighting()
 
 func combatInitiate():
 	in_combat = true
@@ -166,6 +174,7 @@ func deselect_unit(force_deselect = false):
 	
 	# Clear all highlighted tiles
 	clear_highlighted_tiles()
+	clear_splash_highlighted_tiles()  # Clear any splash highlights
 	
 	# Deselect the currently selected unit and reset the tile color
 	if selected_unit_instance:
@@ -177,7 +186,6 @@ func deselect_unit(force_deselect = false):
 		player_combat_controller.currently_selected_tile = null
 		player_combat_controller.unit_name_label.text = ""
 		print("Unit deselected.")
-
 
 func highlight_tiles_around_unit(selected_unit_instance, range):
 	# Fetch the current tile based on the latest position of the unit
@@ -197,7 +205,6 @@ func highlight_tiles_around_unit(selected_unit_instance, range):
 				highlighted_tiles.append(tile)
 	else:
 		print("No unit tile found to highlight.")
-
 
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Ensure that unit_instance is a Node3D instance
@@ -286,10 +293,6 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 
 	print("Unit moved to tile: ", target_tile.global_transform.origin, " Remaining movement: ", unit_instance.get_meta("remaining_movement"))
 
-
-
-
-
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
 	var direction = (end_position - start_position).normalized()
@@ -308,7 +311,6 @@ func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Arr
 
 	return path_tiles
 
-
 # Modified function to get closest tiles, with randomness to break ties
 func get_closest_tiles(position: Vector3) -> Array:
 	var closest_tiles = []
@@ -325,7 +327,6 @@ func get_closest_tiles(position: Vector3) -> Array:
 
 	# Return all closest tiles for randomness in selection
 	return closest_tiles
-
 
 func any_unit_moving() -> bool:
 	for tile in player_combat_controller.units_on_tiles.keys():
@@ -344,7 +345,7 @@ func moveButton():
 
 		# Highlight the movement range when move mode is activated
 		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
-		
+
 func shootButton():
 	clear_highlighted_tiles()  # Clear any existing highlights
 	print("Shoot action selected.")
@@ -361,8 +362,6 @@ func attackButton():
 		highlight_attack_range(selected_unit_instance)
 	else:
 		print("No unit selected for attack.")
-
-var originally_blue_tiles = []  # List to track which tiles were originally blue
 
 func highlight_attack_range(unit_instance):
 	# Initialize variables to store the highest range and splash rating
@@ -419,11 +418,56 @@ func clear_highlighted_tiles():
 	highlighted_tiles.clear()
 	originally_blue_tiles.clear()  # Clear the tracking list
 
+func clear_splash_highlighted_tiles():
+	for tile in splash_highlighted_tiles:
+		var material_override = tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
+		# Reset only orange tiles back to their original state
+		if material_override == TILE_MATERIALS[4]:
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
+	splash_highlighted_tiles.clear()
 
+func handle_splash_highlighting():
+	var from = camera.project_ray_origin(get_viewport().get_mouse_position())
+	var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * 50000
+
+	var space_state = camera.get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.new()
+	query.from = from
+	query.to = to
+
+	var result = space_state.intersect_ray(query)
+
+	if result:
+		var hover_position = result.position
+		var hover_position_2d = Vector2(hover_position.x, hover_position.z)  # Convert to Vector2
+		var hover_tile = player_combat_controller._get_tile_with_tolerance(hover_position_2d)
+
+		if hover_tile and hover_tile != current_hover_tile:
+			clear_splash_highlighted_tiles()  # Clear previous splash highlights
+			current_hover_tile = hover_tile
+			
+			var splash_radius = selected_unit_instance.unitParts.splash
+			highlight_splash_area(hover_tile, splash_radius)
+	else:
+		clear_splash_highlighted_tiles()
+		current_hover_tile = null
+
+func highlight_splash_area(center_tile, splash_radius):
+	var center_position = center_tile.global_transform.origin
+	var tile_size = player_combat_controller.TILE_SIZE
+
+	for tile_key in player_combat_controller.tiles.keys():
+		var tile = player_combat_controller.tiles[tile_key]
+		var distance = tile.global_transform.origin.distance_to(center_position) / tile_size
+		
+		if distance <= splash_radius and tile != center_tile:
+			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[4]  # Set to orange
+			splash_highlighted_tiles.append(tile)
 
 func end_move_mode():
 	move_mode_active = false  # Deactivate move mode
 	clear_highlighted_tiles()  # Clear highlighted tiles
+	clear_splash_highlighted_tiles()  # Clear any splash highlights
 	print("Move mode deactivated.")
 
 func endTurn():
