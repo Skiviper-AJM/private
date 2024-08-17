@@ -215,7 +215,7 @@ func _handle_tile_click(mouse_position):
 					# If we are placing a unit, place it on the empty tile
 					if placing_unit and DataPasser.selectedUnit != null:
 						print("Placing unit on empty tile...")
-						place_unit_on_tile(clicked_position_2d)
+						place_unit_on_tile(clicked_position_2d, DataPasser.selectedUnit)
 						return
 			else:
 				print("No matching coordinates found for clicked tile.")
@@ -282,6 +282,8 @@ func move_unit_to_tile(target_tile):
 			# Update the dictionaries
 			placed_units[new_model.get_instance_id()] = new_model
 			units_on_tiles[target_tile] = new_model
+			
+
 			placed_units_queue.push_back(new_model)
 
 			# Update tile color
@@ -372,110 +374,79 @@ func remove_enemy_from_grid(tile_position: Vector2):
 	if units_on_tiles.has(tile_position):
 		units_on_tiles.erase(tile_position)
 
-func place_unit_on_tile(clicked_position_2d: Vector2):
-	if placing_unit and unit_to_place:
-		print("Placing unit...")
-		var unit_id = unit_to_place.get_instance_id()
+func place_unit_on_tile(clicked_position_2d: Vector2, unit_to_place: Node3D, is_player: bool = true):
+	print("Placing unit...")
+	var unit_id = unit_to_place.get_instance_id()
 
-		var closest_tile = _get_tile_with_tolerance(clicked_position_2d)
-		if closest_tile:
-			print("Closest tile instance ID: ", closest_tile.get_instance_id())
+	var closest_tile = _get_tile_with_tolerance(clicked_position_2d)
+	if closest_tile:
+		print("Closest tile instance ID: ", closest_tile.get_instance_id())
 
-			# Check if the tile already has a unit
-			if units_on_tiles.has(closest_tile):
-				var existing_unit = units_on_tiles[closest_tile]
-				print("Existing unit instance ID: ", existing_unit.get_instance_id())
+		# Check if the tile already has a unit
+		if units_on_tiles.has(closest_tile):
+			var existing_unit = units_on_tiles[closest_tile]
+			print("Existing unit instance ID: ", existing_unit.get_instance_id())
 
-				# Check if the existing unit belongs to the enemy group
-				if existing_unit.is_in_group("enemy_units"):
-					print("Cannot place unit on a tile occupied by an enemy unit.")
-					return  # Block placement if the tile is occupied by an enemy unit
+			# Block placement if the tile is occupied by another unit of the same type
+			if (is_player and existing_unit.is_in_group("player_units")) or (not is_player and existing_unit.is_in_group("enemy_units")):
+				print("Cannot place unit on a tile occupied by another unit of the same type.")
+				return
 
-				# If the same unit is being placed on the same tile, do nothing
-				if existing_unit.get_instance_id() == unit_id:
-					print("Same unit is already on this tile. No action taken.")
-					return
+			# Remove the existing unit if the placement is allowed
+			print("Removing existing unit to place a new one...")
+			remove_unit(existing_unit)
 
-				# Otherwise, remove the existing player unit and place the new one
-				print("Another player unit is on this tile. Removing existing unit...")
-				remove_unit(existing_unit)
+		# Create and place the 3D model at the tile position
+		print("Creating new unit model...")
+		unit_to_place.scale = unit_scale  # Apply the unit scale
 
-			# Temporarily remove the unit from the queue if it’s already placed
-			var was_unit_already_placed = placed_units.has(unit_id)
-			if was_unit_already_placed:
-				print("Unit is already placed, removing from current position.")
-				placed_units_queue.erase(placed_units[unit_id])
-				remove_unit(placed_units[unit_id])
+		# Set the unit position based on the tile position
+		var left_foot_node = unit_to_place.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
+		var right_foot_node = unit_to_place.get_node_or_null("chestPivot/rLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
 
-			# Check if the max squad size has been reached after accounting for the move
-			if placed_units_queue.size() >= max_squad_size:
-				# If the limit is reached, remove the oldest placed unit
-				var oldest_unit = placed_units_queue.pop_front()
-				print("Removing oldest placed unit with ID: ", oldest_unit.get_instance_id())
-				remove_unit(oldest_unit)
-				print("Max squad size reached. Removing the oldest placed unit.")
+		if left_foot_node and right_foot_node:
+			var left_foot_bbox = left_foot_node.get_aabb()
+			var right_foot_bbox = right_foot_node.get_aabb()
 
-			# Create and place the 3D model at the tile position
-			print("Creating new unit model...")
-			var new_model = Node3D.new()
-			add_child(new_model)
-			new_model.set_script(load("res://combat/resources/unitAssembler.gd"))
-			new_model.unitParts = unit_to_place
-			new_model.assembleUnit()
+			var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
 
-			# Set the scale of the 3D model
-			new_model.scale = unit_scale  # Apply the unit scale
+			unit_to_place.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
+		else:
+			print("Foot nodes not found! Adjusting using the main bounding box.")
+			# Fallback to use the main bounding box
+			var bbox = unit_to_place.get_aabb()
+			unit_to_place.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
 
-			# Access the foot nodes using the full path
-			var left_foot_node = new_model.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
-			var right_foot_node = new_model.get_node_or_null("chestPivot/rLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
+		# Store the unit in the correct dictionary and assign the correct group
+		units_on_tiles[closest_tile] = unit_to_place
+		if is_player:
+			unit_to_place.add_to_group("player_units")
+			placed_units_queue.push_back(unit_to_place)
+		else:
+			unit_to_place.add_to_group("enemy_units")
 
-			if left_foot_node and right_foot_node:
-				var left_foot_bbox = left_foot_node.get_aabb()
-				var right_foot_bbox = right_foot_node.get_aabb()
+		# Set the tile color accordingly
+		if is_player:
+			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red for player
+		else:
+			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[3]  # Set to yellow for enemy
 
-				var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
 
-				new_model.position = closest_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
-			else:
-				print("Foot nodes not found! Adjusting using the main bounding box.")
-				# Fallback to use the main bounding box
-				var bbox = new_model.get_aabb()
-				new_model.position = closest_tile.global_transform.origin - Vector3(0, bbox.position.y, 0)
+		# Add the unit to the scene tree if it wasn't already
+		if not is_instance_valid(unit_to_place.get_parent()):
+			add_child(unit_to_place)
 
-			# Store the new unit in the placed_units dictionary and on the tile
-			placed_units[unit_id] = new_model
-			units_on_tiles[closest_tile] = new_model
-			print("Placed unit instance ID: ", new_model.get_instance_id(), " on tile ID: ", closest_tile.get_instance_id())
-
-			# Add to player group
-			new_model.add_to_group("player_units")
-
-			# Set the tile color to red since the unit is placed
-			closest_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
-
-			# Add the unit back to the queue if it was already placed before
-			placed_units_queue.push_back(new_model)
-
-			# Update the label text
+		# Update the label text if placing a player unit
+		if is_player:
 			_update_units_label()
 
-			# Clear unit selected
-			unit_to_place = null
-			DataPasser.selectedUnit = null
-			placing_unit = false  # Reset the placing flag
-			unit_name_label.text = ""
-
-			# If the currently_selected_tile is different from the new tile, revert the old one to blue (if no unit is on it) or red
-			if currently_selected_tile and currently_selected_tile != closest_tile:
-				_deselect_tile(currently_selected_tile)
-
-			# Update the currently selected tile reference
-			currently_selected_tile = closest_tile
-		else:
-			print("No valid tile found for placement.")
+		# Update the currently selected tile reference if needed
+		if is_player and currently_selected_tile and currently_selected_tile != closest_tile:
+			_deselect_tile(currently_selected_tile)
+		currently_selected_tile = closest_tile
 	else:
-		print("No unit to place or placing_unit flag is false.")
+		print("No valid tile found for placement.")
+
 
 
 func remove_unit(unit):

@@ -26,7 +26,8 @@ func _on_grid_generated():
 			print("No suitable tile found for enemy placement.")
 		else:
 			print("Placing enemy at tile position: ", tile_position)
-			place_enemy_on_tile(enemy_unit, tile_position)
+			grid_controller.place_unit_on_tile(tile_position, enemy_unit, false) # Passing `false` to indicate it's an enemy unit
+
 
 func generate_random_enemy_instance() -> Node3D:
 	print("Creating new enemy unit instance...")
@@ -72,45 +73,3 @@ func find_free_tile() -> Vector2:
 		return Vector2(-1, -1)
 	
 	return free_tiles[randi_range(0, free_tiles.size() - 1)]
-
-func place_enemy_on_tile(enemy_unit: Node3D, tile_position: Vector2):
-	if grid_controller.tiles.has(tile_position):
-		var target_tile = grid_controller.tiles[tile_position]
-		
-		# Check if the tile is already occupied by another unit
-		if grid_controller.units_on_tiles.has(tile_position):
-			print("Tile at position ", tile_position, " is already occupied. Cannot place enemy.")
-			return
-		
-		enemy_unit.scale = grid_controller.unit_scale
-
-		var left_foot_node = enemy_unit.get_node_or_null("chestPivot/lLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
-		var right_foot_node = enemy_unit.get_node_or_null("chestPivot/rLegPos/upperLegPivot/upperLeg/lowerLegPivot/lowerLeg/footPivot/foot")
-
-		if left_foot_node and right_foot_node:
-			var left_foot_bbox = left_foot_node.get_aabb()
-			var right_foot_bbox = right_foot_node.get_aabb()
-			var lowest_y = min(left_foot_bbox.position.y, right_foot_bbox.position.y)
-			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, lowest_y - 1.1, 0)
-		else:
-			enemy_unit.position = target_tile.global_transform.origin - Vector3(0, 1.1, 0)
-		
-		# Add the enemy unit as a child of the 3DGrid node
-		grid_controller.add_child(enemy_unit)
-		
-		# Mark the tile as occupied by this enemy
-		grid_controller.units_on_tiles[tile_position] = enemy_unit
-		
-		# Add to enemy units group after adding to the scene tree
-		enemy_unit.add_to_group("enemy_units")
-
-		# Verify that the unit was correctly added to the group
-		if enemy_unit.is_in_group("enemy_units"):
-			print("Enemy unit successfully added to 'enemy_units' group.")
-		else:
-			print("Failed to add enemy unit to 'enemy_units' group.")
-
-		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = PURPLE_MATERIAL
-		print("Enemy unit placed on tile at position: ", tile_position, " with coordinates: ", target_tile.global_transform.origin)
-	else:
-		print("Error: Tile not found in the grid for position: ", tile_position)
