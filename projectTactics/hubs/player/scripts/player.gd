@@ -86,9 +86,7 @@ func _input(event):
 	#temp test input
 	var parent_scene = get_parent().get_parent()  # Adjust based on your scene tree structure
 	if Input.is_action_just_pressed("Generate_Grid"):
-		var current_scene =  get_tree().get_current_scene()
-		DataPasser.priorScene = str(get_tree().current_scene.scene_file_path)
-		changeScene("res://combat/grid/gridController/3D Tiles/hex_grid.tscn");
+		enterCombat()
 	
 	#temp test input^
 	if event is InputEventMouseMotion and !isStopped and fishingState == FISHING_STATES.inactive: updateCam(event);
@@ -484,3 +482,8 @@ func updateSFXVolume():
 	else:
 		%footstepsSFX.volume_db = -80
 		%reelSFX.volume_db = -80
+
+func enterCombat():
+	var current_scene =  get_tree().get_current_scene()
+	DataPasser.priorScene = str(get_tree().current_scene.scene_file_path)
+	changeScene("res://combat/grid/gridController/3D Tiles/hex_grid.tscn");
