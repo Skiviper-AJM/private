@@ -369,15 +369,15 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 				# Check if the existing unit belongs to the enemy group
 				if existing_unit.is_in_group("enemy_units"):
 					print("Cannot place unit on a tile occupied by an enemy unit.")
-					return
+					return  # Block placement if the tile is occupied by an enemy unit
 
 				# If the same unit is being placed on the same tile, do nothing
 				if existing_unit.get_instance_id() == unit_id:
 					print("Same unit is already on this tile. No action taken.")
 					return
 
-				# Otherwise, remove the existing unit and place the new one
-				print("Another unit is on this tile. Removing existing unit...")
+				# Otherwise, remove the existing player unit and place the new one
+				print("Another player unit is on this tile. Removing existing unit...")
 				remove_unit(existing_unit)
 
 			# Temporarily remove the unit from the queue if it’s already placed
@@ -460,6 +460,7 @@ func place_unit_on_tile(clicked_position_2d: Vector2):
 			print("No valid tile found for placement.")
 	else:
 		print("No unit to place or placing_unit flag is false.")
+
 
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
