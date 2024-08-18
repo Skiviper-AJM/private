@@ -1,10 +1,10 @@
 extends Node
 
-#next attempt will be to find all units then get their closest tile 
 @export var unit_part_count: int = 4
 @export var hex_grid: NodePath = "../HexGrid"
 
 @onready var grid_controller = $"../HexGrid"
+@onready var combat_manager = $"../combatManager"
 @onready var root_node = $"../.."  # Get the 3DGrid node (parent of HexGrid)
 
 @export var max_enemies: int = 2
@@ -85,3 +85,96 @@ func is_tile_in_bounds(tile_key: Vector2) -> bool:
 	# Ensure the tile is within grid bounds
 	#print("Checking bounds for tile: ", tile_key)
 	return abs(tile_key.x) <= grid_controller.grid_size and abs(tile_key.y) <= grid_controller.grid_size
+
+func take_enemy_turns():
+	var player_units = grid_controller.placed_units_queue  # Queue of player units
+	for tile_key in grid_controller.units_on_tiles.keys():
+		var enemy_unit = grid_controller.units_on_tiles[tile_key]
+		if enemy_unit.is_in_group("enemy_units"):
+			move_and_attack_nearest_player(enemy_unit, player_units)
+
+func move_and_attack_nearest_player(enemy_unit: Node3D, player_units):
+	var nearest_player_unit = find_nearest_player_unit(enemy_unit, player_units)
+	if nearest_player_unit == null:
+		return  # No player units found
+
+	# Calculate the target tile to move to (closest unoccupied tile near the player unit)
+	var target_tile = find_closest_unoccupied_tile(enemy_unit, nearest_player_unit)
+
+	if target_tile != null:
+		combat_manager.move_unit_to_tile(enemy_unit, target_tile)
+		# If the enemy is within range, attack the player unit
+		if is_within_attack_range(enemy_unit, nearest_player_unit):
+			attack_player_unit(enemy_unit, nearest_player_unit)
+	else:
+		print("No valid tile to move to for enemy:", enemy_unit.name)
+
+
+func find_nearest_player_unit(enemy_unit: Node3D, player_units) -> Node3D:
+	var min_distance = INF
+	var nearest_unit = null
+	for player_unit in player_units:
+		var distance = enemy_unit.global_transform.origin.distance_to(player_unit.global_transform.origin)
+		if distance < min_distance:
+			min_distance = distance
+			nearest_unit = player_unit
+	return nearest_unit
+
+func find_closest_unoccupied_tile(enemy_unit: Node3D, target_unit: Node3D) -> Node3D:
+	var min_distance = INF
+	var target_tile = null
+
+	# Get all adjacent tiles around the target player unit
+	var adjacent_tiles = get_adjacent_tiles(target_unit)
+
+	# Check for the closest unoccupied adjacent tile
+	for tile in adjacent_tiles:
+		if not grid_controller.units_on_tiles.has(tile):
+			var distance = tile.global_transform.origin.distance_to(enemy_unit.global_transform.origin)
+			if distance < min_distance:
+				min_distance = distance
+				target_tile = tile
+
+	return target_tile
+
+
+func is_within_attack_range(attacker: Node3D, target: Node3D) -> bool:
+	var distance = attacker.global_transform.origin.distance_to(target.global_transform.origin) / grid_controller.TILE_SIZE
+	return distance <= attacker.unitParts.range
+
+func attack_player_unit(attacker: Node3D, target: Node3D):
+	target.unitParts.armorRating -= attacker.unitParts.damage
+	print("Player unit took damage! Remaining armor:", target.unitParts.armorRating)
+	if target.unitParts.armorRating <= 0:
+		print("Player unit destroyed!")
+		grid_controller.remove_unit(target)
+		
+func get_adjacent_tiles(unit: Node3D) -> Array:
+	var adjacent_tiles = []
+
+	# Convert the unit's position to a Vector2
+	var unit_tile = grid_controller._get_tile_with_tolerance(Vector2(unit.global_transform.origin.x, unit.global_transform.origin.z))
+	
+	if unit_tile != null:
+		var directions = [
+			Vector2(1, 0), Vector2(-1, 0),
+			Vector2(0.5, -1), Vector2(-0.5, 1),
+			Vector2(-0.5, -1), Vector2(0.5, 1)
+		]
+
+		for direction in directions:
+			# Convert the unit_tile's global_transform.origin to a Vector2
+			var unit_tile_position = Vector2(unit_tile.global_transform.origin.x, unit_tile.global_transform.origin.z)
+			
+			# Calculate the adjacent tile's position as a Vector2
+			var adjacent_tile_position = unit_tile_position + direction * grid_controller.TILE_SIZE
+			
+			# Find the adjacent tile using the calculated position
+			var adjacent_tile = grid_controller._get_tile_with_tolerance(adjacent_tile_position)
+			
+			if adjacent_tile != null:
+				adjacent_tiles.append(adjacent_tile)
+	
+	return adjacent_tiles
+
+

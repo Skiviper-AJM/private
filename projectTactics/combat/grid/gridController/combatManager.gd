@@ -603,6 +603,10 @@ func endTurn():
 
 	print("Turn ended. Turn count is now ", turnCount)
 
+	# Trigger enemy turn after player ends their turn
+	AI_Controller.take_enemy_turns()
+
+
 func reset_all_units_status():
 	for tile in player_combat_controller.units_on_tiles.keys():
 		var unit_instance = player_combat_controller.units_on_tiles[tile]
