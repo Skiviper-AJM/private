@@ -107,12 +107,15 @@ func move_and_attack_nearest_player(enemy_unit: Node3D, player_units):
 	var target_tile = find_closest_unoccupied_tile(enemy_unit, nearest_player_unit)
 
 	if target_tile != null:
+		# Move the enemy unit to the target tile using the combat manager's method
 		combat_manager.move_enemy_unit_to_tile(enemy_unit, target_tile)
+		
 		# If the enemy is within range, attack the player unit
 		if is_within_attack_range(enemy_unit, nearest_player_unit):
 			attack_player_unit(enemy_unit, nearest_player_unit)
 	else:
 		print("No valid tile to move to for enemy:", enemy_unit.name)
+
 
 func find_nearest_player_unit(enemy_unit: Node3D, player_units) -> Node3D:
 	var min_distance = INF

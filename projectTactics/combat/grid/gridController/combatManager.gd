@@ -684,9 +684,11 @@ func move_enemy_unit_to_tile(enemy_unit: Node3D, target_tile: Vector2):
 	var initial_y = enemy_unit.global_transform.origin.y
 	target_position.y = initial_y  # Ensure the Y-axis remains unchanged
 
+	# Rotate to face the target tile
 	enemy_unit.look_at(target_position, Vector3.UP)
 	enemy_unit.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backward
 
+	# Smooth movement animation
 	var duration = 0.5
 	var elapsed = 0.0
 
@@ -700,5 +702,11 @@ func move_enemy_unit_to_tile(enemy_unit: Node3D, target_tile: Vector2):
 		elapsed += 0.01
 
 	enemy_unit.global_transform.origin = target_position
+
+	# Update the tile color to reflect the unit's new position
+	player_combat_controller.tiles[target_tile].get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[4]  # Set to purple
+	
+	# Mark the unit as not moving
 	enemy_unit.set_meta("moving", false)
+
 	print("Enemy unit moved to tile: ", target_tile)
