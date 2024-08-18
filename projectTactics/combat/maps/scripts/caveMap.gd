@@ -37,6 +37,7 @@ extends Node2D
 # Initializes map scene
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	
 	# Connects buttons to locationPressed function
 	for location in allLocations: location.button_up.connect(locationPressed.bind(location));
 	updateLocations()
@@ -51,6 +52,8 @@ func updateLocations():
 		location.add_theme_stylebox_override("hover", lockedPointHoverStyle)
 		location.add_theme_stylebox_override("pressed", lockedPointHoverStyle)
 		location.focus_mode = Control.FOCUS_NONE
+	
+	
 	# Updates starting button state
 	startingLocation.add_theme_stylebox_override("normal", unlockedPointStyle)
 	startingLocation.add_theme_stylebox_override("hover", unlockedPointHoverStyle)
@@ -82,14 +85,37 @@ func updateLocations():
 
 # Button pressed event
 func locationPressed(location:Button):
+	
 	if location not in activeLocations: return;
 	# Unlock new hub area
-	if location == $location5:
+	if location == $location5 and GS.entranceName == "caveBottom":
 		GS.entranceName = "caveTop"
+		DataPasser.fights = 0
 		get_tree().change_scene_to_file("res://hubs/desertCave/cave.tscn")
 	# Unlock next button/s
+	elif location == $location5 and GS.entranceName == "caveTop":
+		GS.entranceName = "caveBottom"
+		DataPasser.fights = 0
+		get_tree().change_scene_to_file("res://hubs/desertCave/cave.tscn")
+	else:
+		if DataPasser.fights == 0:
+			var current_scene =  get_tree().get_current_scene()
+			DataPasser.priorScene = str(get_tree().current_scene.scene_file_path)
+			
+		if (randi() % 3) > 1 and DataPasser.fights <= 2:
+			DataPasser.fights += 1
+			get_tree().change_scene_to_file("res://combat/grid/gridController/3D Tiles/hex_grid.tscn")
 	completeLocations.append(location)
+	
+
+	
+
+	
+		
+	
 	updateLocations()
+	
+
 
 # Return player to pre-map hub
 func _on_quit_button_button_up():
