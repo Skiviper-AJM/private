@@ -487,6 +487,12 @@ func handle_enemy_click(enemy_unit_instance, clicked_tile):
 		var max_range = selected_unit_instance.unitParts.range  # Assuming you have calculated the max range
 		var distance = clicked_tile.global_transform.origin.distance_to(player_combat_controller.currently_selected_tile.global_transform.origin) / player_combat_controller.TILE_SIZE
 
+		# Check if the enemy is within 1 tile and the unit has a range greater than 1
+		if max_range > 1 and distance <= 1:
+			print("Cannot attack enemy: Out of melee range for ranged unit.")
+			# Act like an empty tile was clicked
+			return
+
 		if distance <= max_range and not selected_unit_instance.get_meta("has_attacked", false):
 			
 			# Apply damage to the enemy unit
@@ -508,6 +514,7 @@ func handle_enemy_click(enemy_unit_instance, clicked_tile):
 			print("Enemy unit is out of range.")
 	else:
 		print("No selected unit to attack with.")
+
 
 func remove_unit_from_map(unit_instance, tile):
 	# Remove the unit from the map and erase its node reference
