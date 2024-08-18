@@ -282,6 +282,7 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 
 	# Adjust the rotation to face the correct direction
 	unit_instance.look_at(target_position, Vector3.UP)
+	unit_instance.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backwards
 
 	# Now perform the movement animation
 	var duration = 0.5  # seconds per tile
