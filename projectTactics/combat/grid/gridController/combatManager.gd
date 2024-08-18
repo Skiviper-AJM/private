@@ -295,17 +295,21 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Ensure the final position is set
 	unit_instance.global_transform.origin = target_position
 
-	# Update the `units_on_tiles` dictionary only for the final destination, not for the tiles passed through
+	# Check if the target tile is occupied by another unit
 	if player_combat_controller.units_on_tiles.has(target_tile):
-		# If the target tile is occupied by another unit, do not remove the other unit
-		print("Target tile is already occupied by another unit.")
+		var existing_unit = player_combat_controller.units_on_tiles[target_tile]
+		if existing_unit != unit_instance:
+			print("Unit is moving through an occupied tile.")
+
+			# Do not update the position in the units_on_tiles dictionary
+			# Reset the start tile to blue as the unit has left it
+			start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
+			return
 	else:
-		# Only move the unit from the start tile if it's currently marked as occupying that tile
+		# Update the units_on_tiles dictionary only for the final destination, not for the tiles passed through
 		if player_combat_controller.units_on_tiles.get(start_tile) == unit_instance:
 			player_combat_controller.units_on_tiles.erase(start_tile)
 			player_combat_controller.units_on_tiles[target_tile] = unit_instance
-			# Reset the start tile to blue once the unit leaves it
-			start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 
 		# Set the target tile color to red to indicate the path
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
