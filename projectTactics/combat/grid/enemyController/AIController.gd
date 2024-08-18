@@ -87,10 +87,16 @@ func is_tile_in_bounds(tile_key: Vector2) -> bool:
 
 func take_enemy_turns():
 	var player_units = grid_controller.placed_units_queue  # Queue of player units
+	
 	for tile_key in grid_controller.units_on_tiles.keys():
-		var enemy_unit = grid_controller.units_on_tiles[tile_key]
-		if enemy_unit.is_in_group("enemy_units"):
-			move_and_attack_nearest_player(enemy_unit, player_units)
+		# Ensure the key is valid and exists
+		if grid_controller.units_on_tiles.has(tile_key):
+			var enemy_unit = grid_controller.units_on_tiles[tile_key]
+			if enemy_unit.is_in_group("enemy_units"):
+				move_and_attack_nearest_player(enemy_unit, player_units)
+		else:
+			print("Invalid tile key or tile not found in units_on_tiles:", tile_key)
+
 
 func move_and_attack_nearest_player(enemy_unit: Node3D, player_units):
 	var nearest_player_unit = find_nearest_player_unit(enemy_unit, player_units)
@@ -111,16 +117,33 @@ func move_and_attack_nearest_player(enemy_unit: Node3D, player_units):
 func find_nearest_player_unit(enemy_unit: Node3D, player_units) -> Node3D:
 	var min_distance = INF
 	var nearest_unit = null
+	
+	# Check if there are any player units on the map
+	if grid_controller.placed_units_queue.is_empty():
+		print("No player units on the map. No valid target.")
+		return null
+
 	for player_unit in player_units:
+		if not is_instance_valid(player_unit):
+			continue  # Skip this unit if it is no longer valid (i.e., has been freed)
+
 		var distance = enemy_unit.global_transform.origin.distance_to(player_unit.global_transform.origin)
 		if distance < min_distance:
 			min_distance = distance
 			nearest_unit = player_unit
+			
 	return nearest_unit
+
 
 func find_closest_unoccupied_tile(enemy_unit: Node3D, target_unit: Node3D) -> Vector2:
 	var min_distance = INF
 	var target_tile = null
+	
+	# Check if there are any player units on the map
+	if grid_controller.placed_units_queue.is_empty():
+		print("No player units on the map. No valid target tile.")
+		return Vector2(-1, -1)
+
 
 	# Get the coordinates of the player unit
 	print(grid_controller._get_tile_with_tolerance(Vector2(target_unit.global_transform.origin.x, target_unit.global_transform.origin.z)))
@@ -166,7 +189,7 @@ func attack_player_unit(attacker: Node3D, target: Node3D):
 	print("Player unit took damage! Remaining armor:", target.unitParts.armorRating)
 	if target.unitParts.armorRating <= 0:
 		print("Player unit destroyed!")
-		grid_controller.remove_unit(target)
+		combat_manager.remove_unit_from_map(target, grid_controller._get_tile_with_tolerance(Vector2(target.global_transform.origin.x, target.global_transform.origin.z)))
 		
 func get_adjacent_tiles(unit: Node3D) -> Array:
 	var adjacent_tiles = []
