@@ -247,12 +247,16 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		unit_instance.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backward
 
 	# Iterate over each tile in the path and move the unit one tile at a time
-	for tile in path_tiles:
+	for i in range(path_tiles.size()):
+		var tile = path_tiles[i]
+		var is_final_tile = (i == path_tiles.size() - 1)
+		
 		if unit_instance.get_meta("remaining_movement") <= 0:
 			break  # Stop if the unit has no remaining movement
 
 		# Move the unit to the current tile
-		await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, tile)
+		await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, tile, i == path_tiles.size())
+
 
 		# Update the currently selected tile to the new tile
 		player_combat_controller.currently_selected_tile = tile
@@ -261,12 +265,12 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	unit_instance.set_meta("moving", false)
 
 	# Guarantee that the unit ends up on the target tile
-	await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, target_tile)
+	await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, target_tile, true)
 
 	print("Unit moved successfully with remaining movement: ", unit_instance.get_meta("remaining_movement"))
 
 
-func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: Node3D):
+func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: Node3D, is_final_tile: bool = false):
 	# Get the current and target positions
 	var start_position = start_tile.global_transform.origin
 	var target_position = target_tile.global_transform.origin
@@ -288,9 +292,10 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Calculate the direction to the target
 	var direction = (target_position - start_position).normalized()
 
-	# Adjust the rotation to face the correct direction
-	unit_instance.look_at(target_position, Vector3.UP)
-	unit_instance.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backwards
+	# Rotate the unit only if it's not the final tile
+	if not is_final_tile:
+		unit_instance.look_at(target_position, Vector3.UP)
+		unit_instance.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backward
 
 	# Now perform the movement animation
 	var duration = 0.5  # seconds per tile
@@ -322,7 +327,6 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	unit_instance.set_meta("remaining_movement", max(0, remaining_movement - distance_to_move))
 
 	print("Unit moved to tile: ", target_tile.global_transform.origin, " Remaining movement: ", unit_instance.get_meta("remaining_movement"))
-
 
 
 
