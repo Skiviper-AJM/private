@@ -102,29 +102,48 @@ func find_tiles_within_movement_range(enemy_unit: Node3D) -> Array:
 	return reachable_tiles
 
 func find_nearest_tile_to_player(unit_instance: Node3D) -> Array:
-	var player_position: Vector3 = Vector3()  # Replace this with the actual position of the player unit.
+	var player_position: Vector3 = Vector3()
+	var player_tile: Vector2 = Vector2()
+	var player_found = false
+
+	# Find the tile of the nearest player unit
 	for tile_key in grid_controller.units_on_tiles.keys():
+		print("Checking tile_key: ", tile_key)
 		var player_unit = grid_controller.units_on_tiles[tile_key]
+		print("Unit on tile: ", player_unit)
+
 		if player_unit.is_in_group("player_units"):
 			player_position = player_unit.global_transform.origin
-			break  # Assuming there's only one player unit or you only care about the first one.
+			if typeof(tile_key) == TYPE_VECTOR2:
+				player_tile = tile_key  # Safely assign if tile_key is a Vector2
+				player_found = true
+				break
+
+	if not player_found:
+		print("No player unit found.")
+		return []
 
 	var closest_tiles: Array = []
-	var min_distance: float = INF
+	var candidate_tiles: Array = []
 
-	for tile_key in grid_controller.tiles.keys():
-		var tile = grid_controller.tiles[tile_key]
-		var distance = tile.global_transform.origin.distance_to(player_position)
+	# Attempt to move to adjacent tiles around the player
+	var adjacent_positions = [
+		player_tile + Vector2(-1, 0),
+		player_tile + Vector2(1, 0),
+		player_tile + Vector2(0, -1),
+		player_tile + Vector2(0, 1),
+		player_tile + Vector2(-1, -1),
+		player_tile + Vector2(1, 1)
+	]
 
-		if distance < min_distance:
-			min_distance = distance
-			closest_tiles.clear()
-			closest_tiles.append(tile)
-		elif distance == min_distance:
-			closest_tiles.append(tile)
+	for adj_pos in adjacent_positions:
+		if grid_controller.tiles.has(adj_pos) and not grid_controller.units_on_tiles.has(adj_pos):
+			candidate_tiles.append(grid_controller.tiles[adj_pos])
+
+	if candidate_tiles.size() > 0:
+		closest_tiles.append(candidate_tiles[0])  # Pick the first available tile for now
 
 	return closest_tiles
-
 
 
 
