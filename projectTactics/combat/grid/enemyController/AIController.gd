@@ -11,6 +11,12 @@ extends Node
 
 const PURPLE_MATERIAL = preload("res://combat/grid/gridController/3D Tiles/materials/purple.tres")
 
+@export var enemy_units: Array = []
+
+func _ready():
+	# Initialize enemy AI behavior here
+	pass
+
 func _on_grid_generated():
 	if grid_controller == null:
 		print("HexGrid not found!")
@@ -29,6 +35,20 @@ func _on_grid_generated():
 		else:
 			print("Placing enemy at tile position: ", tile_position)
 			grid_controller.enemy_place_unit_on_tile(tile_position, enemy_unit, false)
+
+	# Place any predefined enemies
+	place_enemy_units()
+
+func place_enemy_units():
+	for enemy_data in enemy_units:
+		var tile_position = enemy_data["tile_position"]
+		var enemy_unit = enemy_data["enemy_unit"]
+
+		if grid_controller.tiles.has(tile_position):
+			grid_controller.enemy_place_unit_on_tile(tile_position, enemy_unit, false)
+			print("Enemy unit placed on tile at: ", tile_position)
+		else:
+			print("Invalid tile position: ", tile_position, ". Could not place enemy unit.")
 
 func generate_random_enemy_instance() -> Node3D:
 	print("Creating new enemy unit instance...")
@@ -114,34 +134,30 @@ func find_nearest_reachable_tile_to_player(enemy_unit: Node3D) -> Vector2:
 
 	print("=== Units on Tiles ===")
 	for tile_key in grid_controller.units_on_tiles.keys():
-		print("Tile Key: ", tile_key, " - Unit: ", grid_controller.units_on_tiles[tile_key])
+		var unit_on_tile = grid_controller.units_on_tiles[tile_key]
+		print("Tile Key: ", tile_key, " - Unit: ", unit_on_tile)
+		if not unit_on_tile.is_in_group("enemy_units"):  # Ensure it's a player unit
+			var player_position = Vector2(unit_on_tile.global_transform.origin.x, unit_on_tile.global_transform.origin.z)
+			var distance = player_position.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z))
+			print("Player unit found at ", tile_key, " with distance: ", distance)
+			if not player_found or distance < nearest_player_position.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z)):
+				nearest_player_position = player_position
+				nearest_player_tile = Vector2(tile_key.global_transform.origin.x, tile_key.global_transform.origin.z)
+				player_found = true
 
-	print("=== Tiles ===")
-	for tile_key in grid_controller.tiles.keys():
-		print("Tile Key: ", tile_key)
-		if grid_controller.units_on_tiles.has(tile_key):  # Check if there is a unit on this tile
-			var unit_on_tile = grid_controller.units_on_tiles[tile_key]
-			print("Unit detected on tile ", tile_key, ": ", unit_on_tile, " (is enemy: ", unit_on_tile.is_in_group("enemy_units"), ")")
-			if not unit_on_tile.is_in_group("enemy_units"):  # Ensure it's a player unit
-				var player_position = Vector2(unit_on_tile.global_transform.origin.x, unit_on_tile.global_transform.origin.z)
-				var distance = player_position.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z))
-				print("Player unit found at ", tile_key, " with distance: ", distance)
-				if not player_found or distance < nearest_player_position.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z)):
-					nearest_player_position = player_position
-					nearest_player_tile = tile_key  # This should be a Vector2 tile key
-					player_found = true
 
 	if not player_found:
-		print("No player unit found.")
-		return Vector2(-1, -1)
+		print("No player unit found. Executing fallback movement.")
+		return find_fallback_tile(enemy_unit)
 
 	print("Nearest player unit found at: ", nearest_player_tile)
 
 	# Find all reachable tiles within the enemy unit's speed range
 	var reachable_tiles = find_tiles_within_movement_range(enemy_unit)
-	if reachable_tiles.empty():
+	if reachable_tiles.size() == 0:
 		print("No tiles within movement range.")
-		return Vector2(-1, -1)
+		return find_fallback_tile(enemy_unit)
+
 
 	# Find the nearest tile adjacent to the player unit
 	var min_distance: float = INF
@@ -151,10 +167,8 @@ func find_nearest_reachable_tile_to_player(enemy_unit: Node3D) -> Vector2:
 	print("Finding adjacent tiles to the nearest player unit at: ", nearest_player_tile)
 
 	for tile in adjacent_tiles:
-		print("Checking adjacent tile: ", tile)
 		if tile in reachable_tiles:
 			var distance = tile.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z))
-			print("Distance to adjacent tile ", tile, ": ", distance)
 			if distance < min_distance:
 				min_distance = distance
 				target_tile = tile
@@ -163,7 +177,6 @@ func find_nearest_reachable_tile_to_player(enemy_unit: Node3D) -> Vector2:
 	if target_tile == Vector2(-1, -1):
 		for tile in reachable_tiles:
 			var distance = tile.distance_to(nearest_player_tile)
-			print("Checking tile: ", tile, " with distance to player: ", distance)
 			if distance < min_distance:
 				min_distance = distance
 				target_tile = tile
@@ -171,20 +184,40 @@ func find_nearest_reachable_tile_to_player(enemy_unit: Node3D) -> Vector2:
 	print("Target tile for enemy movement: ", target_tile)
 	return target_tile
 
+func find_fallback_tile(enemy_unit: Node3D) -> Vector2:
+	# Fallback logic when no player units are found
+	var random_direction = Vector2(randi_range(-1, 1), randi_range(-1, 1))
+	var fallback_tile = _get_tile_with_tolerance(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z) + random_direction)
+	
+	if grid_controller.tiles.has(fallback_tile) and not grid_controller.units_on_tiles.has(fallback_tile):
+		print("Fallback tile chosen: ", fallback_tile)
+		return fallback_tile
+
+	print("No valid fallback tile found.")
+	return Vector2(-1, -1)
+
+
 func take_turn_for_all_enemies():
 	print("Taking turn for all enemies.")
-	for tile_key in grid_controller.units_on_tiles.keys():
-		var unit_instance = grid_controller.units_on_tiles[tile_key]
-		print("Processing unit at tile: ", tile_key, " - Unit: ", unit_instance)
-		if unit_instance.is_in_group("enemy_units"):
-			var nearest_tile = find_nearest_reachable_tile_to_player(unit_instance)
-			if nearest_tile != Vector2(-1, -1):
-				print("Moving enemy unit to tile: ", nearest_tile)
-				combat_manager.move_unit_to_tile(unit_instance, grid_controller.tiles[nearest_tile])
+	for tile_coords in grid_controller.units_on_tiles.keys():
+		print("Processing tile_coords: ", tile_coords)
+		if grid_controller.units_on_tiles.has(tile_coords):
+			var unit_instance = grid_controller.units_on_tiles[tile_coords]
+			print("Processing unit at tile: ", tile_coords, " - Unit: ", unit_instance)
+			if unit_instance.is_in_group("enemy_units"):
+				var nearest_tile = find_nearest_reachable_tile_to_player(unit_instance)
+				if nearest_tile != Vector2(-1, -1):
+					print("Moving enemy unit to tile: ", nearest_tile)
+					combat_manager.move_unit_to_tile(unit_instance, grid_controller.tiles[nearest_tile])
+				else:
+					print("No valid tile found for enemy movement.")
 			else:
-				print("No valid tile found for enemy movement.")
+				print("Skipping non-enemy unit at tile: ", tile_coords)
 		else:
-			print("Skipping non-enemy unit at tile: ", tile_key)
+			print("Warning: tile_coords not found in units_on_tiles: ", tile_coords)
+
+
+
 
 func on_end_turn():
 	print("Ending turn, processing AI moves.")
@@ -235,3 +268,27 @@ func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Vector2:
 	else:
 		print("No valid tile found or out of bounds for position: ", position)
 		return Vector2(-1, -1)
+
+func move_enemy_to_tile(enemy_unit: Node3D, target_tile_position: Vector2):
+	if grid_controller.tiles.has(target_tile_position):
+		var target_tile = grid_controller.tiles[target_tile_position]
+		
+		if grid_controller.units_on_tiles.has(target_tile):
+			print("Target tile already occupied by another unit.")
+			return
+		
+		# Update the enemy unit's position on the grid
+		var current_tile_position = grid_controller.units_on_tiles.find(enemy_unit)
+		
+		if current_tile_position != null:
+			grid_controller.remove_enemy_from_grid(current_tile_position)
+		
+		grid_controller.enemy_place_unit_on_tile(target_tile_position, enemy_unit, false)
+		print("Enemy unit moved to new tile at: ", target_tile_position)
+	else:
+		print("Invalid target tile position: ", target_tile_position, ". Could not move enemy unit.")
+
+func engage_combat():
+	# Logic to engage in combat
+	print("Engaging in combat with player units...")
+	combat_manager.start_combat_with_enemies(enemy_units)
