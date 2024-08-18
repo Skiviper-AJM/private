@@ -18,6 +18,7 @@ const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
+	preload("res://combat/grid/gridController/3D Tiles/materials/purple.tres")
 ]
 
 var highlighted_tiles := []
@@ -298,18 +299,21 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Ensure the final position is set
 	unit_instance.global_transform.origin = target_position
 
-	# Only clear the start tile if it is not occupied by another unit
-	if not player_combat_controller.units_on_tiles.has(start_tile):
+	# Only clear the start tile if it is not occupied by another unit and is not purple
+	var start_tile_material = start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
+	if not player_combat_controller.units_on_tiles.has(start_tile) and start_tile_material != TILE_MATERIALS[4]:  # Assuming TILE_MATERIALS[4] is purple
 		start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
-	# Set the target tile color to red to indicate the path if it's not already green (final destination)
-	if target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override != TILE_MATERIALS[1]:
+	# Set the target tile color to red to indicate the path if it's not already green (final destination) and not purple
+	var target_tile_material = target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
+	if target_tile_material != TILE_MATERIALS[1] and target_tile_material != TILE_MATERIALS[4]:
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 	# Decrement the remaining movement by the distance moved, considering the buffer
 	unit_instance.set_meta("remaining_movement", max(0, remaining_movement - distance_to_move))
 
 	print("Unit moved to tile: ", target_tile.global_transform.origin, " Remaining movement: ", unit_instance.get_meta("remaining_movement"))
+
 
 
 
