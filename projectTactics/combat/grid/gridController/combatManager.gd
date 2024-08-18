@@ -228,6 +228,8 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		# Update the units_on_tiles dictionary to reflect the new position
 		player_combat_controller.units_on_tiles.erase(player_combat_controller.currently_selected_tile)
 		player_combat_controller.units_on_tiles[target_tile] = unit_instance
+		# Set the target tile green immediately upon clicking
+		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 
 	# Set the unit as moving
 	unit_instance.set_meta("moving", true)
@@ -252,10 +254,8 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Guarantee that the unit ends up on the target tile
 	await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, target_tile)
 
-	# Ensure the final position tile is green
-	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-
 	print("Unit moved successfully with remaining movement: ", unit_instance.get_meta("remaining_movement"))
+
 
 func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: Node3D):
 	# Get the current and target positions
@@ -298,17 +298,19 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Ensure the final position is set
 	unit_instance.global_transform.origin = target_position
 
-	# Clean up the previous tile (reset to blue)
-	start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
+	# Only clear the start tile if it is not occupied by another unit
+	if not player_combat_controller.units_on_tiles.has(start_tile):
+		start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
-	# Only update the target tile's material if it's not already occupied by another unit
-	if not player_combat_controller.units_on_tiles.has(target_tile):
+	# Set the target tile color to red to indicate the path if it's not already green (final destination)
+	if target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override != TILE_MATERIALS[1]:
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 	# Decrement the remaining movement by the distance moved, considering the buffer
 	unit_instance.set_meta("remaining_movement", max(0, remaining_movement - distance_to_move))
 
 	print("Unit moved to tile: ", target_tile.global_transform.origin, " Remaining movement: ", unit_instance.get_meta("remaining_movement"))
+
 
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
