@@ -122,10 +122,11 @@ text = "NO UNITS:
 YOU MUST FLEE"
 
 [node name="armorBarName" type="Label" parent="CombatGridUI"]
-offset_left = 773.0
-offset_top = 45.0
-offset_right = 949.0
-offset_bottom = 112.0
+visible = false
+offset_left = 596.0
+offset_top = 63.0
+offset_right = 1125.0
+offset_bottom = 130.0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 15
 theme_override_font_sizes/font_size = 48
@@ -133,10 +134,11 @@ text = "Unit HP"
 horizontal_alignment = 1
 
 [node name="ArmorBar" type="HSlider" parent="CombatGridUI"]
+visible = false
 offset_left = 611.0
 offset_top = 20.0
 offset_right = 1111.0
-offset_bottom = 36.0
+offset_bottom = 70.0
 step = 0.0
 value = 20.0
 editable = false

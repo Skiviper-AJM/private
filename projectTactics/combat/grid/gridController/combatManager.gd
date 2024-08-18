@@ -6,12 +6,13 @@ var turnCount: int = 1  # Track the current turn count
 
 @export var playerInfo : PlayerData
 
-
 @onready var player_combat_controller = $"../HexGrid"
 @onready var AI_Controller = $"../aiController"
 @onready var camera = $"../HexGrid/Camera3D"  # Initialize the camera properly
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 @onready var end_turn_button = $"../CombatGridUI/UnitPlaceUI/EndTurn"  # Reference to the end turn button
+@onready var armor_bar = $"../CombatGridUI/ArmorBar"
+@onready var armor_bar_name = $"../CombatGridUI/armorBarName"
 
 var block_placement: bool = false
 var move_mode_active: bool = false  # New variable to control movement mode
@@ -19,7 +20,7 @@ var attack_mode_active: bool = false  # New variable to control attack mode
 
 # Define the total number of player and enemy units on the field
 @onready var total_player_units: int = player_combat_controller.max_squad_size # Adjust this number as needed
-@onready var total_enemy_units: int = AI_Controller.max_enemies# Adjust this number as needed
+@onready var total_enemy_units: int = AI_Controller.max_enemies # Adjust this number as needed
 
 # Track the remaining player and enemy units on the field
 @onready var remaining_player_units: int = total_player_units
@@ -162,6 +163,9 @@ func _handle_unit_click(unit_instance):
 
 		$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = true
 
+		# Update and show the armor bar
+		update_armor_bar(unit_instance)
+
 		# Immediately update the current tile reference for this unit
 		var selected_tile = null
 		for tile in player_combat_controller.units_on_tiles.keys():
@@ -191,6 +195,9 @@ func deselect_unit(force_deselect = false):
 	$"../CombatGridUI/UnitPlaceUI/Shoot".visible = false
 	$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = false
 	
+	# Hide the armor bar
+	hide_armor_bar()
+
 	# Clear all highlighted tiles
 	clear_highlighted_tiles()
 
@@ -545,7 +552,6 @@ func remove_unit_from_map(unit_instance, tile):
 	print("Remaining player units:", remaining_player_units)
 	print("Remaining enemy units:", remaining_enemy_units)
 
-
 func all_players_died():
 	print("All player units have died.")
 	# Add additional logic here to handle the game over condition for the player.
@@ -583,7 +589,7 @@ func endTurn():
 	
 	# Increment the turn count
 	turnCount += 1
-	deselect_unit() #deselect a unit when you end the turn
+	deselect_unit()
 	end_move_mode()  # End move mode at the end of a turn
 	
 	# Reset the remaining movement and attack flag for all units
@@ -650,3 +656,15 @@ func highlight_tiles_around_unit(unit_instance, range):
 				highlighted_tiles.append(tile)
 	else:
 		print("No unit tile found to highlight.")
+
+# New functions for handling the armor bar
+func update_armor_bar(unit_instance):
+	armor_bar.max_value = unit_instance.unitParts.maxArmor
+	armor_bar.value = unit_instance.unitParts.armorRating
+	armor_bar_name.text = "Armor: " + str(unit_instance.unitParts.armorRating) + " / " + str(unit_instance.unitParts.maxArmor)
+	armor_bar.visible = true
+	armor_bar_name.visible = true
+
+func hide_armor_bar():
+	armor_bar.visible = false
+	armor_bar_name.visible = false

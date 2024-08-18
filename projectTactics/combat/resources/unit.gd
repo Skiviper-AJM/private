@@ -30,3 +30,4 @@ var speedRating : int = 0
 var range : int = 0
 var splash : int = 0
 var has_attacked : bool = false
+var maxArmor : int = 0

@@ -25,6 +25,7 @@ func assembleUnit(_trigger=true):
 		unitParts.range = 0
 		unitParts.splash = 0
 		unitParts.has_attacked = false
+		unitParts.maxArmor = 0
 	
 	for childPart in get_children(): childPart.free()
 	if unitParts.chest != null:
@@ -50,6 +51,7 @@ func assembleUnit(_trigger=true):
 				unitParts.range += part.range
 				unitParts.splash += part.splash
 				unitParts.has_attacked = false
+				unitParts.maxArmor += part.armorRating
 
 func createChild(childScene, parent=self, inverted:bool = false):
 	var newChild = childScene.model.instantiate()
