@@ -363,9 +363,13 @@ func moveButton():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
 		print("Input suppressed: Unit is currently moving.")
 		return  # Ignore any input if the unit is moving
-		
+
 	clear_highlighted_tiles()  # Clear any existing highlights
-	if selected_unit_instance and move_mode_active:
+	
+	if attack_mode_active:
+		end_attack_mode()  # Deactivate attack mode if it is active
+
+	if move_mode_active:
 		end_move_mode()  # If move mode is active, deactivate it
 	else:
 		print("Move mode activated for selected unit.")
@@ -373,10 +377,7 @@ func moveButton():
 
 		# Highlight the movement range when move mode is activated
 		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
-	
-	# Deactivate attack mode if it is active
-	if attack_mode_active:
-		end_attack_mode()
+
 
 func shootButton():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
@@ -395,11 +396,15 @@ func attackButton():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
 		print("Input suppressed: Unit is currently moving.")
 		return  # Ignore any input if the unit is moving
+
+	clear_highlighted_tiles()  # Clear any existing highlights
+	
+	if move_mode_active:
+		end_move_mode()  # Deactivate move mode if it is active
+
 	if attack_mode_active:
-		# Deactivate attack mode if it's already active
-		end_attack_mode()
+		end_attack_mode()  # Deactivate attack mode if it's already active
 	else:
-		clear_highlighted_tiles()  # Clear any existing highlights
 		print("Attack mode activated.")
 		attack_mode_active = true  # Activate attack mode
 
@@ -408,6 +413,7 @@ func attackButton():
 			highlight_attack_range(selected_unit_instance)
 		else:
 			print("No unit selected for attack.")
+
 
 func end_attack_mode():
 	attack_mode_active = false  # Deactivate attack mode
