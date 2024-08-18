@@ -1,6 +1,6 @@
 extends Node
 
-
+#next attempt will be to find all units then get their closest tile 
 @export var unit_part_count: int = 4
 @export var hex_grid: NodePath = "../HexGrid"
 
