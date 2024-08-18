@@ -583,6 +583,7 @@ func endTurn():
 	
 	# Increment the turn count
 	turnCount += 1
+	deselect_unit() #deselect a unit when you end the turn
 	end_move_mode()  # End move mode at the end of a turn
 	
 	# Reset the remaining movement and attack flag for all units
