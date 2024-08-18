@@ -56,13 +56,13 @@ var placing_unit: bool = false
 var unit_to_place = null
 
 # Dictionary to store tile positions with coordinates as keys
-var tiles = {}
+@export var tiles = {}
 
 # Dictionary to track placed units by their instance ID
-var placed_units = {}
+@export var placed_units = {}
 
 # Dictionary to track units by tile
-var units_on_tiles = {}
+@export var units_on_tiles = {}
 
 # Queue to track the order of placed units
 var placed_units_queue := []

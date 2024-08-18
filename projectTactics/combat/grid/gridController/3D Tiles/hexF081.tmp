@@ -1,0 +1,180 @@
+[gd_scene load_steps=6 format=3 uid="uid://cdaoc6h2v1pg2"]
+
+[ext_resource type="Script" path="res://combat/grid/gridController/combatManager.gd" id="1_dxr7s"]
+[ext_resource type="Script" path="res://combat/grid/gridController/3D Tiles/HexGrid.gd" id="1_nbd6x"]
+[ext_resource type="Script" path="res://combat/grid/enemyController/AIController.gd" id="2_icscm"]
+[ext_resource type="PackedScene" uid="uid://bpoag1rko7t2q" path="res://hubs/player/scenes/player.tscn" id="2_m6smf"]
+[ext_resource type="Script" path="res://combat/grid/gridController/playerCombat.gd" id="3_30t6i"]
+
+[node name="3DGrid" type="Node3D"]
+
+[node name="combatManager" type="Node" parent="."]
+script = ExtResource("1_dxr7s")
+
+[node name="aiController" type="Node" parent="."]
+script = ExtResource("2_icscm")
+unit_part_count = null
+hex_grid = null
+max_enemies = null
+
+[node name="HexGrid" type="Node3D" parent="."]
+script = ExtResource("1_nbd6x")
+
+[node name="Camera3D" type="Camera3D" parent="HexGrid"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 3, 5, 3)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.0191799, 0.999816, 0, -0.999816, 0.0191799, 0, 0, 0)
+
+[node name="player" parent="." instance=ExtResource("2_m6smf")]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 3, 42.4239, -0.802212)
+visible = false
+script = ExtResource("3_30t6i")
+playerInfo = null
+
+[node name="CombatGridUI" type="CanvasLayer" parent="."]
+layer = 5
+follow_viewport_enabled = true
+
+[node name="UnitPlaceUI" type="GridContainer" parent="CombatGridUI"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -441.0
+offset_top = 45.0
+offset_right = -42.0
+offset_bottom = 242.0
+grow_horizontal = 0
+
+[node name="UnitsLabel" type="Label" parent="CombatGridUI/UnitPlaceUI"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
+theme_override_font_sizes/font_size = 48
+text = "Select Units X / Y "
+horizontal_alignment = 1
+
+[node name="StartCombat" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Start Combat"
+
+[node name="UnitName" type="Label" parent="CombatGridUI/UnitPlaceUI"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.815686, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 1
+
+[node name="Move" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Move"
+
+[node name="Attack" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Attack"
+
+[node name="Shoot" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Special"
+
+[node name="CenterCam" type="Button" parent="CombatGridUI/UnitPlaceUI"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Center Camera"
+
+[node name="UnitPlaceUI2" type="GridContainer" parent="CombatGridUI"]
+visible = false
+offset_left = 50.0
+offset_top = 45.0
+offset_right = 446.0
+offset_bottom = 171.0
+
+[node name="TurnCounter" type="Label" parent="CombatGridUI/UnitPlaceUI2"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
+theme_override_font_sizes/font_size = 48
+text = "Turn: 1"
+horizontal_alignment = 1
+
+[node name="EndTurn" type="Button" parent="CombatGridUI/UnitPlaceUI2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "End Turn"
+
+[node name="noUnits" type="Button" parent="CombatGridUI"]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 0, 0.0196078, 1)
+top_level = true
+offset_left = 1286.0
+offset_top = 116.0
+offset_right = 1682.0
+offset_bottom = 208.0
+theme_override_font_sizes/font_size = 30
+text = "NO UNITS: 
+YOU MUST FLEE"
+
+[node name="armorBarName" type="Label" parent="CombatGridUI"]
+visible = false
+offset_left = 596.0
+offset_top = 63.0
+offset_right = 1125.0
+offset_bottom = 130.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 15
+theme_override_font_sizes/font_size = 48
+text = "Unit HP"
+horizontal_alignment = 1
+
+[node name="ArmorBar" type="HSlider" parent="CombatGridUI"]
+visible = false
+offset_left = 611.0
+offset_top = 20.0
+offset_right = 1111.0
+offset_bottom = 70.0
+step = 0.0
+value = 20.0
+editable = false
+scrollable = false
+tick_count = 11
+
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="combatInitiate"]
+[connection signal="button_up" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="startButtonReleased"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/StartCombat" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI/Move" to="combatManager" method="moveButton"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Move" to="combatManager" method="buttonHover"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Move" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Move" to="combatManager" method="buttonLeft"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Move" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI/Attack" to="combatManager" method="attackButton"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Attack" to="combatManager" method="buttonHover"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Attack" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Attack" to="combatManager" method="buttonLeft"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Attack" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="shootButton"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="buttonHover"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/Shoot" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Shoot" to="combatManager" method="buttonLeft"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/Shoot" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="centerCamera"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="buttonHover"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI/CenterCam" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/CenterCam" to="combatManager" method="buttonLeft"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI/CenterCam" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="combatManager" method="endTurn"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="combatManager" method="buttonHover"]
+[connection signal="mouse_entered" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="HexGrid" method="buttonHover"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="combatManager" method="buttonLeft"]
+[connection signal="mouse_exited" from="CombatGridUI/UnitPlaceUI2/EndTurn" to="HexGrid" method="buttonLeft"]
+[connection signal="button_down" from="CombatGridUI/noUnits" to="HexGrid" method="fleeCombat"]
