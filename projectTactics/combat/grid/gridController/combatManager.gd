@@ -445,7 +445,7 @@ func highlight_attack_range(unit_instance):
 
 	# Manually retrieve the parts from the unitParts
 	var parts = [unit_instance.unitParts.head, unit_instance.unitParts.arm, unit_instance.unitParts.leg, unit_instance.unitParts.core, unit_instance.unitParts.chest]
-	
+
 	for part in parts:
 		if part.name != "head":
 			max_range = max(max_range, part.range)
@@ -454,16 +454,16 @@ func highlight_attack_range(unit_instance):
 
 	# Fetch the current tile based on the latest position of the unit
 	var unit_tile = player_combat_controller.currently_selected_tile
-	
+
 	if unit_tile:
 		var unit_position = unit_tile.global_transform.origin
 		var tile_size = player_combat_controller.TILE_SIZE
-		
+
 		# Highlight tiles within range based on the current position
 		for tile_key in player_combat_controller.tiles.keys():
 			var tile = player_combat_controller.tiles[tile_key]
 			var distance = tile.global_transform.origin.distance_to(unit_position) / tile_size
-			
+
 			if tile == unit_tile:
 				continue  # Skip the tile the unit is standing on to keep it green
 
@@ -480,6 +480,7 @@ func highlight_attack_range(unit_instance):
 					highlighted_tiles.append(tile)
 	else:
 		print("No unit tile found to highlight attack range.")
+
 
 func handle_enemy_click(enemy_unit_instance, clicked_tile):
 	if selected_unit_instance and attack_mode_active:
@@ -572,7 +573,6 @@ func buttonLeft():
 func centerCamera():
 	if selected_unit_instance:
 		print("Centering camera on selected unit.")
-		end_move_mode()  # End move mode when centering the camera
 
 		# Get the current position of the selected unit
 		var unit_position = selected_unit_instance.global_transform.origin
