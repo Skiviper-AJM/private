@@ -238,6 +238,14 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Get the tiles along the path
 	var path_tiles = get_tiles_along_path(unit_instance.global_transform.origin, target_tile.global_transform.origin)
 
+	# Instantly rotate the unit to face the first tile
+	if path_tiles.size() > 0:
+		var first_tile = path_tiles[0]
+		var first_target_position = first_tile.global_transform.origin
+		var direction = (first_target_position - unit_instance.global_transform.origin).normalized()
+		unit_instance.look_at(first_target_position, Vector3.UP)
+		unit_instance.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backward
+
 	# Iterate over each tile in the path and move the unit one tile at a time
 	for tile in path_tiles:
 		if unit_instance.get_meta("remaining_movement") <= 0:
