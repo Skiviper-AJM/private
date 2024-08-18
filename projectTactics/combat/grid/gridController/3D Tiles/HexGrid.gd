@@ -457,7 +457,7 @@ func place_unit_on_tile(position: Vector2, unit_to_place: Node3D, is_player: boo
 	print("Placing unit at position: ", position)
 
 	var target_tile: Node3D = null
-
+	
 	# If direct placement is used, skip raycasting and tolerance checks
 	if use_direct_placement:
 		target_tile = tiles.get(position, null)
@@ -466,7 +466,7 @@ func place_unit_on_tile(position: Vector2, unit_to_place: Node3D, is_player: boo
 
 	if target_tile:
 		print("Target tile found: ", target_tile.get_instance_id())
-
+		
 		# Check if a unit with the same unitParts is already placed
 		if placed_units.has(unit_to_place.unitParts):
 			var existing_unit = placed_units[unit_to_place.unitParts]

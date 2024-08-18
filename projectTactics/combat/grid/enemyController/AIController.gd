@@ -106,27 +106,27 @@ func find_nearest_tile_to_player(unit_instance: Node3D) -> Array:
 	var player_tile: Vector2 = Vector2()
 	var player_found = false
 
-	# Find the tile of the nearest player unit
+	# Find the tile of the nearest non-enemy unit
 	for tile_key in grid_controller.units_on_tiles.keys():
-		print("Checking tile_key: ", tile_key)
-		var player_unit = grid_controller.units_on_tiles[tile_key]
-		print("Unit on tile: ", player_unit)
+		var unit_on_tile = grid_controller.units_on_tiles[tile_key]
+		print("Unit on tile: ", unit_on_tile, "Groups: ", unit_on_tile.get_groups())
 
-		if player_unit.is_in_group("player_units"):
-			player_position = player_unit.global_transform.origin
+		# Check if the unit is not in the enemy group
+		if not unit_on_tile.is_in_group("enemy_units"):
+			player_position = unit_on_tile.global_transform.origin
 			if typeof(tile_key) == TYPE_VECTOR2:
 				player_tile = tile_key  # Safely assign if tile_key is a Vector2
 				player_found = true
 				break
 
 	if not player_found:
-		print("No player unit found.")
+		print("No non-enemy unit found.")
 		return []
 
 	var closest_tiles: Array = []
 	var candidate_tiles: Array = []
 
-	# Attempt to move to adjacent tiles around the player
+	# Attempt to move to adjacent tiles around the identified unit
 	var adjacent_positions = [
 		player_tile + Vector2(-1, 0),
 		player_tile + Vector2(1, 0),
@@ -162,5 +162,4 @@ func take_turn_for_all_enemies():
 				else:
 					print("No valid tile found for enemy movement.")
 			else:
-				print("No valid tiles found near the player.")
-
+				print("No valid tiles found near a non-enemy unit.")
