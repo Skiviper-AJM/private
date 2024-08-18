@@ -16,11 +16,11 @@ var attack_mode_active: bool = false  # New variable to control attack mode
 
 # Define the total number of player and enemy units on the field
 @onready var total_player_units: int = player_combat_controller.max_squad_size # Adjust this number as needed
-@onready var total_enemy_units: int = player_combat_controller.max_squad_size # Adjust this number as needed
+@onready var total_enemy_units: int = AI_Controller.max_enemies# Adjust this number as needed
 
 # Track the remaining player and enemy units on the field
-var remaining_player_units: int = total_player_units
-var remaining_enemy_units: int = total_enemy_units
+@onready var remaining_player_units: int = total_player_units
+@onready var remaining_enemy_units: int = total_enemy_units
 
 const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
@@ -504,6 +504,7 @@ func handle_enemy_click(enemy_unit_instance, clicked_tile):
 			if enemy_unit_instance.unitParts.armorRating <= 0:
 				print("Enemy unit destroyed!")
 				remove_unit_from_map(enemy_unit_instance, clicked_tile)
+				
 
 			# Mark that the unit has attacked
 			selected_unit_instance.unitParts.has_attacked = true
@@ -522,7 +523,7 @@ func remove_unit_from_map(unit_instance, tile):
 	# Remove the unit from the map and erase its node reference
 	player_combat_controller.units_on_tiles.erase(tile)
 	unit_instance.queue_free()
-	
+
 	# Reset the tile color to blue after the unit is removed
 	tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 
@@ -537,6 +538,9 @@ func remove_unit_from_map(unit_instance, tile):
 			all_enemies_dead()
 
 	print("Unit removed from map.")
+	print("Remaining player units:", remaining_player_units)
+	print("Remaining enemy units:", remaining_enemy_units)
+
 
 func all_players_died():
 	print("All player units have died.")

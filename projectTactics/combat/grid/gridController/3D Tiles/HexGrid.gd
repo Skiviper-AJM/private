@@ -29,8 +29,8 @@ var currently_selected_tile = null
 @export_range(2, 35) var grid_size: int = 10  # Controls the 'radius' of the square grid generated
 
 
-@onready var max_squad_size: int = 2  # Default max squad size
-@export var set_squad_size: int = max_squad_size
+@export var max_squad_size: int = 2  # Default max squad size
+
 @export var playerInfo : PlayerData
 
 # Label to display the number of units placed and max squad size

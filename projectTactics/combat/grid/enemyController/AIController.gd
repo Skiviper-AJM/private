@@ -7,7 +7,7 @@ extends Node
 @onready var grid_controller = $"../HexGrid"
 @onready var root_node = $"../.."  # Get the 3DGrid node (parent of HexGrid)
 
-@onready var max_enemies: int = 2
+@export var max_enemies: int = 2
 
 const PURPLE_MATERIAL = preload("res://combat/grid/gridController/3D Tiles/materials/purple.tres")
 
