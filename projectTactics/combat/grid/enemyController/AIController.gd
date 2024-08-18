@@ -89,7 +89,6 @@ func take_enemy_turns():
 	var player_units = grid_controller.placed_units_queue  # Queue of player units
 	
 	for tile_key in grid_controller.units_on_tiles.keys():
-		# Ensure the key is valid and exists
 		if grid_controller.units_on_tiles.has(tile_key):
 			var enemy_unit = grid_controller.units_on_tiles[tile_key]
 			if enemy_unit.is_in_group("enemy_units"):
@@ -98,23 +97,22 @@ func take_enemy_turns():
 			print("Invalid tile key or tile not found in units_on_tiles:", tile_key)
 
 
+
 func move_and_attack_nearest_player(enemy_unit: Node3D, player_units):
 	var nearest_player_unit = find_nearest_player_unit(enemy_unit, player_units)
 	if nearest_player_unit == null:
 		return  # No player units found
 
-	# Calculate the target tile to move to (closest unoccupied tile near the player unit)
-	var target_tile = find_closest_unoccupied_tile(enemy_unit, nearest_player_unit)
-
-	if target_tile != null:
-		# Move the enemy unit to the target tile using the combat manager's method
-		combat_manager.move_enemy_unit_to_tile(enemy_unit, target_tile)
+	var target_tile_position = find_closest_unoccupied_tile(enemy_unit, nearest_player_unit)
+	if target_tile_position != null:
+		move_enemy_unit_to_tile(enemy_unit, target_tile_position)
 		
-		# If the enemy is within range, attack the player unit
+		# Check if the enemy is within range to attack the player unit
 		if is_within_attack_range(enemy_unit, nearest_player_unit):
 			attack_player_unit(enemy_unit, nearest_player_unit)
 	else:
 		print("No valid tile to move to for enemy:", enemy_unit.name)
+
 
 
 func find_nearest_player_unit(enemy_unit: Node3D, player_units) -> Node3D:
@@ -221,3 +219,18 @@ func get_adjacent_tiles(unit: Node3D) -> Array:
 				adjacent_tiles.append(adjacent_tile)
 	
 	return adjacent_tiles
+
+func move_enemy_unit_to_tile(enemy_unit: Node3D, target_tile_position: Vector2):
+	if not enemy_unit is Node3D:
+		print("Error: enemy_unit is not a Node3D instance. Cannot move it.")
+		return
+
+	# Find the Node3D instance for the target tile using the position
+	var target_tile = grid_controller.tiles.get(target_tile_position)
+	
+	if not target_tile:
+		print("Error: Target tile at position ", target_tile_position, " not found.")
+		return
+
+	# Use the existing move_unit_to_tile logic
+	combat_manager.move_unit_to_tile(enemy_unit, target_tile)
