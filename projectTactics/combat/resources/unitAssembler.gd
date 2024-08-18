@@ -24,6 +24,7 @@ func assembleUnit(_trigger=true):
 		unitParts.speedRating = 0
 		unitParts.range = 0
 		unitParts.splash = 0
+		unitParts.has_attacked = false
 	
 	for childPart in get_children(): childPart.free()
 	if unitParts.chest != null:
@@ -48,6 +49,7 @@ func assembleUnit(_trigger=true):
 				unitParts.speedRating += part.speedRating
 				unitParts.range += part.range
 				unitParts.splash += part.splash
+				unitParts.has_attacked = false
 
 func createChild(childScene, parent=self, inverted:bool = false):
 	var newChild = childScene.model.instantiate()

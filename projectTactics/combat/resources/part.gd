@@ -55,3 +55,4 @@ var strType : Array = ["Arm", "Leg", "Chest", "Core", "Head"]
 @export var speedRating : int = 0
 @export_range(0, 10000) var range : int = 0
 @export_range(0, 10000) var splash : int = 0
+

@@ -134,11 +134,6 @@ func _handle_unit_click(unit_instance):
 		# Display the name of the unit
 		unit_name_label.text = "Unit: " + unit_instance.unitParts.name
 
-		# Ensure the unit_instance is a Node3D and not a resource reference
-		if not unit_instance is Node3D:
-			print("Error: The selected unit is not a Node3D instance.")
-			return
-
 		# Initialize remaining movement if not set
 		if not unit_instance.has_meta("remaining_movement"):
 			unit_instance.set_meta("remaining_movement", unit_instance.unitParts.speedRating)
@@ -146,9 +141,15 @@ func _handle_unit_click(unit_instance):
 		# Set the instance as selected
 		selected_unit_instance = unit_instance
 		$"../CombatGridUI/UnitPlaceUI/Move".visible = true
-		#$"../CombatGridUI/UnitPlaceUI/Shoot".visible = true
-		$"../CombatGridUI/UnitPlaceUI/Attack".visible = not unit_instance.get_meta("has_attacked", false)
+		
+		# Update the attack button visibility based on the 'has_attacked' property
+		if unit_instance.unitParts.has_attacked:
+			$"../CombatGridUI/UnitPlaceUI/Attack".visible = false  # Hide the attack button if the unit has already attacked
+		else:
+			$"../CombatGridUI/UnitPlaceUI/Attack".visible = true  # Show the attack button if the unit has not yet attacked
+
 		$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = true
+
 		# Immediately update the current tile reference for this unit
 		var selected_tile = null
 		for tile in player_combat_controller.units_on_tiles.keys():
@@ -171,6 +172,8 @@ func _handle_unit_click(unit_instance):
 				end_attack_mode()
 		else:
 			print("Selected unit instance not found on any tile.")
+
+
 
 func deselect_unit(force_deselect = false):
 	$"../CombatGridUI/UnitPlaceUI/Attack".visible = false
@@ -447,7 +450,7 @@ func attackButton():
 		if selected_unit_instance:
 			highlight_attack_range(selected_unit_instance)
 		else:
-			print("No unit selected for attack.")
+			print("No unit selected for ttack.")
 
 
 func end_attack_mode():
@@ -506,36 +509,32 @@ func highlight_attack_range(unit_instance):
 
 func handle_enemy_click(enemy_unit_instance, clicked_tile):
 	if selected_unit_instance and attack_mode_active:
-		var max_range = selected_unit_instance.unitParts.range  # Assuming you have calculated the max range
+		var max_range = selected_unit_instance.unitParts.range
 		var distance = clicked_tile.global_transform.origin.distance_to(player_combat_controller.currently_selected_tile.global_transform.origin) / player_combat_controller.TILE_SIZE
 
-		# Check if the enemy is within 1 tile and the unit has a range greater than 1
 		if max_range > 1 and distance <= 1:
 			print("Cannot attack enemy: Out of melee range for ranged unit.")
-			# Act like an empty tile was clicked
 			return
 
-		if distance <= max_range and not selected_unit_instance.get_meta("has_attacked", false):
-			
+		if distance <= max_range and not selected_unit_instance.unitParts.has_attacked:
 			# Apply damage to the enemy unit
 			enemy_unit_instance.unitParts.armorRating -= selected_unit_instance.unitParts.damage
 			print("Enemy unit took damage! Remaining armor:", enemy_unit_instance.unitParts.armorRating)
 
-			# Check if the enemy unit's armor has reached 0 or less
 			if enemy_unit_instance.unitParts.armorRating <= 0:
 				print("Enemy unit destroyed!")
 				remove_unit_from_map(enemy_unit_instance, clicked_tile)
 
 			# Mark that the unit has attacked
-			selected_unit_instance.set_meta("has_attacked", true)
+			selected_unit_instance.unitParts.has_attacked = true
 			$"../CombatGridUI/UnitPlaceUI/Attack".visible = false  # Hide the attack button after attacking
 			
-			# End attack mode after the attack
 			end_attack_mode()
 		else:
 			print("Enemy unit is out of range.")
 	else:
 		print("No selected unit to attack with.")
+
 
 
 func remove_unit_from_map(unit_instance, tile):
@@ -569,6 +568,7 @@ func endTurn():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
 		print("Input suppressed: Unit is currently moving.")
 		return  # Ignore any input if the unit is moving
+	
 	# Increment the turn count
 	turnCount += 1
 	end_move_mode()  # End move mode at the end of a turn
@@ -581,17 +581,19 @@ func endTurn():
 
 	print("Turn ended. Turn count is now ", turnCount)
 
+
 func reset_all_units_status():
-	# Iterate through all units and reset their remaining movement and attack flag
 	for tile in player_combat_controller.units_on_tiles.keys():
 		var unit_instance = player_combat_controller.units_on_tiles[tile]
 		unit_instance.set_meta("remaining_movement", unit_instance.unitParts.speedRating)
-		unit_instance.set_meta("has_attacked", false)  # Reset attack flag
+		unit_instance.unitParts.has_attacked = false  # Reset attack flag
 		print("Reset unit's movement and attack status.")
 
-		# Make the attack button visible again if the unit hasn't attacked
 		if unit_instance == selected_unit_instance:
 			$"../CombatGridUI/UnitPlaceUI/Attack".visible = true
+
+
+
 
 func update_end_turn_label():
 	$"../CombatGridUI/UnitPlaceUI2/TurnCounter".text = "End Turn: " + str(turnCount)
