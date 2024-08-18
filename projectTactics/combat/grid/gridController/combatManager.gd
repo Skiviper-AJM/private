@@ -301,8 +301,9 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Clean up the previous tile (reset to blue)
 	start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 
-	# Set the target tile color to red to indicate the path
-	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+	# Only update the target tile's material if it's not already occupied by another unit
+	if not player_combat_controller.units_on_tiles.has(target_tile):
+		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 	# Decrement the remaining movement by the distance moved, considering the buffer
 	unit_instance.set_meta("remaining_movement", max(0, remaining_movement - distance_to_move))
