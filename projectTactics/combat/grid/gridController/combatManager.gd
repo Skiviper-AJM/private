@@ -32,8 +32,14 @@ func buttonHover():
 	block_placement = true
 
 func _input(event):
+	# Suppress input if the currently selected unit is moving
+	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
+		print("Input suppressed: Unit is currently moving.")
+		return  # Ignore any input if the unit is moving
+
 	if event.is_action_pressed("interact") and not block_placement:
 		handle_unit_selection()
+
 
 func combatInitiate():
 	in_combat = true
@@ -221,6 +227,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 			print("Cannot move to a tile occupied by an enemy unit.")
 			return
 
+	# Set the unit as moving
+	unit_instance.set_meta("moving", true)
+
 	# Get the tiles along the path
 	var path_tiles = get_tiles_along_path(unit_instance.global_transform.origin, target_tile.global_transform.origin)
 
@@ -236,6 +245,9 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
+	# Guarantee that the unit ends up on the target tile
+	move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, target_tile)
+
 	# Set the target tile green to indicate the unit has arrived
 	player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 
@@ -249,8 +261,10 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Calculate the distance to move
 	var distance_to_move = start_position.distance_to(target_position) / player_combat_controller.TILE_SIZE
 
-	# Check if the unit has enough remaining movement
-	if unit_instance.get_meta("remaining_movement") < distance_to_move:
+	# Check if the unit has enough remaining movement, allowing for a small precision buffer
+	var remaining_movement = unit_instance.get_meta("remaining_movement")
+	var precision_buffer = 0.001  # Small buffer to account for floating-point precision issues
+	if remaining_movement + precision_buffer < distance_to_move:
 		print("Unit does not have enough remaining movement to move to the target tile.")
 		return
 
@@ -293,9 +307,8 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 		# Set the target tile color accordingly
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
-	# Decrement the remaining movement by the distance moved
-	var remaining_movement = unit_instance.get_meta("remaining_movement")
-	unit_instance.set_meta("remaining_movement", remaining_movement - distance_to_move)
+	# Decrement the remaining movement by the distance moved, considering the buffer
+	unit_instance.set_meta("remaining_movement", max(0, remaining_movement - distance_to_move))
 
 	print("Unit moved to tile: ", target_tile.global_transform.origin, " Remaining movement: ", unit_instance.get_meta("remaining_movement"))
 
