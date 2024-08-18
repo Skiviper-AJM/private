@@ -678,3 +678,46 @@ func update_armor_bar(unit_instance, is_enemy):
 func hide_armor_bar():
 	armor_bar.visible = false
 	armor_bar_name.visible = false
+
+
+func move_enemy_unit_to_tile(enemy_unit: Node3D, target_tile: Vector2):
+	if not enemy_unit is Node3D:
+		print("Error: enemy_unit is not a Node3D instance. Cannot move it.")
+		return
+
+	# Check if the target tile is already occupied
+	if player_combat_controller.units_on_tiles.has(target_tile):
+		print("Target tile is occupied by another unit. Movement aborted.")
+		return
+	else:
+		# Update the units_on_tiles dictionary
+		var current_tile = player_combat_controller._get_tile_with_tolerance(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z))
+		player_combat_controller.units_on_tiles.erase(current_tile)
+		player_combat_controller.units_on_tiles[target_tile] = enemy_unit
+
+	# Set the unit as moving
+	enemy_unit.set_meta("moving", true)
+
+	# Move the unit to the target tile
+	var target_position = player_combat_controller.tiles[target_tile].global_transform.origin
+	var initial_y = enemy_unit.global_transform.origin.y
+	target_position.y = initial_y  # Ensure the Y-axis remains unchanged
+
+	enemy_unit.look_at(target_position, Vector3.UP)
+	enemy_unit.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backward
+
+	var duration = 0.5
+	var elapsed = 0.0
+
+	while elapsed < duration:
+		var t = elapsed / duration
+		var interpolated_position = enemy_unit.global_transform.origin.lerp(target_position, t)
+		interpolated_position.y = initial_y  # Keep Y constant during interpolation
+		enemy_unit.global_transform.origin = interpolated_position
+
+		await get_tree().create_timer(0.01).timeout
+		elapsed += 0.01
+
+	enemy_unit.global_transform.origin = target_position
+	enemy_unit.set_meta("moving", false)
+	print("Enemy unit moved to tile: ", target_tile)

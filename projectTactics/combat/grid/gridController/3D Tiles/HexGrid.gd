@@ -55,6 +55,8 @@ var is_rotating := false  # Track whether the camera is being rotated
 var placing_unit: bool = false
 var unit_to_place = null
 
+var out_coords: Vector2
+
 # Dictionary to store tile positions with coordinates as keys
 var tiles = {}
 
@@ -274,6 +276,7 @@ func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	
 	if closest_tile and min_distance < TILE_SIZE / 2 + tolerance:
 		print("Closest tile coordinates: ", closest_tile_coords)
+		out_coords = closest_tile_coords
 		return closest_tile
 	else:
 		print("No valid tile found or out of bounds.")

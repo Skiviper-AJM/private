@@ -83,7 +83,6 @@ func find_free_tile() -> Vector2:
 
 func is_tile_in_bounds(tile_key: Vector2) -> bool:
 	# Ensure the tile is within grid bounds
-	#print("Checking bounds for tile: ", tile_key)
 	return abs(tile_key.x) <= grid_controller.grid_size and abs(tile_key.y) <= grid_controller.grid_size
 
 func take_enemy_turns():
@@ -102,13 +101,12 @@ func move_and_attack_nearest_player(enemy_unit: Node3D, player_units):
 	var target_tile = find_closest_unoccupied_tile(enemy_unit, nearest_player_unit)
 
 	if target_tile != null:
-		combat_manager.move_unit_to_tile(enemy_unit, target_tile)
+		combat_manager.move_enemy_unit_to_tile(enemy_unit, target_tile)
 		# If the enemy is within range, attack the player unit
 		if is_within_attack_range(enemy_unit, nearest_player_unit):
 			attack_player_unit(enemy_unit, nearest_player_unit)
 	else:
 		print("No valid tile to move to for enemy:", enemy_unit.name)
-
 
 func find_nearest_player_unit(enemy_unit: Node3D, player_units) -> Node3D:
 	var min_distance = INF
@@ -120,23 +118,44 @@ func find_nearest_player_unit(enemy_unit: Node3D, player_units) -> Node3D:
 			nearest_unit = player_unit
 	return nearest_unit
 
-func find_closest_unoccupied_tile(enemy_unit: Node3D, target_unit: Node3D) -> Node3D:
+func find_closest_unoccupied_tile(enemy_unit: Node3D, target_unit: Node3D) -> Vector2:
 	var min_distance = INF
 	var target_tile = null
 
-	# Get all adjacent tiles around the target player unit
-	var adjacent_tiles = get_adjacent_tiles(target_unit)
+	# Get the coordinates of the player unit
+	print(grid_controller._get_tile_with_tolerance(Vector2(target_unit.global_transform.origin.x, target_unit.global_transform.origin.z)))
+	var player_tile = grid_controller.out_coords
+
+	# Calculate the six adjacent tiles around the player
+	var adjacent_tiles = [
+		Vector2(player_tile.x + 1, player_tile.y),
+		Vector2(player_tile.x + 1, player_tile.y - 1),
+		Vector2(player_tile.x, player_tile.y - 1),
+		Vector2(player_tile.x - 1, player_tile.y),
+		Vector2(player_tile.x - 1, player_tile.y + 1),
+		Vector2(player_tile.x, player_tile.y + 1)
+	]
+
+	print("Checking adjacent tiles for enemy:", enemy_unit.name, "with target:", target_unit.name)
 
 	# Check for the closest unoccupied adjacent tile
-	for tile in adjacent_tiles:
-		if not grid_controller.units_on_tiles.has(tile):
-			var distance = tile.global_transform.origin.distance_to(enemy_unit.global_transform.origin)
+	for tile_key in adjacent_tiles:
+		if is_tile_in_bounds(tile_key) and not grid_controller.units_on_tiles.has(tile_key):
+			var tile_position = grid_controller.tiles[tile_key].global_transform.origin
+			var distance = enemy_unit.global_transform.origin.distance_to(tile_position)
+			print("Checking tile at position:", tile_position, " Distance:", distance)
 			if distance < min_distance:
 				min_distance = distance
-				target_tile = tile
+				target_tile = tile_key
+		else:
+			print("Tile at position:", tile_key, "is occupied or out of bounds.")
 
+	if target_tile == null:
+		print("No valid tile found for enemy:", enemy_unit.name)
+	else:
+		print("Found valid tile for enemy:", enemy_unit.name, " at position:", target_tile)
+	
 	return target_tile
-
 
 func is_within_attack_range(attacker: Node3D, target: Node3D) -> bool:
 	var distance = attacker.global_transform.origin.distance_to(target.global_transform.origin) / grid_controller.TILE_SIZE
@@ -176,5 +195,3 @@ func get_adjacent_tiles(unit: Node3D) -> Array:
 				adjacent_tiles.append(adjacent_tile)
 	
 	return adjacent_tiles
-
-
