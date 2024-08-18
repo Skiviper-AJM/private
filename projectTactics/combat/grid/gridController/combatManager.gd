@@ -89,8 +89,10 @@ func handle_unit_selection():
 					if unit_instance.is_in_group("player_units"):
 						handle_tile_click(clicked_tile)
 					elif attack_mode_active and not unit_instance.get_meta("has_attacked", false):
+						
 						handle_enemy_click(unit_instance, clicked_tile)
 					else:
+						update_armor_bar(unit_instance, true)
 						print("Cannot select this unit: it belongs to the enemy.")
 				else:
 					# No unit detected on the tile; deselect current unit if selected
@@ -164,7 +166,7 @@ func _handle_unit_click(unit_instance):
 		$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = true
 
 		# Update and show the armor bar
-		update_armor_bar(unit_instance)
+		update_armor_bar(unit_instance, false)
 
 		# Immediately update the current tile reference for this unit
 		var selected_tile = null
@@ -499,6 +501,7 @@ func highlight_attack_range(unit_instance):
 		print("No unit tile found to highlight attack range.")
 
 func handle_enemy_click(enemy_unit_instance, clicked_tile):
+	
 	if selected_unit_instance and attack_mode_active:
 		var max_range = selected_unit_instance.unitParts.range
 		var distance = clicked_tile.global_transform.origin.distance_to(player_combat_controller.currently_selected_tile.global_transform.origin) / player_combat_controller.TILE_SIZE
@@ -658,10 +661,13 @@ func highlight_tiles_around_unit(unit_instance, range):
 		print("No unit tile found to highlight.")
 
 # New functions for handling the armor bar
-func update_armor_bar(unit_instance):
+func update_armor_bar(unit_instance, is_enemy):
 	armor_bar.max_value = unit_instance.unitParts.maxArmor
 	armor_bar.value = unit_instance.unitParts.armorRating
-	armor_bar_name.text = "Armor: " + str(unit_instance.unitParts.armorRating) + " / " + str(unit_instance.unitParts.maxArmor)
+	if !is_enemy:
+		armor_bar_name.text = "Unit armor: " + str(unit_instance.unitParts.armorRating) + " / " + str(unit_instance.unitParts.maxArmor)
+	else:
+		armor_bar_name.text = "Enemy armor: " + str(unit_instance.unitParts.armorRating) + " / " + str(unit_instance.unitParts.maxArmor)
 	armor_bar.visible = true
 	armor_bar_name.visible = true
 
