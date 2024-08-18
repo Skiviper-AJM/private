@@ -313,6 +313,29 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Ensure the final position is set
 	unit_instance.global_transform.origin = target_position
 
+	# Track units that were within 1 tile before the move
+	var enemies_in_range_at_start = []
+
+	for tile_key in player_combat_controller.tiles.keys():
+		var tile = player_combat_controller.tiles[tile_key]
+		var start_distance = tile.global_transform.origin.distance_to(start_position) / player_combat_controller.TILE_SIZE
+
+		if player_combat_controller.units_on_tiles.has(tile):
+			var nearby_unit = player_combat_controller.units_on_tiles[tile]
+
+			# Only consider enemy units with range 1 (melee units)
+			if nearby_unit.is_in_group("enemy_units") and nearby_unit.unitParts.range == 1:
+				if start_distance <= 1:
+					enemies_in_range_at_start.append(nearby_unit)
+
+	# Now check if the unit has exited the range of any of these enemies after the move
+	for enemy in enemies_in_range_at_start:
+		var end_distance = enemy.global_transform.origin.distance_to(target_position) / player_combat_controller.TILE_SIZE
+		if end_distance > 1:
+			# The unit moved out of range of this enemy, so take damage
+			unit_instance.unitParts.armorRating -= enemy.unitParts.damage
+			print("Moving unit took damage from enemy after moving out of range! Remaining armor:", unit_instance.unitParts.armorRating)
+
 	# Only clear the start tile if it is not occupied by another unit and is not purple
 	var start_tile_material = start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
 	if not player_combat_controller.units_on_tiles.has(start_tile) and start_tile_material != TILE_MATERIALS[4]:  # Assuming TILE_MATERIALS[4] is purple
@@ -327,7 +350,6 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	unit_instance.set_meta("remaining_movement", max(0, remaining_movement - distance_to_move))
 
 	print("Unit moved to tile: ", target_tile.global_transform.origin, " Remaining movement: ", unit_instance.get_meta("remaining_movement"))
-
 
 
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
