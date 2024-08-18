@@ -4,6 +4,9 @@ extends Node
 var in_combat = false
 var turnCount: int = 1  # Track the current turn count
 
+@export var playerInfo : PlayerData
+
+
 @onready var player_combat_controller = $"../HexGrid"
 @onready var AI_Controller = $"../aiController"
 @onready var camera = $"../HexGrid/Camera3D"  # Initialize the camera properly
@@ -35,6 +38,7 @@ var selected_unit_instance = null  # Store the instance of the selected unit
 
 # Prevents placing, moving, or interacting if a button is hovered over
 func _ready():
+	playerInfo = FM.playerData
 	set_process_input(true)
 	update_end_turn_label()  # Update the button text at the start
 
@@ -550,6 +554,8 @@ func all_players_died():
 func all_enemies_dead():
 	print("All enemy units have been defeated.")
 	
+	# Give the player a random amount of coins between 1 and 100 for each enemy they beat
+	playerInfo.balance += total_enemy_units * (randi() % 100)+1
 	# Add additional logic here to handle the victory condition.
 	player_combat_controller.fleeCombat()
 
