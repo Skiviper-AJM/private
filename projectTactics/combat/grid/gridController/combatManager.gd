@@ -11,6 +11,8 @@ var turnCount: int = 1  # Track the current turn count
 
 var block_placement: bool = false
 var move_mode_active: bool = false  # New variable to control movement mode
+var attack_mode_active: bool = false  # New variable to control attack mode
+var has_attacked: bool = false  # Track if the unit has attacked this turn
 
 const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
@@ -20,7 +22,6 @@ const TILE_MATERIALS = [
 ]
 
 var highlighted_tiles := []
-var originally_blue_tiles = []  # List to track which tiles were originally blue
 var selected_unit_instance = null  # Store the instance of the selected unit
 
 # Prevents placing, moving, or interacting if a button is hovered over
@@ -66,12 +67,12 @@ func handle_unit_selection():
 				# Check if there is a unit on the clicked tile
 				if player_combat_controller.units_on_tiles.has(clicked_tile):
 					var unit_instance = player_combat_controller.units_on_tiles[clicked_tile]
-					if unit_instance.is_in_group("enemy_units"):
-						handle_enemy_click(unit_instance, clicked_tile)
-					elif unit_instance.is_in_group("player_units"):
+					if unit_instance.is_in_group("player_units"):
 						handle_tile_click(clicked_tile)
+					elif attack_mode_active and not has_attacked:
+						handle_enemy_click(unit_instance, clicked_tile)
 					else:
-						print("Cannot interact with this unit.")
+						print("Cannot select this unit: it belongs to the enemy.")
 				else:
 					# No unit detected on the tile; deselect current unit if selected
 					handle_tile_click(clicked_tile)
@@ -79,40 +80,6 @@ func handle_unit_selection():
 				print("No valid tile found.")
 		else:
 			print("No raycast hit detected.")
-
-func handle_enemy_click(enemy_unit_instance, clicked_tile):
-	# Check if the clicked tile is within range
-	var selected_tile = player_combat_controller.currently_selected_tile
-	if selected_tile:
-		var selected_position = selected_tile.global_transform.origin
-		var clicked_position = clicked_tile.global_transform.origin
-		var distance = selected_position.distance_to(clicked_position) / player_combat_controller.TILE_SIZE
-
-		# Get the maximum range of the selected unit
-		var max_range = selected_unit_instance.unitParts.range
-
-		if distance <= max_range:
-			# Apply damage to the enemy unit's armorRating
-			enemy_unit_instance.unitParts.armorRating -= selected_unit_instance.unitParts.damage
-			print("Enemy unit took damage! Remaining armor rating:", enemy_unit_instance.unitParts.armorRating)
-	
-			# Check if the enemy unit's armorRating has reached 0 or less
-			if enemy_unit_instance.unitParts.armorRating <= 0:
-				print("Enemy unit destroyed!")
-				remove_unit_from_map(enemy_unit_instance, clicked_tile)
-			else:
-				print("Enemy unit is out of range.")
-		else:
-			print("No selected unit to attack with.")
-
-
-func remove_unit_from_map(unit_instance, tile):
-	# Remove the unit from the map and free its node
-	player_combat_controller.units_on_tiles.erase(tile)
-	unit_instance.queue_free()
-
-	# Reset the tile to blue
-	tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
 func handle_tile_click(tile):
 	if in_combat:
@@ -192,6 +159,10 @@ func _handle_unit_click(unit_instance):
 
 			# Update the selected tile and set the material to green after highlighting
 			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+			
+			# Deactivate attack mode when selecting a new friendly unit
+			if attack_mode_active:
+				end_attack_mode()
 		else:
 			print("Selected unit instance not found on any tile.")
 
@@ -203,7 +174,7 @@ func deselect_unit(force_deselect = false):
 	
 	# Clear all highlighted tiles
 	clear_highlighted_tiles()
-	
+
 	# Deselect the currently selected unit and reset the tile color
 	if selected_unit_instance:
 		# Only reset the tile color to red if the unit is not moving or if forced to deselect
@@ -214,6 +185,10 @@ func deselect_unit(force_deselect = false):
 		player_combat_controller.currently_selected_tile = null
 		player_combat_controller.unit_name_label.text = ""
 		print("Unit deselected.")
+		
+		# Deactivate attack mode when deselecting a unit
+		if attack_mode_active:
+			end_attack_mode()
 
 func highlight_tiles_around_unit(selected_unit_instance, range):
 	# Fetch the current tile based on the latest position of the unit
@@ -373,23 +348,40 @@ func moveButton():
 
 		# Highlight the movement range when move mode is activated
 		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
+	
+	# Deactivate attack mode if it is active
+	if attack_mode_active:
+		end_attack_mode()
 
 func shootButton():
 	clear_highlighted_tiles()  # Clear any existing highlights
 	print("Shoot action selected.")
 	end_move_mode()  # End move mode when shooting
 	# Implement shooting logic here
+	
+	# Deactivate attack mode if it is active
+	if attack_mode_active:
+		end_attack_mode()
 
 func attackButton():
-	clear_highlighted_tiles()  # Clear any existing highlights
-	print("Attack action selected.")
-	end_move_mode()  # End move mode when attacking
-
-	# Calculate and highlight the attack range
-	if selected_unit_instance:
-		highlight_attack_range(selected_unit_instance)
+	if attack_mode_active:
+		# Deactivate attack mode if it's already active
+		end_attack_mode()
 	else:
-		print("No unit selected for attack.")
+		clear_highlighted_tiles()  # Clear any existing highlights
+		print("Attack mode activated.")
+		attack_mode_active = true  # Activate attack mode
+
+		# Calculate and highlight the attack range
+		if selected_unit_instance:
+			highlight_attack_range(selected_unit_instance)
+		else:
+			print("No unit selected for attack.")
+
+func end_attack_mode():
+	attack_mode_active = false  # Deactivate attack mode
+	has_attacked = false  # Reset the attack flag
+	print("Attack mode deactivated.")
 
 func highlight_attack_range(unit_instance):
 	# Initialize variables to store the highest range
@@ -426,28 +418,57 @@ func highlight_attack_range(unit_instance):
 					# Highlight all adjacent tiles (melee attack)
 					tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 					highlighted_tiles.append(tile)
-					originally_blue_tiles.append(tile)  # Track this tile as originally blue
 				elif max_range > 1 and distance <= max_range and distance > 1:
 					# Highlight tiles outside the immediate surrounding area (ranged attack)
 					tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 					highlighted_tiles.append(tile)
-					originally_blue_tiles.append(tile)  # Track this tile as originally blue
 	else:
 		print("No unit tile found to highlight attack range.")
+
+func handle_enemy_click(enemy_unit_instance, clicked_tile):
+	if selected_unit_instance and attack_mode_active:
+		var max_range = selected_unit_instance.unitParts.range  # Assuming you have calculated the max range
+		var distance = clicked_tile.global_transform.origin.distance_to(player_combat_controller.currently_selected_tile.global_transform.origin) / player_combat_controller.TILE_SIZE
+
+		if distance <= max_range and not has_attacked:
+			# Apply damage to the enemy unit
+			enemy_unit_instance.unitParts.armorRating -= selected_unit_instance.unitParts.damage
+			print("Enemy unit took damage! Remaining armor:", enemy_unit_instance.unitParts.armorRating)
+
+			# Check if the enemy unit's armor has reached 0 or less
+			if enemy_unit_instance.unitParts.armorRating <= 0:
+				print("Enemy unit destroyed!")
+				remove_unit_from_map(enemy_unit_instance, clicked_tile)
+
+			# Mark that the unit has attacked
+			has_attacked = true
+		else:
+			print("Enemy unit is out of range.")
+	else:
+		print("No selected unit to attack with.")
+
+func remove_unit_from_map(unit_instance, tile):
+	# Remove the unit from the map and erase its node reference
+	player_combat_controller.units_on_tiles.erase(tile)
+	unit_instance.queue_free()
+	print("Unit removed from map.")
 
 func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
 		var material_override = tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
 		# Reset to blue if it was originally blue or if it's currently yellow or red
-		if tile in originally_blue_tiles or material_override == TILE_MATERIALS[2] or material_override == TILE_MATERIALS[3]:
+		if material_override == TILE_MATERIALS[2] or material_override == TILE_MATERIALS[3]:
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 	highlighted_tiles.clear()
-	originally_blue_tiles.clear()  # Clear the tracking list
 
 func end_move_mode():
 	move_mode_active = false  # Deactivate move mode
 	clear_highlighted_tiles()  # Clear highlighted tiles
 	print("Move mode deactivated.")
+	
+	# Deactivate attack mode if it is active
+	if attack_mode_active:
+		end_attack_mode()
 
 func endTurn():
 	# Increment the turn count
