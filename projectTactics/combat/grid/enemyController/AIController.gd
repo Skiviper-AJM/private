@@ -91,10 +91,12 @@ func take_enemy_turns():
 	for tile_key in grid_controller.units_on_tiles.keys():
 		if grid_controller.units_on_tiles.has(tile_key):
 			var enemy_unit = grid_controller.units_on_tiles[tile_key]
-			if enemy_unit.is_in_group("enemy_units"):
+			# Ensure the enemy_unit is valid before proceeding
+			if enemy_unit != null and enemy_unit.is_in_group("enemy_units"):
 				move_and_attack_nearest_player(enemy_unit, player_units)
-		else:
-			print("Invalid tile key or tile not found in units_on_tiles:", tile_key)
+			else:
+				print("Invalid tile key or tile not found in units_on_tiles:", tile_key)
+
 
 
 

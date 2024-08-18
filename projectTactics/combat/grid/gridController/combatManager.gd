@@ -272,6 +272,11 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	print("Unit moved successfully with remaining movement: ", unit_instance.get_meta("remaining_movement"))
 
 func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: Node3D, is_final_tile: bool = false):
+	# Ensure that both start_tile and target_tile are valid Node3D instances
+	if not is_instance_valid(start_tile) or not is_instance_valid(target_tile):
+		print("Error: start_tile or target_tile is not a valid Node3D instance.")
+		return
+
 	# Get the current and target positions
 	var start_position = start_tile.global_transform.origin
 	var target_position = target_tile.global_transform.origin
@@ -319,7 +324,7 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 		start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
 	# If this is the final tile, set it to purple (or green if it's selected)
-	var final_tile_material = TILE_MATERIALS[4] if is_final_tile else TILE_MATERIALS[1]
+	var final_tile_material = TILE_MATERIALS[4] if unit_instance.is_in_group("enemy_units") else TILE_MATERIALS[1]
 	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = final_tile_material
 
 	# Decrement the remaining movement by the distance moved, considering the buffer
@@ -334,23 +339,6 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 		# Ensure the unit ends up on the target tile and is correctly displayed
 		unit_instance.global_transform.origin = target_position
 
-func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
-	var path_tiles = []
-	var direction = (end_position - start_position).normalized()
-	var distance = start_position.distance_to(end_position)
-	var steps = int(distance / player_combat_controller.TILE_SIZE) * 2  # Increase resolution by multiplying steps
-
-	for i in range(steps + 1):
-		var current_position = start_position + direction * (distance / steps) * i
-		
-		# Get the closest tile and add randomness to choose between equally distant tiles
-		var candidate_tiles = get_closest_tiles(current_position)
-		if candidate_tiles.size() > 0:
-			var chosen_tile = candidate_tiles[randi() % candidate_tiles.size()]
-			if chosen_tile not in path_tiles:
-				path_tiles.append(chosen_tile)
-
-	return path_tiles
 
 # Modified function to get closest tiles, with randomness to break ties
 func get_closest_tiles(position: Vector3) -> Array:
@@ -372,9 +360,11 @@ func get_closest_tiles(position: Vector3) -> Array:
 func any_unit_moving() -> bool:
 	for tile in player_combat_controller.units_on_tiles.keys():
 		var unit_instance = player_combat_controller.units_on_tiles[tile]
-		if unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
+		# Check if unit_instance is valid (not null) before accessing its properties
+		if unit_instance != null and unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
 			return true
 	return false
+
 
 func moveButton():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
@@ -591,12 +581,15 @@ func endTurn():
 func reset_all_units_status():
 	for tile in player_combat_controller.units_on_tiles.keys():
 		var unit_instance = player_combat_controller.units_on_tiles[tile]
-		unit_instance.set_meta("remaining_movement", unit_instance.unitParts.speedRating)
-		unit_instance.unitParts.has_attacked = false  # Reset attack flag
-		print("Reset unit's movement and attack status.")
+		
+		# Check if the unit instance is valid before accessing its properties
+		if is_instance_valid(unit_instance):
+			unit_instance.set_meta("remaining_movement", unit_instance.unitParts.speedRating)
+			unit_instance.unitParts.has_attacked = false  # Reset attack flag
+			print("Reset unit's movement and attack status.")
+		else:
+			print("Warning: Attempted to reset status for a unit that has been freed.")
 
-		if unit_instance == selected_unit_instance:
-			$"../CombatGridUI/UnitPlaceUI/Attack".visible = true
 
 func update_end_turn_label():
 	$"../CombatGridUI/UnitPlaceUI2/TurnCounter".text = "End Turn: " + str(turnCount)
@@ -662,3 +655,20 @@ func hide_armor_bar():
 
 
 
+func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
+	var path_tiles = []
+	var direction = (end_position - start_position).normalized()
+	var distance = start_position.distance_to(end_position)
+	var steps = int(distance / player_combat_controller.TILE_SIZE) * 2  # Increase resolution by multiplying steps
+
+	for i in range(steps + 1):
+		var current_position = start_position + direction * (distance / steps) * i
+		
+		# Get the closest tile and add randomness to choose between equally distant tiles
+		var candidate_tiles = get_closest_tiles(current_position)
+		if candidate_tiles.size() > 0:
+			var chosen_tile = candidate_tiles[randi() % candidate_tiles.size()]
+			if chosen_tile not in path_tiles:
+				path_tiles.append(chosen_tile)
+
+	return path_tiles
