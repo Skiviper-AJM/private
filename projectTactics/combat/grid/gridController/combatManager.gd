@@ -145,7 +145,7 @@ func _handle_unit_click(unit_instance):
 		# Set the instance as selected
 		selected_unit_instance = unit_instance
 		$"../CombatGridUI/UnitPlaceUI/Move".visible = true
-		$"../CombatGridUI/UnitPlaceUI/Shoot".visible = true
+		#$"../CombatGridUI/UnitPlaceUI/Shoot".visible = true
 		$"../CombatGridUI/UnitPlaceUI/Attack".visible = not unit_instance.get_meta("has_attacked", false)
 		$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = true
 		# Immediately update the current tile reference for this unit
@@ -248,8 +248,8 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 	# Guarantee that the unit ends up on the target tile
 	move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, target_tile)
 
-	# Set the target tile green to indicate the unit has arrived
-	player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+	# Ensure the final position tile is green
+	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 
 	print("Unit moved successfully with remaining movement: ", unit_instance.get_meta("remaining_movement"))
 
@@ -295,7 +295,7 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Ensure the final position is set
 	unit_instance.global_transform.origin = target_position
 
-	# Only update the `units_on_tiles` dictionary for the final destination, not the tiles passed through
+	# Update the `units_on_tiles` dictionary only for the final destination, not for the tiles passed through
 	if player_combat_controller.units_on_tiles.has(target_tile):
 		# If the target tile is occupied by another unit, do not remove the other unit
 		print("Target tile is already occupied by another unit.")
@@ -304,7 +304,10 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 		if player_combat_controller.units_on_tiles.get(start_tile) == unit_instance:
 			player_combat_controller.units_on_tiles.erase(start_tile)
 			player_combat_controller.units_on_tiles[target_tile] = unit_instance
-		# Set the target tile color accordingly
+			# Reset the start tile to blue once the unit leaves it
+			start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
+
+		# Set the target tile color to red to indicate the path
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 	# Decrement the remaining movement by the distance moved, considering the buffer
@@ -356,6 +359,10 @@ func any_unit_moving() -> bool:
 	return false
 
 func moveButton():
+	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
+		print("Input suppressed: Unit is currently moving.")
+		return  # Ignore any input if the unit is moving
+		
 	clear_highlighted_tiles()  # Clear any existing highlights
 	if selected_unit_instance and move_mode_active:
 		end_move_mode()  # If move mode is active, deactivate it
@@ -371,6 +378,9 @@ func moveButton():
 		end_attack_mode()
 
 func shootButton():
+	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
+		print("Input suppressed: Unit is currently moving.")
+		return  # Ignore any input if the unit is moving
 	clear_highlighted_tiles()  # Clear any existing highlights
 	print("Shoot action selected.")
 	end_move_mode()  # End move mode when shooting
@@ -381,6 +391,9 @@ func shootButton():
 		end_attack_mode()
 
 func attackButton():
+	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
+		print("Input suppressed: Unit is currently moving.")
+		return  # Ignore any input if the unit is moving
 	if attack_mode_active:
 		# Deactivate attack mode if it's already active
 		end_attack_mode()
@@ -503,6 +516,9 @@ func end_move_mode():
 		end_attack_mode()
 
 func endTurn():
+	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
+		print("Input suppressed: Unit is currently moving.")
+		return  # Ignore any input if the unit is moving
 	# Increment the turn count
 	turnCount += 1
 	end_move_mode()  # End move mode at the end of a turn
