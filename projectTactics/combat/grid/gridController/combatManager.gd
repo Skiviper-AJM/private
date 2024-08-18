@@ -1,31 +1,35 @@
 extends Node
 
-# A flag to determine whether the player is in combat mode
+# Flag indicating whether the player is currently in combat mode
 var in_combat = false
-var turnCount: int = 1  # Track the current turn count
+# Counter for tracking the current turn number
+var turnCount: int = 1
 
 @export var playerInfo : PlayerData
 
+# References to various nodes in the scene
 @onready var player_combat_controller = $"../HexGrid"
 @onready var AI_Controller = $"../aiController"
-@onready var camera = $"../HexGrid/Camera3D"  # Initialize the camera properly
+@onready var camera = $"../HexGrid/Camera3D"  # Camera used for raycasting and view
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
-@onready var end_turn_button = $"../CombatGridUI/UnitPlaceUI/EndTurn"  # Reference to the end turn button
+@onready var end_turn_button = $"../CombatGridUI/UnitPlaceUI/EndTurn"  # Button to end the current turn
 @onready var armor_bar = $"../CombatGridUI/ArmorBar"
 @onready var armor_bar_name = $"../CombatGridUI/armorBarName"
 
+# Flags controlling unit placement, movement, and attack modes
 var block_placement: bool = false
-var move_mode_active: bool = false  # New variable to control movement mode
-var attack_mode_active: bool = false  # New variable to control attack mode
+var move_mode_active: bool = false  # Flag for movement mode activation
+var attack_mode_active: bool = false  # Flag for attack mode activation
 
-# Define the total number of player and enemy units on the field
-@onready var total_player_units: int = player_combat_controller.max_squad_size # Adjust this number as needed
-@onready var total_enemy_units: int = AI_Controller.max_enemies # Adjust this number as needed
+# Total number of player and enemy units allowed on the field
+@onready var total_player_units: int = player_combat_controller.max_squad_size
+@onready var total_enemy_units: int = AI_Controller.max_enemies
 
-# Track the remaining player and enemy units on the field
+# Counters for the remaining player and enemy units on the field
 @onready var remaining_player_units: int = total_player_units
 @onready var remaining_enemy_units: int = total_enemy_units
 
+# Preloaded materials for tile coloring
 const TILE_MATERIALS = [
 	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
@@ -35,39 +39,43 @@ const TILE_MATERIALS = [
 ]
 
 var highlighted_tiles := []
-var selected_unit_instance = null  # Store the instance of the selected unit
+var selected_unit_instance = null  # Instance of the currently selected unit
 
-# Prevents placing, moving, or interacting if a button is hovered over
+# Initialize the script and set up input processing
 func _ready():
 	playerInfo = FM.playerData
 	set_process_input(true)
-	update_end_turn_label()  # Update the button text at the start
+	update_end_turn_label()  # Initialize the end turn button label
 
+# Disable placement when hovering over a button
 func buttonHover():
 	block_placement = true
 
 func _input(event):
-	# Suppress input if the currently selected unit is moving
+	# Suppress input if the selected unit is currently moving
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
 		print("Input suppressed: Unit is currently moving.")
-		return  # Ignore any input if the unit is moving
+		return
 
+	# Handle unit selection if the interact action is triggered and placement is not blocked
 	if event.is_action_pressed("interact") and not block_placement:
 		handle_unit_selection()
 
+# Start combat mode and disable unit placement from inventory
 func combatInitiate():
 	in_combat = true
-	player_combat_controller.block_placement = true  # Disable unit placement from inventory
+	player_combat_controller.block_placement = true
 	print("Combat initiated. Unit selection from inventory disabled.")
 
+# Handle the logic for selecting units and interacting with tiles
 func handle_unit_selection():
 	if in_combat:
-		# Prevent selecting a unit if any unit is currently moving
+		# Prevent unit selection if any unit is currently moving
 		if any_unit_moving():
 			print("Cannot select any unit while a unit is moving.")
 			return
 
-		# Raycast to find the tile and the unit instance on it
+		# Raycast to determine the clicked position on the grid
 		var from = camera.project_ray_origin(get_viewport().get_mouse_position())
 		var to = from + camera.project_ray_normal(get_viewport().get_mouse_position()) * 50000
 
@@ -80,95 +88,93 @@ func handle_unit_selection():
 
 		if result:
 			var clicked_position = result.position
-			var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to Vector2
+			var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to 2D coordinates
 			var clicked_tile = player_combat_controller._get_tile_with_tolerance(clicked_position_2d)
 			if clicked_tile:
-				# Check if there is a unit on the clicked tile
+				# Check if a unit exists on the clicked tile
 				if player_combat_controller.units_on_tiles.has(clicked_tile):
 					var unit_instance = player_combat_controller.units_on_tiles[clicked_tile]
 					if unit_instance.is_in_group("player_units"):
 						handle_tile_click(clicked_tile)
 					elif attack_mode_active and not unit_instance.get_meta("has_attacked", false):
-						
 						handle_enemy_click(unit_instance, clicked_tile)
 					else:
 						update_armor_bar(unit_instance, true)
 						print("Cannot select this unit: it belongs to the enemy.")
 				else:
-					# No unit detected on the tile; deselect current unit if selected
+					# Deselect the current unit if the clicked tile is empty
 					handle_tile_click(clicked_tile)
 			else:
 				print("No valid tile found.")
 		else:
 			print("No raycast hit detected.")
 
+# Handle logic when a tile is clicked
 func handle_tile_click(tile):
 	if in_combat:
 		if player_combat_controller.units_on_tiles.has(tile):
-			# Always prioritize selecting a unit on the clicked tile
+			# Select the unit on the clicked tile
 			var unit_instance = player_combat_controller.units_on_tiles[tile]
 			_handle_unit_click(unit_instance)
-			end_move_mode()  # End move mode when another unit is selected
-		elif selected_unit_instance and move_mode_active:  # Check if move mode is active
-			# Only attempt movement if a unit is already selected and move mode is active
+			end_move_mode()  # End move mode when a new unit is selected
+		elif selected_unit_instance and move_mode_active:
+			# Move the selected unit if move mode is active and the tile is within range
 			if tile in highlighted_tiles:
-				# Tile within range and empty, move the selected unit to this tile
 				print("Moving unit to tile:", tile)
 				move_unit_to_tile(selected_unit_instance, tile)
-				end_move_mode()  # End move mode after moving
+				end_move_mode()
 			else:
-				# Tile outside of range, deselect the unit and end move mode
 				print("Clicked tile is outside of range. Deselecting unit.")
 				end_move_mode()
 				deselect_unit()
 		else:
-			# If move mode is not active and the tile is empty, deselect the unit
+			# Deselect the unit if the tile is empty and move mode is not active
 			print("Empty tile clicked. Deselecting unit.")
 			end_move_mode()
 			deselect_unit()
 
+# Handle logic when a unit is clicked
 func _handle_unit_click(unit_instance):
 	if in_combat:
-		# Prevent selecting the unit if it is currently moving
+		# Prevent selection if the unit is currently moving
 		if unit_instance.has_meta("moving") and unit_instance.get_meta("moving"):
 			print("Cannot select unit: it is currently moving.")
 			return
 
-		# Check if the unit is a player unit
+		# Ensure the unit is a player unit before selecting it
 		if not unit_instance.is_in_group("player_units"):
 			print("Cannot select this unit: it belongs to the enemy.")
 			return
 
-		# If another unit is selected, deselect it without turning its tile red
+		# Deselect any previously selected unit
 		if selected_unit_instance and selected_unit_instance != unit_instance:
 			deselect_unit(true)
 
 		clear_highlighted_tiles()
 
 		print("Switching to selected unit instance:", unit_instance)
-		# Display the name of the unit
+		# Display the selected unit's name
 		unit_name_label.text = "Unit: " + unit_instance.unitParts.name
 
-		# Initialize remaining movement if not set
+		# Initialize remaining movement if it hasn't been set
 		if not unit_instance.has_meta("remaining_movement"):
 			unit_instance.set_meta("remaining_movement", unit_instance.unitParts.speedRating)
 
-		# Set the instance as selected
 		selected_unit_instance = unit_instance
 		$"../CombatGridUI/UnitPlaceUI/Move".visible = true
-		
-		# Update the attack button visibility based on the 'has_attacked' property
+
+		# Update attack button visibility based on whether the unit has attacked
 		if unit_instance.unitParts.has_attacked:
-			$"../CombatGridUI/UnitPlaceUI/Attack".visible = false  # Hide the attack button if the unit has already attacked
+			$"../CombatGridUI/UnitPlaceUI/Attack".visible = false
 		else:
-			$"../CombatGridUI/UnitPlaceUI/Attack".visible = true  # Show the attack button if the unit has not yet attacked
+			$"../CombatGridUI/UnitPlaceUI/Attack".visible = true
 
 		$"../CombatGridUI/UnitPlaceUI/CenterCam".visible = true
 
-		# Update and show the armor bar
+		# Update and show the armor bar for the selected unit
 		update_armor_bar(unit_instance, false)
 
-		# Immediately update the current tile reference for this unit
+		# Find the tile where the selected unit is located
 		var selected_tile = null
 		for tile in player_combat_controller.units_on_tiles.keys():
 			if player_combat_controller.units_on_tiles[tile] == unit_instance:
@@ -178,19 +184,20 @@ func _handle_unit_click(unit_instance):
 		if selected_tile:
 			player_combat_controller.currently_selected_tile = selected_tile
 
-			# Only highlight tiles if move mode is active
+			# Highlight tiles around the unit if move mode is active
 			if move_mode_active:
 				highlight_tiles_around_unit(selected_unit_instance, unit_instance.get_meta("remaining_movement"))
 
-			# Update the selected tile and set the material to green after highlighting
-			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
-			
-			# Deactivate attack mode when selecting a new friendly unit
+			# Set the selected tile color to green
+			selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]
+
+			# Deactivate attack mode if a new friendly unit is selected
 			if attack_mode_active:
 				end_attack_mode()
 		else:
 			print("Selected unit instance not found on any tile.")
 
+# Deselect the currently selected unit and reset relevant UI elements
 func deselect_unit(force_deselect = false):
 	$"../CombatGridUI/UnitPlaceUI/Attack".visible = false
 	$"../CombatGridUI/UnitPlaceUI/Move".visible = false
@@ -200,48 +207,49 @@ func deselect_unit(force_deselect = false):
 	# Hide the armor bar
 	hide_armor_bar()
 
-	# Clear all highlighted tiles
+	# Clear any highlighted tiles
 	clear_highlighted_tiles()
 
-	# Deselect the currently selected unit and reset the tile color
+	# Deselect the current unit and reset its tile color
 	if selected_unit_instance:
-		# Only reset the tile color to red if the unit is not moving or if forced to deselect
+		# Reset tile color to red if forced or if the unit is not moving
 		if player_combat_controller.currently_selected_tile and (force_deselect or not selected_unit_instance.get_meta("moving")):
-			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+			player_combat_controller.currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]
 
 		selected_unit_instance = null
 		player_combat_controller.currently_selected_tile = null
 		player_combat_controller.unit_name_label.text = ""
 		print("Unit deselected.")
 		
-		# Deactivate attack mode when deselecting a unit
+		# Deactivate attack mode when a unit is deselected
 		if attack_mode_active:
 			end_attack_mode()
 
+# Move the selected unit to the specified tile
 func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
-	# Ensure that unit_instance is a Node3D instance
+	# Ensure the unit is a valid Node3D instance
 	if not unit_instance is Node3D:
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
 
-	# Immediately update the unit's position in the units_on_tiles dictionary
+	# Prevent movement if the target tile is already occupied
 	if player_combat_controller.units_on_tiles.has(target_tile):
 		print("Target tile is occupied by another unit. Movement aborted.")
 		return
 	else:
-		# Update the units_on_tiles dictionary to reflect the new position
+		# Update the unit's position in the units_on_tiles dictionary
 		player_combat_controller.units_on_tiles.erase(player_combat_controller.currently_selected_tile)
 		player_combat_controller.units_on_tiles[target_tile] = unit_instance
-		# Set the target tile green immediately upon clicking
-		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
+		# Set the target tile color to green
+		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]
 
-	# Set the unit as moving
+	# Mark the unit as moving
 	unit_instance.set_meta("moving", true)
 
-	# Get the tiles along the path
+	# Get the tiles along the path to the target tile
 	var path_tiles = get_tiles_along_path(unit_instance.global_transform.origin, target_tile.global_transform.origin)
 
-	# Instantly rotate the unit to face the first tile
+	# Rotate the unit to face the first tile in the path
 	if path_tiles.size() > 0:
 		var first_tile = path_tiles[0]
 		var first_target_position = first_tile.global_transform.origin
@@ -249,7 +257,7 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		unit_instance.look_at(first_target_position, Vector3.UP)
 		unit_instance.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backward
 
-	# Iterate over each tile in the path and move the unit one tile at a time
+	# Move the unit along the path, tile by tile
 	for i in range(path_tiles.size()):
 		var tile = path_tiles[i]
 		var is_final_tile = (i == path_tiles.size() - 1)
@@ -263,43 +271,44 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		# Update the currently selected tile to the new tile
 		player_combat_controller.currently_selected_tile = tile
 
-	# Mark the unit as not moving anymore
+	# Mark the unit as stationary after movement
 	unit_instance.set_meta("moving", false)
 
-	# Guarantee that the unit ends up on the target tile
+	# Ensure the unit ends up on the target tile
 	await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, target_tile, true)
 
 	print("Unit moved successfully with remaining movement: ", unit_instance.get_meta("remaining_movement"))
 
+# Move the unit one tile along the path
 func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: Node3D, is_final_tile: bool = false):
-	# Get the current and target positions
+	# Get the start and target positions
 	var start_position = start_tile.global_transform.origin
 	var target_position = target_tile.global_transform.origin
 
 	# Calculate the distance to move
 	var distance_to_move = start_position.distance_to(target_position) / player_combat_controller.TILE_SIZE
 
-	# Check if the unit has enough remaining movement, allowing for a small precision buffer
+	# Check if the unit has enough remaining movement to reach the target tile
 	var remaining_movement = unit_instance.get_meta("remaining_movement")
-	var precision_buffer = 0.001  # Small buffer to account for floating-point precision issues
+	var precision_buffer = 0.001  # Buffer to account for floating-point precision
 	if remaining_movement + precision_buffer < distance_to_move:
 		print("Unit does not have enough remaining movement to move to the target tile.")
 		return
 
-	# Preserve the Y position from the start
+	# Maintain the Y position during the move
 	var initial_y = unit_instance.global_transform.origin.y
-	target_position.y = initial_y  # Ensure the Y-axis remains unchanged
+	target_position.y = initial_y
 
 	# Calculate the direction to the target
 	var direction = (target_position - start_position).normalized()
 
-	# Rotate the unit only if it's not the final tile
+	# Rotate the unit towards the target unless it's the final tile
 	if not is_final_tile:
 		unit_instance.look_at(target_position, Vector3.UP)
 		unit_instance.rotate_y(deg_to_rad(180))  # Rotate 180 degrees to face backward
 
-	# Now perform the movement animation
-	var duration = 0.5  # seconds per tile
+	# Perform the movement animation
+	var duration = 0.5  # Time to move per tile
 	var elapsed = 0.0
 
 	while elapsed < duration:
@@ -311,10 +320,10 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 		await get_tree().create_timer(0.01).timeout
 		elapsed += 0.01
 
-	# Ensure the final position is set
+	# Ensure the unit reaches the target position
 	unit_instance.global_transform.origin = target_position
 
-	# Track units that were within 1 tile before the move
+	# Check for enemies in range before the move
 	var enemies_in_range_at_start = []
 
 	for tile_key in player_combat_controller.tiles.keys():
@@ -324,34 +333,35 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 		if player_combat_controller.units_on_tiles.has(tile):
 			var nearby_unit = player_combat_controller.units_on_tiles[tile]
 
-			# Only consider enemy units with range 1 (melee units)
+			# Consider only enemy units with melee range
 			if nearby_unit.is_in_group("enemy_units") and nearby_unit.unitParts.range == 1:
 				if start_distance <= 1:
 					enemies_in_range_at_start.append(nearby_unit)
 
-	# Now check if the unit has exited the range of any of these enemies after the move
+	# Check if the unit moved out of range of any enemies
 	for enemy in enemies_in_range_at_start:
 		var end_distance = enemy.global_transform.origin.distance_to(target_position) / player_combat_controller.TILE_SIZE
 		if end_distance > 1:
-			# The unit moved out of range of this enemy, so take damage
+			# The unit moved out of melee range, so it takes damage
 			unit_instance.unitParts.armorRating -= enemy.unitParts.damage
 			print("Moving unit took damage from enemy after moving out of range! Remaining armor:", unit_instance.unitParts.armorRating)
 
-	# Only clear the start tile if it is not occupied by another unit and is not purple
+	# Reset the start tile color if unoccupied and not purple
 	var start_tile_material = start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
 	if not player_combat_controller.units_on_tiles.has(start_tile) and start_tile_material != TILE_MATERIALS[4]:  # Assuming TILE_MATERIALS[4] is purple
 		start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
-	# Set the target tile color to red to indicate the path if it's not already green (final destination) and not purple
+	# Set the target tile color to red if it's not green (final destination) and not purple
 	var target_tile_material = target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
 	if target_tile_material != TILE_MATERIALS[1] and target_tile_material != TILE_MATERIALS[4]:
 		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
-	# Decrement the remaining movement by the distance moved, considering the buffer
+	# Deduct the distance moved from the unit's remaining movement
 	unit_instance.set_meta("remaining_movement", max(0, remaining_movement - distance_to_move))
 
 	print("Unit moved to tile: ", target_tile.global_transform.origin, " Remaining movement: ", unit_instance.get_meta("remaining_movement"))
 
+# Get the list of tiles along the path between two positions
 func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Array:
 	var path_tiles = []
 	var direction = (end_position - start_position).normalized()
@@ -370,7 +380,7 @@ func get_tiles_along_path(start_position: Vector3, end_position: Vector3) -> Arr
 
 	return path_tiles
 
-# Modified function to get closest tiles, with randomness to break ties
+# Get the closest tiles to a given position, with randomness to break ties
 func get_closest_tiles(position: Vector3) -> Array:
 	var closest_tiles = []
 	var min_distance = INF
@@ -387,6 +397,7 @@ func get_closest_tiles(position: Vector3) -> Array:
 	# Return all closest tiles for randomness in selection
 	return closest_tiles
 
+# Check if any unit on the field is currently moving
 func any_unit_moving() -> bool:
 	for tile in player_combat_controller.units_on_tiles.keys():
 		var unit_instance = player_combat_controller.units_on_tiles[tile]
@@ -394,10 +405,11 @@ func any_unit_moving() -> bool:
 			return true
 	return false
 
+# Handle the move button action
 func moveButton():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
 		print("Input suppressed: Unit is currently moving.")
-		return  # Ignore any input if the unit is moving
+		return  # Ignore input if the unit is moving
 
 	clear_highlighted_tiles()  # Clear any existing highlights
 	
@@ -413,10 +425,11 @@ func moveButton():
 		# Highlight the movement range when move mode is activated
 		highlight_tiles_around_unit(selected_unit_instance, selected_unit_instance.get_meta("remaining_movement"))
 
+# Handle the shoot button action
 func shootButton():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
 		print("Input suppressed: Unit is currently moving.")
-		return  # Ignore any input if the unit is moving
+		return  # Ignore input if the unit is moving
 	clear_highlighted_tiles()  # Clear any existing highlights
 	print("Shoot action selected.")
 	end_move_mode()  # End move mode when shooting
@@ -426,10 +439,11 @@ func shootButton():
 	if attack_mode_active:
 		end_attack_mode()
 
+# Handle the attack button action
 func attackButton():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
 		print("Input suppressed: Unit is currently moving.")
-		return  # Ignore any input if the unit is moving
+		return  # Ignore input if the unit is moving
 
 	clear_highlighted_tiles()  # Clear any existing highlights
 	
@@ -448,6 +462,7 @@ func attackButton():
 		else:
 			print("No unit selected for attack.")
 
+# Deactivate attack mode and reset relevant state
 func end_attack_mode():
 	attack_mode_active = false  # Deactivate attack mode
 	
@@ -458,6 +473,7 @@ func end_attack_mode():
 	clear_highlighted_tiles()  # Clear highlighted attack tiles
 	print("Attack mode deactivated.")
 
+# Highlight tiles within the attack range of the selected unit
 func highlight_attack_range(unit_instance):
 	# Initialize variables to store the highest range
 	var max_range = 0
@@ -500,6 +516,7 @@ func highlight_attack_range(unit_instance):
 	else:
 		print("No unit tile found to highlight attack range.")
 
+# Handle enemy unit click during attack mode
 func handle_enemy_click(enemy_unit_instance, clicked_tile):
 	
 	if selected_unit_instance and attack_mode_active:
@@ -530,6 +547,7 @@ func handle_enemy_click(enemy_unit_instance, clicked_tile):
 	else:
 		print("No selected unit to attack with.")
 
+# Remove the specified unit from the map and update the game state
 func remove_unit_from_map(unit_instance, tile):
 	# Determine if the unit is a player or enemy unit
 	var is_player_unit = unit_instance.is_in_group("player_units")
@@ -555,19 +573,22 @@ func remove_unit_from_map(unit_instance, tile):
 	print("Remaining player units:", remaining_player_units)
 	print("Remaining enemy units:", remaining_enemy_units)
 
+# Handle the case when all player units have been defeated
 func all_players_died():
 	print("All player units have died.")
 	# Add additional logic here to handle the game over condition for the player.
 	player_combat_controller.fleeCombat()
 
+# Handle the case when all enemy units have been defeated
 func all_enemies_dead():
 	print("All enemy units have been defeated.")
 	
-	# Give the player a random amount of coins between 1 and 100 for each enemy they beat
+	# Reward the player with coins for each defeated enemy
 	playerInfo.balance += total_enemy_units * (randi() % 100)+1
 	# Add additional logic here to handle the victory condition.
 	player_combat_controller.fleeCombat()
 
+# Clear all highlighted tiles on the grid
 func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
 		var material_override = tile.get_node("unit_hex/mergedBlocks(Clone)").material_override
@@ -576,6 +597,7 @@ func clear_highlighted_tiles():
 			tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set back to blue
 	highlighted_tiles.clear()
 
+# Deactivate move mode and reset relevant state
 func end_move_mode():
 	move_mode_active = false  # Deactivate move mode
 	clear_highlighted_tiles()  # Clear highlighted tiles
@@ -585,6 +607,7 @@ func end_move_mode():
 	if attack_mode_active:
 		end_attack_mode()
 
+# Handle the end turn action
 func endTurn():
 	if selected_unit_instance and selected_unit_instance.get_meta("moving", false):
 		print("Input suppressed: Unit is currently moving.")
@@ -603,6 +626,7 @@ func endTurn():
 
 	print("Turn ended. Turn count is now ", turnCount)
 
+# Reset the status of all units on the field at the end of the turn
 func reset_all_units_status():
 	for tile in player_combat_controller.units_on_tiles.keys():
 		var unit_instance = player_combat_controller.units_on_tiles[tile]
@@ -613,12 +637,15 @@ func reset_all_units_status():
 		if unit_instance == selected_unit_instance:
 			$"../CombatGridUI/UnitPlaceUI/Attack".visible = true
 
+# Update the label for the end turn button
 func update_end_turn_label():
 	$"../CombatGridUI/UnitPlaceUI2/TurnCounter".text = "End Turn: " + str(turnCount)
 
+# Re-enable placement after leaving a button
 func buttonLeft():
 	block_placement = false
 
+# Center the camera on the currently selected unit
 func centerCamera():
 	if selected_unit_instance:
 		print("Centering camera on selected unit.")
@@ -642,6 +669,7 @@ func centerCamera():
 	else:
 		print("No unit selected to center camera.")
 
+# Highlight tiles within movement range around the selected unit
 func highlight_tiles_around_unit(unit_instance, range):
 	var unit_tile = player_combat_controller.currently_selected_tile
 	
@@ -660,7 +688,7 @@ func highlight_tiles_around_unit(unit_instance, range):
 	else:
 		print("No unit tile found to highlight.")
 
-# New functions for handling the armor bar
+# Update the armor bar with the selected unit's or enemy's armor values
 func update_armor_bar(unit_instance, is_enemy):
 	armor_bar.max_value = unit_instance.unitParts.maxArmor
 	armor_bar.value = unit_instance.unitParts.armorRating
@@ -671,6 +699,7 @@ func update_armor_bar(unit_instance, is_enemy):
 	armor_bar.visible = true
 	armor_bar_name.visible = true
 
+# Hide the armor bar
 func hide_armor_bar():
 	armor_bar.visible = false
 	armor_bar_name.visible = false

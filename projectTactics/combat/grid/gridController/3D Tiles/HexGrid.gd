@@ -1,5 +1,6 @@
 extends Node3D
 
+# Enum defining different item types
 enum ItemTypes {
 	ALL,
 	PART,
@@ -7,96 +8,104 @@ enum ItemTypes {
 	FISH
 }
 
+# Preloaded materials for tile coloring
 const TILE_MATERIALS = [
-	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),   # Blue material
+	preload("res://combat/grid/gridController/3D Tiles/materials/blue.tres"),  # Blue material
 	preload("res://combat/grid/gridController/3D Tiles/materials/green.tres"),
-	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),    # Red material
+	preload("res://combat/grid/gridController/3D Tiles/materials/red.tres"),   # Red material
 	preload("res://combat/grid/gridController/3D Tiles/materials/yellow.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/orange.tres"),
 	preload("res://combat/grid/gridController/3D Tiles/materials/white.tres"),
-	preload("res://combat/grid/gridController/3D Tiles/materials/purple.tres")
+	preload("res://combat/grid/gridController/3D Tiles/materials/purple.tres") # Purple material
 ]
 
-const TILE_HEIGHT := 1.0  
-@export var TILE_SIZE := 1.0
+const TILE_HEIGHT := 1.0  # Tile height adjustment
+@export var TILE_SIZE := 1.0  # Tile size (scaling factor)
 const HEX_TILE = preload("res://combat/grid/gridController/3D Tiles/hex_tile.tscn")
-var currently_selected_tile = null
+var currently_selected_tile = null  # Reference to the currently selected tile
 
+# Node references
 @onready var combat_manager = $"../combatManager"
 @onready var ai_controller = $"../aiController"
 
-@export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)  # Controls placed unit scale
-@export_range(2, 35) var grid_size: int = 10  # Controls the 'radius' of the square grid generated
+# Controls for unit scaling and grid size
+@export var unit_scale: Vector3 = Vector3(0.15, 0.15, 0.15)
+@export_range(2, 35) var grid_size: int = 10  # Controls the 'radius' of the grid generated
 
+@export var max_squad_size: int = 2  # Default maximum squad size
 
-@export var max_squad_size: int = 2  # Default max squad size
+@export var playerInfo : PlayerData  # Player data reference
 
-@export var playerInfo : PlayerData
-
-# Label to display the number of units placed and max squad size
+# Label references for UI elements
 @onready var units_label = $"../CombatGridUI/UnitPlaceUI/UnitsLabel" 
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 
-var block_placement: bool = false  # Flag to block tile selection and unit placement
-var enemyOccupied: bool = false  # Flag to block tile selection and unit placement
+# Flags for controlling unit placement and tile selection
+var block_placement: bool = false
+var enemyOccupied: bool = false
 
-const PAN_SPEED := 10.0  # Speed at which the camera pans with WASD keys
-const ZOOM_SPEED := 1.5  # Speed at which the camera zooms
+# Camera control constants
+const PAN_SPEED := 10.0  # Speed for panning the camera with WASD keys
+const ZOOM_SPEED := 1.5  # Speed for zooming in/out
 const MIN_ZOOM := 20.0   # Minimum FOV value for zoom
 const MAX_ZOOM := 90.0   # Maximum FOV value for zoom
-const ROTATION_SPEED := 0.5  # Speed of rotation when dragging the mouse
-const MAX_ROTATION_X := -60  # Maximum rotation angle on the x-axis (camera looks down slightly)
-const MIN_ROTATION_X := -90.0  # Minimum rotation angle on the x-axis (camera looks straight down)
+const ROTATION_SPEED := 0.5  # Speed of camera rotation
+const MAX_ROTATION_X := -60  # Maximum upward rotation angle
+const MIN_ROTATION_X := -90.0  # Maximum downward rotation angle
 
-var rotation_angle_x := -90.0  # Start with -90 degrees on the x-axis
-var rotation_angle_y := 0.0  # Start with 0 degrees on the y-axis
-var is_rotating := false  # Track whether the camera is being rotated
+# Variables for camera rotation tracking
+var rotation_angle_x := -90.0  # Initial X-axis rotation
+var rotation_angle_y := 0.0  # Initial Y-axis rotation
+var is_rotating := false  # Flag for detecting rotation
 
-var placing_unit: bool = false
-var unit_to_place = null
+var placing_unit: bool = false  # Flag for unit placement mode
+var unit_to_place = null  # Reference to the unit being placed
 
-# Dictionary to store tile positions with coordinates as keys
+# Dictionaries for storing tile and unit data
 var tiles = {}
-
-# Dictionary to track placed units by their instance ID
 var placed_units = {}
-
-# Dictionary to track units by tile
 var units_on_tiles = {}
 
 # Queue to track the order of placed units
 var placed_units_queue := []
 
+# Initialize the grid and set up the camera
 func _ready():
 	DataPasser.selectedUnit = null
 	DataPasser.inActiveCombat = false
 	
 	_generate_grid()
-	_update_units_label()  # Initialize the label text
+	_update_units_label()  # Initialize the units label
 	var camera = $Camera3D
-	# Initialize the camera's position and rotation
+	
+	# Set the initial camera position and rotation
 	camera.position.x = 0
 	camera.position.z = grid_size
 	camera.rotation_degrees.x = rotation_angle_x
 	camera.rotation_degrees.y = rotation_angle_y
 	
 	playerInfo = FM.playerData
+	
+	# Filter units from player inventory
 	var units = playerInfo.inventory.keys().filter(func(item):
 		return item.itemType == ItemTypes.UNIT
 	)
 	
+	# Handle the case where no units are available
 	if units.size() == 0:
 		%noUnits.visible = true
 		$"../CombatGridUI/UnitPlaceUI/StartCombat".visible = false
 
+# Block placement when hovering over a button
 func buttonHover():
 	block_placement = true
 
+# Handle input events for camera control and unit placement
 func _input(event):
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Ensure the cursor is always visible
 	var camera = $Camera3D
 
-	# Handle WASD keys for panning based on camera's facing direction
+	# Handle WASD keys for panning the camera
 	var input_vector := Vector3.ZERO
 	
 	if Input.is_action_pressed("moveLeft"):
@@ -104,7 +113,7 @@ func _input(event):
 	if Input.is_action_pressed("moveRight"):
 		input_vector += camera.global_transform.basis.x * PAN_SPEED
 	
-	# Adjust the forward and backward movement based on the camera's Y-axis rotation
+	# Adjust forward/backward movement based on the camera's rotation
 	var forward_direction = -Vector3(
 		sin(deg_to_rad(rotation_angle_y)),
 		0,
@@ -121,25 +130,25 @@ func _input(event):
 		input_vector.y = 0  # Ensure no vertical movement
 		camera.position += input_vector
 
-	# Handle rotation
+	# Handle camera rotation
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
 		is_rotating = event.pressed
 
 	if is_rotating and event is InputEventMouseMotion:
 		rotation_angle_x -= event.relative.y * ROTATION_SPEED
 		rotation_angle_y -= event.relative.x * ROTATION_SPEED
-		rotation_angle_x = clamp(rotation_angle_x, MIN_ROTATION_X, MAX_ROTATION_X)  # Clamping x rotation
+		rotation_angle_x = clamp(rotation_angle_x, MIN_ROTATION_X, MAX_ROTATION_X)  # Clamp X-axis rotation
 		camera.rotation_degrees.x = rotation_angle_x
 		camera.rotation_degrees.y = rotation_angle_y
 
-	# Handle zooming
+	# Handle camera zooming
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			camera.fov = clamp(camera.fov - ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			camera.fov = clamp(camera.fov + ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM)
 	
-	# Skip any input processing related to unit placement when in combat mode or block_placement is true
+	# Skip input processing for unit placement when in combat mode or placement is blocked
 	if combat_manager.in_combat or block_placement:
 		return
 	
@@ -147,10 +156,12 @@ func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_handle_tile_click(event.position)
 	
+	# Handle unit placement when the interact action is triggered
 	if Input.is_action_just_pressed("interact"):
-		if DataPasser.selectedUnit != null and !block_placement and !enemyOccupied: 
+		if DataPasser.selectedUnit != null and not block_placement and not enemyOccupied: 
 			unitPlacer()
 
+# Handle logic for tile clicking and unit selection
 func _handle_tile_click(mouse_position):
 	var camera = $Camera3D
 	var from = camera.project_ray_origin(mouse_position)
@@ -167,13 +178,13 @@ func _handle_tile_click(mouse_position):
 		print("Raycast hit detected at position: ", result.position)  # Verify the raycast hit
 
 		var clicked_position = result.position
-		var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to Vector2
+		var clicked_position_2d = Vector2(clicked_position.x, clicked_position.z)  # Convert to 2D coordinates
 		var clicked_tile = _get_tile_with_tolerance(clicked_position_2d)
 
 		if clicked_tile:
 			print("Clicked tile instance ID: ", clicked_tile.get_instance_id())
 
-			# Look for the coordinates by checking the dictionary keys
+			# Find the coordinates corresponding to the clicked tile
 			var coord = null
 			for key in tiles.keys():
 				if tiles[key] == clicked_tile:
@@ -217,7 +228,7 @@ func _handle_tile_click(mouse_position):
 					print("No unit detected on tile coordinates: ", coord)
 					enemyOccupied = false
 
-					# If we are placing a unit, place it on the empty tile
+					# If placing a unit, place it on the empty tile
 					if placing_unit and DataPasser.selectedUnit != null:
 						print("Placing unit on empty tile...")
 
@@ -242,20 +253,18 @@ func _handle_tile_click(mouse_position):
 	else:
 		print("No raycast hit detected.")  # If raycast doesn't hit anything
 
-
-
-
-
+# Deselect a tile by resetting its color
 func _deselect_tile(tile):
-	
-	if units_on_tiles.has(tile) && currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override != TILE_MATERIALS[6]:
+	if units_on_tiles.has(tile) and currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override != TILE_MATERIALS[6]:
 		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 	elif currently_selected_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override != TILE_MATERIALS[6]:
 		tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]  # Set to blue
 
+# Select a tile by changing its color to green
 func _select_tile(tile):
 	tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
 
+# Find the closest tile to a given position, within a tolerance range
 func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 	var closest_tile: Node3D = null
 	var min_distance: float = INF
@@ -279,6 +288,7 @@ func _get_tile_with_tolerance(position: Vector2, tolerance=0) -> Node3D:
 		print("No valid tile found or out of bounds.")
 		return null
 
+# Move a unit to a target tile and update the queue
 func move_unit_to_tile(target_tile):
 	if currently_selected_tile and target_tile:
 		var unit = units_on_tiles.get(currently_selected_tile, null)
@@ -294,14 +304,13 @@ func move_unit_to_tile(target_tile):
 	else:
 		print("No unit selected to move or target tile is null.")
 
+# Remove a unit from the placement queue
 func _remove_unit_from_queue(unit):
 	# Find and remove the unit from the queue
 	if placed_units_queue.has(unit):
 		placed_units_queue.erase(unit)
 
-
-
-
+# Generate a grid of hexagonal tiles
 func _generate_grid():
 	var tile_index := 0
 	for x in range(-grid_size, grid_size + 1):
@@ -323,9 +332,9 @@ func _generate_grid():
 			print("Generated tile at: ", tile.global_transform.origin)
 	ai_controller._on_grid_generated()
 
+# Prepare the selected unit for placement on the grid
 func unitPlacer():
-	# Set the flag and assign the unit to place
-	unit_to_place = DataPasser.selectedUnit
+	unit_to_place = DataPasser.selectedUnit  # Set the flag and assign the unit to place
 	
 	if unit_to_place != null:
 		placing_unit = true
@@ -361,16 +370,18 @@ func unitPlacer():
 		# Clear the UnitName label if no unit is selected
 		unit_name_label.text = ""
 
-# Add this method to track enemy positions
+# Track the position of an enemy unit on the grid
 func add_enemy_to_grid(enemy_unit: Node3D, tile_position: Vector2):
 	if not units_on_tiles.has(tile_position):
 		units_on_tiles[tile_position] = enemy_unit
 		enemy_unit.add_to_group("enemy_units")
 
+# Remove an enemy unit from the grid
 func remove_enemy_from_grid(tile_position: Vector2):
 	if units_on_tiles.has(tile_position):
 		units_on_tiles.erase(tile_position)
 
+# Place a unit on a specified tile and handle placement logic
 func enemy_place_unit_on_tile(tile_position: Vector2, unit_to_place: Node3D, is_player: bool = true):
 	print("Placing unit at tile position: ", tile_position)
 	
@@ -452,7 +463,7 @@ func enemy_place_unit_on_tile(tile_position: Vector2, unit_to_place: Node3D, is_
 	else:
 		print("No valid tile found at position: ", tile_position)
 
-
+# Place a unit on the grid and handle related logic
 func place_unit_on_tile(position: Vector2, unit_to_place: Node3D, is_player: bool = true, use_direct_placement: bool = false):
 	print("Placing unit at position: ", position)
 
@@ -550,8 +561,7 @@ func place_unit_on_tile(position: Vector2, unit_to_place: Node3D, is_player: boo
 	else:
 		print("No valid tile found at position: ", position)
 
-
-
+# Remove a unit from the grid and clean up references
 func remove_unit(unit):
 	# Check if the unit still exists in the scene
 	if unit and is_instance_valid(unit):
@@ -577,16 +587,18 @@ func remove_unit(unit):
 	else:
 		print("Warning: Tried to remove a unit that is no longer valid or doesn't exist.")
 
-
+# Update the units label with the current count
 func _update_units_label():
 	var current_units := placed_units_queue.size()
 	units_label.text = "Select Units: %d / %d" % [current_units, max_squad_size]
 
+# Re-enable placement after leaving a button
 func buttonLeft():
 	block_placement = false;
 
+# Initiate combat mode after unit placement
 func combatInitiate():
-	# prevents initiation of combat without selecting at least one unit
+	# Prevent initiation of combat without selecting at least one unit
 	
 	if placed_units_queue.size() < 1:
 		return
@@ -605,6 +617,7 @@ func combatInitiate():
 	combat_manager.combatInitiate()
 	print("fite tiem")
 
+# Handle fleeing from combat and resetting the scene
 func fleeCombat():
 	DataPasser.inActiveCombat = false
 	DataPasser.selectedUnit = null
