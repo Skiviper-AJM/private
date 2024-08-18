@@ -5,6 +5,7 @@ var in_combat = false
 var turnCount: int = 1  # Track the current turn count
 
 @onready var player_combat_controller = $"../HexGrid"
+@onready var AI_Controller = $"../aiController"
 @onready var camera = $"../HexGrid/Camera3D"  # Initialize the camera properly
 @onready var unit_name_label = $"../CombatGridUI/UnitPlaceUI/UnitName"
 @onready var end_turn_button = $"../CombatGridUI/UnitPlaceUI/EndTurn"  # Reference to the end turn button
@@ -540,10 +541,13 @@ func remove_unit_from_map(unit_instance, tile):
 func all_players_died():
 	print("All player units have died.")
 	# Add additional logic here to handle the game over condition for the player.
+	player_combat_controller.fleeCombat()
 
 func all_enemies_dead():
 	print("All enemy units have been defeated.")
+	
 	# Add additional logic here to handle the victory condition.
+	player_combat_controller.fleeCombat()
 
 func clear_highlighted_tiles():
 	for tile in highlighted_tiles:
