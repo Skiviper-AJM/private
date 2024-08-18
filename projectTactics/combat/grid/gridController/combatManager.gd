@@ -220,12 +220,14 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 		print("Error: unit_instance is not a Node3D instance. Cannot move it.")
 		return
 
-	# Prevent moving onto a tile occupied by an enemy
+	# Immediately update the unit's position in the units_on_tiles dictionary
 	if player_combat_controller.units_on_tiles.has(target_tile):
-		var existing_unit = player_combat_controller.units_on_tiles[target_tile]
-		if existing_unit.is_in_group("enemy_units"):
-			print("Cannot move to a tile occupied by an enemy unit.")
-			return
+		print("Target tile is occupied by another unit. Movement aborted.")
+		return
+	else:
+		# Update the units_on_tiles dictionary to reflect the new position
+		player_combat_controller.units_on_tiles.erase(player_combat_controller.currently_selected_tile)
+		player_combat_controller.units_on_tiles[target_tile] = unit_instance
 
 	# Set the unit as moving
 	unit_instance.set_meta("moving", true)
@@ -240,13 +242,15 @@ func move_unit_to_tile(unit_instance: Node3D, target_tile: Node3D):
 
 		# Move the unit to the current tile
 		await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, tile)
-		player_combat_controller.currently_selected_tile = tile  # Update the current tile
+
+		# Update the currently selected tile to the new tile
+		player_combat_controller.currently_selected_tile = tile
 
 	# Mark the unit as not moving anymore
 	unit_instance.set_meta("moving", false)
 
 	# Guarantee that the unit ends up on the target tile
-	move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, target_tile)
+	await move_unit_one_tile(unit_instance, player_combat_controller.currently_selected_tile, target_tile)
 
 	# Ensure the final position tile is green
 	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[1]  # Set to green
@@ -275,9 +279,8 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Calculate the direction to the target
 	var direction = (target_position - start_position).normalized()
 
-	# Adjust the rotation to face the correct direction (backwards)
+	# Adjust the rotation to face the correct direction
 	unit_instance.look_at(target_position, Vector3.UP)
-	unit_instance.rotate_y(deg_to_rad(180))  # Rotate to face backwards
 
 	# Now perform the movement animation
 	var duration = 0.5  # seconds per tile
@@ -295,24 +298,11 @@ func move_unit_one_tile(unit_instance: Node3D, start_tile: Node3D, target_tile: 
 	# Ensure the final position is set
 	unit_instance.global_transform.origin = target_position
 
-	# Check if the target tile is occupied by another unit
-	if player_combat_controller.units_on_tiles.has(target_tile):
-		var existing_unit = player_combat_controller.units_on_tiles[target_tile]
-		if existing_unit != unit_instance:
-			print("Unit is moving through an occupied tile.")
+	# Clean up the previous tile (reset to blue)
+	start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
 
-			# Do not update the position in the units_on_tiles dictionary
-			# Reset the start tile to blue as the unit has left it
-			start_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
-			return
-	else:
-		# Update the units_on_tiles dictionary only for the final destination, not for the tiles passed through
-		if player_combat_controller.units_on_tiles.get(start_tile) == unit_instance:
-			player_combat_controller.units_on_tiles.erase(start_tile)
-			player_combat_controller.units_on_tiles[target_tile] = unit_instance
-
-		# Set the target tile color to red to indicate the path
-		target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
+	# Set the target tile color to red to indicate the path
+	target_tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[2]  # Set to red
 
 	# Decrement the remaining movement by the distance moved, considering the buffer
 	unit_instance.set_meta("remaining_movement", max(0, remaining_movement - distance_to_move))
