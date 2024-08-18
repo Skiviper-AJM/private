@@ -104,25 +104,26 @@ func is_tile_in_bounds(tile_key: Vector2) -> bool:
 func find_tiles_within_movement_range(enemy_unit: Node3D) -> Array:
 	var reachable_tiles = []
 	var speed_rating = enemy_unit.unitParts.speedRating
+	var start_tile 
 	print("Finding tiles within movement range for unit with speed: ", speed_rating)
 
-	# Convert the Vector3 to Vector2 (x, z) and use it in _get_tile_with_tolerance
-	var start_tile = _get_tile_with_tolerance(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z))
+	if enemy_unit != null:
+		start_tile = _get_tile_with_tolerance(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z))
 
-	if start_tile == Vector2(-1, -1):
-		print("Start tile not found.")
-		return reachable_tiles
+		if start_tile == Vector2(-1, -1):
+			print("Start tile not found.")
+			return reachable_tiles
 
-	print("Start tile found: ", start_tile)
+		print("Start tile found: ", start_tile)
 
-	for x in range(-speed_rating, speed_rating + 1):
-		for y in range(max(-speed_rating, -x - speed_rating), min(speed_rating, -x + speed_rating) + 1):
-			var z = -x - y
-			var target_tile_key = start_tile + Vector2(x, y)
-			
-			if grid_controller.tiles.has(target_tile_key):
-				if not grid_controller.units_on_tiles.has(target_tile_key):
-					reachable_tiles.append(target_tile_key)
+		for x in range(-speed_rating, speed_rating + 1):
+			for y in range(max(-speed_rating, -x - speed_rating), min(speed_rating, -x + speed_rating) + 1):
+				var z = -x - y
+				var target_tile_key = start_tile + Vector2(x, y)
+				
+				if grid_controller.tiles.has(target_tile_key):
+					if not grid_controller.units_on_tiles.has(target_tile_key):
+						reachable_tiles.append(target_tile_key)
 
 	print("Reachable tiles found: ", reachable_tiles.size(), " for unit at ", start_tile)
 	return reachable_tiles
@@ -132,19 +133,19 @@ func find_nearest_reachable_tile_to_player(enemy_unit: Node3D) -> Vector2:
 	var nearest_player_tile: Vector2 = Vector2()
 	var player_found = false
 
-	print("=== Units on Tiles ===")
-	for tile_key in grid_controller.units_on_tiles.keys():
-		var unit_on_tile = grid_controller.units_on_tiles[tile_key]
-		print("Tile Key: ", tile_key, " - Unit: ", unit_on_tile)
-		if not unit_on_tile.is_in_group("enemy_units"):  # Ensure it's a player unit
-			var player_position = Vector2(unit_on_tile.global_transform.origin.x, unit_on_tile.global_transform.origin.z)
-			var distance = player_position.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z))
-			print("Player unit found at ", tile_key, " with distance: ", distance)
-			if not player_found or distance < nearest_player_position.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z)):
-				nearest_player_position = player_position
-				nearest_player_tile = Vector2(tile_key.global_transform.origin.x, tile_key.global_transform.origin.z)
-				player_found = true
-
+	if enemy_unit != null:
+		print("=== Units on Tiles ===")
+		for tile_key in grid_controller.units_on_tiles.keys():
+			var unit_on_tile = grid_controller.units_on_tiles[tile_key]
+			print("Tile Key: ", tile_key, " - Unit: ", unit_on_tile)
+			if not unit_on_tile.is_in_group("enemy_units"):  # Ensure it's a player unit
+				var player_position = Vector2(unit_on_tile.global_transform.origin.x, unit_on_tile.global_transform.origin.z)
+				var distance = player_position.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z))
+				print("Player unit found at ", tile_key, " with distance: ", distance)
+				if not player_found or distance < nearest_player_position.distance_to(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z)):
+					nearest_player_position = player_position
+					nearest_player_tile = Vector2(tile_key.global_transform.origin.x, tile_key.global_transform.origin.z)
+					player_found = true
 
 	if not player_found:
 		print("No player unit found. Executing fallback movement.")
@@ -186,12 +187,13 @@ func find_nearest_reachable_tile_to_player(enemy_unit: Node3D) -> Vector2:
 
 func find_fallback_tile(enemy_unit: Node3D) -> Vector2:
 	# Fallback logic when no player units are found
-	var random_direction = Vector2(randi_range(-1, 1), randi_range(-1, 1))
-	var fallback_tile = _get_tile_with_tolerance(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z) + random_direction)
-	
-	if grid_controller.tiles.has(fallback_tile) and not grid_controller.units_on_tiles.has(fallback_tile):
-		print("Fallback tile chosen: ", fallback_tile)
-		return fallback_tile
+	if enemy_unit != null:
+		var random_direction = Vector2(randi_range(-1, 1), randi_range(-1, 1))
+		var fallback_tile = _get_tile_with_tolerance(Vector2(enemy_unit.global_transform.origin.x, enemy_unit.global_transform.origin.z) + random_direction)
+		
+		if grid_controller.tiles.has(fallback_tile) and not grid_controller.units_on_tiles.has(fallback_tile):
+			print("Fallback tile chosen: ", fallback_tile)
+			return fallback_tile
 
 	print("No valid fallback tile found.")
 	return Vector2(-1, -1)
@@ -215,9 +217,6 @@ func take_turn_for_all_enemies():
 				print("Skipping non-enemy unit at tile: ", tile_coords)
 		else:
 			print("Warning: tile_coords not found in units_on_tiles: ", tile_coords)
-
-
-
 
 func on_end_turn():
 	print("Ending turn, processing AI moves.")
