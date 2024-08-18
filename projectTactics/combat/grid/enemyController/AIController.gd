@@ -85,3 +85,56 @@ func is_tile_in_bounds(tile_key: Vector2) -> bool:
 	# Ensure the tile is within grid bounds
 	#print("Checking bounds for tile: ", tile_key)
 	return abs(tile_key.x) <= grid_controller.grid_size and abs(tile_key.y) <= grid_controller.grid_size
+
+func find_tiles_within_movement_range(enemy_unit: Node3D) -> Array:
+	var reachable_tiles = []
+	var speed_rating = enemy_unit.unitParts.speedRating
+
+	for tile_key in grid_controller.tiles.keys():
+		if not grid_controller.units_on_tiles.has(tile_key):
+			var tile_position = grid_controller.tiles[tile_key].global_transform.origin
+			var distance_in_tiles = enemy_unit.global_transform.origin.distance_to(tile_position) / grid_controller.TILE_SIZE
+			if distance_in_tiles <= speed_rating:
+				reachable_tiles.append(tile_key)
+
+	return reachable_tiles
+
+func find_nearest_tile_to_player(enemy_unit: Node3D) -> Node3D:
+	var closest_distance = INF
+	var closest_tile_key: Vector2 = Vector2(-1, -1)  # Initialize with an invalid value
+	var enemy_position = enemy_unit.global_transform.origin
+
+	# Find all tiles within the enemy's movement range
+	var reachable_tiles = find_tiles_within_movement_range(enemy_unit)
+
+	for tile_key in reachable_tiles:
+		for player_tile_key in grid_controller.units_on_tiles.keys():
+			var unit_instance = grid_controller.units_on_tiles[player_tile_key]
+			if unit_instance.is_in_group("player_units"):
+				if grid_controller.tiles.has(player_tile_key):
+					var player_position = grid_controller.tiles[player_tile_key].global_transform.origin
+					var distance = enemy_position.distance_to(player_position)
+
+					if distance < closest_distance:
+						closest_distance = distance
+						closest_tile_key = tile_key  # Store the tile key (Vector2)
+				else:
+					print("Tile key not found in grid_controller.tiles: ", player_tile_key)
+
+	if closest_tile_key != Vector2(-1, -1):  # Check if a valid tile key was found
+		return grid_controller.tiles[closest_tile_key]  # Return the actual Node3D tile
+	
+	# Ensure that if no valid tile was found, return null
+	return null
+
+func take_turn_for_all_enemies():
+	for tile_key in grid_controller.units_on_tiles.keys():
+		var unit_instance = grid_controller.units_on_tiles[tile_key]
+		if unit_instance.is_in_group("enemy_units"):
+			var target_tile = find_nearest_tile_to_player(unit_instance)
+			if target_tile:
+				print("Moving enemy unit to tile: ", target_tile)
+				# Call the move_unit_to_tile function in combatManager.gd
+				root_node.get_node("combatManager").move_unit_to_tile(unit_instance, target_tile)
+			else:
+				print("No valid tile found for enemy movement.")

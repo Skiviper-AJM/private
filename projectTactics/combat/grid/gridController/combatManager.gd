@@ -590,6 +590,8 @@ func endTurn():
 		print("Input suppressed: Unit is currently moving.")
 		return  # Ignore any input if the unit is moving
 	
+	
+	
 	# Increment the turn count
 	turnCount += 1
 	deselect_unit()
@@ -597,7 +599,9 @@ func endTurn():
 	
 	# Reset the remaining movement and attack flag for all units
 	reset_all_units_status()
-
+	
+	AI_Controller.take_turn_for_all_enemies()
+	
 	# Update the end turn button text
 	update_end_turn_label()
 
