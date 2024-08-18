@@ -381,6 +381,7 @@ func attackButton():
 func end_attack_mode():
 	attack_mode_active = false  # Deactivate attack mode
 	has_attacked = false  # Reset the attack flag
+	clear_highlighted_tiles()  # Clear highlighted tiles
 	print("Attack mode deactivated.")
 
 func highlight_attack_range(unit_instance):
@@ -431,6 +432,7 @@ func handle_enemy_click(enemy_unit_instance, clicked_tile):
 		var distance = clicked_tile.global_transform.origin.distance_to(player_combat_controller.currently_selected_tile.global_transform.origin) / player_combat_controller.TILE_SIZE
 
 		if distance <= max_range and not has_attacked:
+			
 			# Apply damage to the enemy unit
 			enemy_unit_instance.unitParts.armorRating -= selected_unit_instance.unitParts.damage
 			print("Enemy unit took damage! Remaining armor:", enemy_unit_instance.unitParts.armorRating)
@@ -442,6 +444,9 @@ func handle_enemy_click(enemy_unit_instance, clicked_tile):
 
 			# Mark that the unit has attacked
 			has_attacked = true
+
+			# Clear the highlighted attack tiles and disable attack mode after attacking
+			end_attack_mode()
 		else:
 			print("Enemy unit is out of range.")
 	else:
@@ -451,6 +456,10 @@ func remove_unit_from_map(unit_instance, tile):
 	# Remove the unit from the map and erase its node reference
 	player_combat_controller.units_on_tiles.erase(tile)
 	unit_instance.queue_free()
+	
+	# Reset the tile to blue after the enemy unit is destroyed
+	tile.get_node("unit_hex/mergedBlocks(Clone)").material_override = TILE_MATERIALS[0]
+	
 	print("Unit removed from map.")
 
 func clear_highlighted_tiles():
